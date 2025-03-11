@@ -5,22 +5,35 @@ export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+/**
+ * @deprecated Use makeErrorMessage instead and truncate the error for display as needed, or make a situation-specific localized error message based on a response code
+ */
 export function makeShortErrorMessage(err: unknown) {
-  if (err instanceof AxiosError && err.response) {
-    return `${err.response?.status} ${err.response?.statusText}: ${JSON.stringify(err.response?.data)}`
-  } else if (err instanceof Error) {
-    return err.message
-  } else {
-    return `Unexpected error: ${err}`
-  }
+  return makeErrorMessage(err)
 }
 
-export function makeErrorMessage(err: unknown) {
-  if (err instanceof AxiosError && err.response) {
-    return `${err.response?.status} ${err.response?.statusText} from ${err.response?.config.url}: ${JSON.stringify(err.response?.data)}`
+/**
+ * Attempts to make a helpful error message from an unknown thrown error
+ * or promise rejection.
+ *
+ * This function is mainly to aid debugging and good bug reports. For
+ * expected errors encountered by end users, it's more ideal to catch
+ * the specific error code and provide a localized app-specific error message.
+ */
+export function makeErrorMessage(err: unknown): string {
+  if (err instanceof AxiosError) {
+    if (err.response) {
+      return `${err.response?.status} ${err.response?.statusText} from ${err.response?.config.url}: ${JSON.stringify(err.response?.data)}`
+    } else if (err.config) {
+      if (err.code === "ERR_NETWORK") {
+        return `${err.message} from ${err.config.url}. This error can happen because of either connection issues or server CORS policy.`
+      } else {
+        return `${err.message} from ${err.config.url}`
+      }
+    }
   } else if (err instanceof Error) {
     return err.message
-  } else {
-    return `Unexpected error: ${tryStringifyJson(err) || err}`
   }
+
+  return `${tryStringifyJson(err) || err}`
 }
