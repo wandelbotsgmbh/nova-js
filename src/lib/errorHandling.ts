@@ -1,4 +1,5 @@
 import { AxiosError } from "axios"
+import { isObject, isString } from "lodash-es"
 import { tryStringifyJson } from "./converters"
 
 export function delay(ms: number) {
@@ -33,7 +34,11 @@ export function makeErrorMessage(err: unknown): string {
     }
   } else if (err instanceof Error) {
     return err.message
+  } else if (isString(err)) {
+    return err
+  } else if (isObject(err)) {
+    return tryStringifyJson(err) || `Unserializable object ${err}`
   }
 
-  return `${tryStringifyJson(err) || err}`
+  return `${err}`
 }
