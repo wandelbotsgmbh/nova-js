@@ -58,7 +58,7 @@
     "@types/three": "^0.174.0",
     "@wandelbots/nova-api": "^25.3.0-dev.29",
     "axios": "^1.8.1",
-    "mobx": "^6.13.6",
+    "mobx": "^6.13.7",
     "path-to-regexp": "^8.2.0",
     "reconnecting-websocket": "^4.4.0",
     "three": "^0.174.0",
