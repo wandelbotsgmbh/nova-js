@@ -24,12 +24,12 @@ export function makeShortErrorMessage(err: unknown) {
 export function makeErrorMessage(err: unknown): string {
   if (err instanceof AxiosError) {
     if (err.response) {
-      return `${err.response?.status} ${err.response?.statusText} from ${err.response?.config.url}: ${JSON.stringify(err.response?.data)}`
+      return `${err.response?.status} ${err.response?.statusText} from ${err.response?.config.method?.toUpperCase() || "accessing"} ${err.response?.config.url}: ${JSON.stringify(err.response?.data)}`
     } else if (err.config) {
       if (err.code === "ERR_NETWORK") {
-        return `${err.message} from ${err.config.url}. This error can happen because of either connection issues or server CORS policy.`
+        return `${err.message} from ${err.config.method?.toUpperCase() || "accessing"} ${err.config.url}. This error can happen because of either connection issues or server CORS policy.`
       } else {
-        return `${err.message} from ${err.config.url}`
+        return `${err.message} from ${err.config.method?.toUpperCase() || "accessing"} ${err.config.url}`
       }
     }
   } else if (err instanceof Error) {
