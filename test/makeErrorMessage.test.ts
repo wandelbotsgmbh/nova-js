@@ -22,7 +22,7 @@ test("making useful error messages", async () => {
     expect(true).toBe(false)
   } catch (err) {
     expect(makeErrorMessage(err)).toMatch(
-      /^404 Not Found from http:\/\/example.com\/doesnt-exist: /,
+      /^404 Not Found from GET http:\/\/example.com\/doesnt-exist: /,
     )
   }
 
@@ -30,9 +30,10 @@ test("making useful error messages", async () => {
   // so let's create it manually
   const networkError = new AxiosError("Network Error", "ERR_NETWORK", {
     url: "http://example.com/some-cors-thing",
+    method: "post",
     headers: new AxiosHeaders(),
   })
   expect(makeErrorMessage(networkError)).toEqual(
-    "Network Error from http://example.com/some-cors-thing. This error can happen because of either connection issues or server CORS policy.",
+    "Network Error from POST http://example.com/some-cors-thing. This error can happen because of either connection issues or server CORS policy.",
   )
 })
