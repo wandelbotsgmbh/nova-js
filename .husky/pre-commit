@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-npx --yes npm run tsc
+. ~/.nvm/nvm.sh
+npx --yes npm run tsc 
