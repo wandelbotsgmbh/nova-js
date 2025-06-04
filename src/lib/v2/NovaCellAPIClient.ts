@@ -10,8 +10,6 @@ import {
   MotionGroupInfoApi,
   MotionGroupKinematicsApi,
   ProgramApi,
-  ProgramLibraryApi,
-  ProgramLibraryMetadataApi,
   ProgramOperatorApi,
   StoreCollisionComponentsApi,
   StoreCollisionScenesApi,
@@ -145,8 +143,6 @@ export class NovaCellAPIClient {
 
   readonly program = this.withCellId(ProgramApi)
   readonly programOperator = this.withCellId(ProgramOperatorApi)
-  readonly programLibraryMetadata = this.withCellId(ProgramLibraryMetadataApi)
-  readonly programLibrary = this.withCellId(ProgramLibraryApi)
 
   readonly controllerIOs = this.withCellId(ControllerInputsOutputsApi)
 

@@ -200,3 +200,9 @@ Then you can run the tests which will use a mocked Nova API and socket connectio
 ```bash
 npm run test
 ```
+
+Update packages:
+
+```bash
+npx npm-check-updates
+```

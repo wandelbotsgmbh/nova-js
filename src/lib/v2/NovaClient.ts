@@ -77,6 +77,9 @@ export class NovaClient {
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
       baseURL: urlJoin(this.config.instanceUrl, "/api/v2"),
+      headers: {
+        "User-Agent": `Wandelbots-Nova-JS-SDK`,
+      },
     })
 
     axiosInstance.interceptors.request.use(async (request) => {

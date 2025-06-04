@@ -1283,6 +1283,7 @@ const defaultMotionState = {
       joint_current: {
         joints: [0, 0, 0, 0, 0, 0],
       },
+      sequence_number: "1",
     },
     tcp_pose: {
       position: {

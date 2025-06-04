@@ -1,1 +1,2 @@
-npm run tsc
+#!/usr/bin/env bash
+npx --yes npm run tsc
