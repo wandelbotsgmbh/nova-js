@@ -73,7 +73,8 @@ export class NovaClient {
     const axiosInstance = axios.create({
       baseURL: urlJoin(this.config.instanceUrl, "/api/v1"),
       headers: {
-        "User-Agent": `Wandelbots-Nova-JS-SDK`,
+        "X-Client-SDK": "Wandelbots-Nova-JS-SDK",
+        "X-SDK-Version": "v1",
       },
     })
 
