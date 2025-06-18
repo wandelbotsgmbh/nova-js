@@ -72,9 +72,15 @@ export class NovaClient {
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
       baseURL: urlJoin(this.config.instanceUrl, "/api/v1"),
-      headers: {
-        "X-Wandelbots-Client": "Wandelbots-Nova-JS-SDK",
-      },
+      // TODO - backend needs to set proper CORS headers for this
+      headers:
+        typeof window !== "undefined" &&
+        window.location.origin.includes("localhost")
+          ? {}
+          : {
+              // Identify the client to the backend for logging purposes
+              "X-Wandelbots-Client": "Wandelbots-Nova-JS-SDK",
+            },
     })
 
     axiosInstance.interceptors.request.use(async (request) => {
