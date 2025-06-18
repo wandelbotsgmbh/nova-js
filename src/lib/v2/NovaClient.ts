@@ -80,6 +80,7 @@ export class NovaClient {
       headers: {
         "X-Client-SDK": "Wandelbots-Nova-JS-SDK",
         "X-SDK-Version": "v2",
+        "X-Wandelbots-Client": "Wandelbots-Nova-JS-SDK",
       },
     })
 
