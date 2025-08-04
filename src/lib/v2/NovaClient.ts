@@ -221,11 +221,11 @@ export class NovaClient {
   async connectMotionGroups(
     motionGroupIds: string[],
   ): Promise<ConnectedMotionGroup[]> {
-    const { controllers } = await this.api.controller.listControllers()
+    const controllerIds = await this.api.controllerApi.listRobotControllers()
 
     return Promise.all(
       motionGroupIds.map((motionGroupId) =>
-        ConnectedMotionGroup.connect(this, motionGroupId, controllers),
+        ConnectedMotionGroup.connect(this, motionGroupId, controllerIds),
       ),
     )
   }

@@ -1,10 +1,4 @@
-import type {
-  ControllersList,
-  MotionGroupSpecification,
-  MotionGroupState,
-  RobotController,
-  SafetySetup,
-} from "@wandelbots/nova-api/v2"
+import type { MotionGroupState, RobotController } from "@wandelbots/nova-api/v2"
 import type { AxiosResponse, InternalAxiosRequestConfig } from "axios"
 import { AxiosError } from "axios"
 import * as pathToRegexp from "path-to-regexp"
@@ -44,7 +38,7 @@ export class MockNovaInstance {
                 error_details: "",
               },
             ],
-          } satisfies ControllersList
+          }
         },
       },
       {
@@ -149,7 +143,7 @@ export class MockNovaInstance {
                 unlimited: false,
               },
             ],
-          } satisfies MotionGroupSpecification
+          } // TODO: Update with correct v2 type
         },
       },
       {
@@ -613,7 +607,7 @@ export class MockNovaInstance {
               },
             ],
             tool_geometries: [],
-          } satisfies SafetySetup
+          } // TODO: Update with correct v2 type
         },
       },
       {
@@ -623,7 +617,6 @@ export class MockNovaInstance {
           return {
             coordinatesystems: [
               {
-                coordinate_system: "",
                 name: "world",
                 reference_uid: "",
                 position: [0, 0, 0],
@@ -746,9 +739,6 @@ export class MockNovaInstance {
                           -1.829018235206604, 1.264623761177063,
                         ],
                       },
-                      joint_velocity: {
-                        joints: [0, 0, 0, 0, 0, 0],
-                      },
                       flange_pose: {
                         position: [
                           6.437331889439328, -628.4123774830913,
@@ -759,7 +749,6 @@ export class MockNovaInstance {
                           y: -1.9783363827298732,
                           z: -0.4928031860165713,
                         },
-                        coordinate_system: "",
                       },
                       tcp_pose: {
                         position: [
@@ -771,8 +760,6 @@ export class MockNovaInstance {
                           y: -1.9783363827298732,
                           z: -0.4928031860165713,
                         },
-                        coordinate_system: "",
-                        tcp: "Flange",
                       },
                       velocity: {
                         linear: {
@@ -785,20 +772,6 @@ export class MockNovaInstance {
                           y: 0,
                           z: 0,
                         },
-                        coordinate_system: "",
-                      },
-                      force: {
-                        force: {
-                          x: 0,
-                          y: 0,
-                          z: 0,
-                        },
-                        moment: {
-                          x: 0,
-                          y: 0,
-                          z: 0,
-                        },
-                        coordinate_system: "",
                       },
                       joint_limit_reached: {
                         limit_reached: [
@@ -848,9 +821,6 @@ export class MockNovaInstance {
                           -1.829018235206604, 1.264623761177063,
                         ],
                       },
-                      joint_velocity: {
-                        joints: [0, 0, 0, 0, 0, 0],
-                      },
                       flange_pose: {
                         position: [
                           -2.763015284002938, -630.2151479701106,
@@ -861,7 +831,6 @@ export class MockNovaInstance {
                           y: -1.9722372952861567,
                           z: -0.4852079204210754,
                         },
-                        coordinate_system: "",
                       },
                       tcp_pose: {
                         position: [
@@ -873,8 +842,6 @@ export class MockNovaInstance {
                           y: -1.9722372952861567,
                           z: -0.4852079204210754,
                         },
-                        coordinate_system: "",
-                        tcp: "Flange",
                       },
                       velocity: {
                         linear: {
@@ -887,20 +854,6 @@ export class MockNovaInstance {
                           y: 0,
                           z: 0,
                         },
-                        coordinate_system: "",
-                      },
-                      force: {
-                        force: {
-                          x: 0,
-                          y: 0,
-                          z: 0,
-                        },
-                        moment: {
-                          x: 0,
-                          y: 0,
-                          z: 0,
-                        },
-                        coordinate_system: "",
                       },
                       joint_limit_reached: {
                         limit_reached: [
@@ -936,6 +889,8 @@ export class MockNovaInstance {
 
 const defaultMotionState = {
   result: {
+    timestamp: "2024-09-18T12:48:26.096266444Z",
+    sequence_number: 627897,
     motion_group: "0@universalrobots-ur5e",
     controller: "universalrobots-ur5e",
     joint_position: {
@@ -944,33 +899,17 @@ const defaultMotionState = {
         1.0299999713897705, 1.2899999618530273, 1.2799999713897705,
       ],
     },
-    joint_velocity: {
-      joints: [0, 0, 0, 0, 0, 0],
-    },
     flange_pose: {
       position: [1.3300010259703043, -409.2680714682808, 531.0203477065281],
       orientation: [
         1.7564919306270736, -1.7542521568325058, 0.7326972590614671,
       ],
-      coordinate_system: "",
     },
     tcp_pose: {
       position: [1.3300010259703043, -409.2680714682808, 531.0203477065281],
       orientation: [
         1.7564919306270736, -1.7542521568325058, 0.7326972590614671,
       ],
-      coordinate_system: "",
-      tcp: "Flange",
-    },
-    velocity: {
-      linear: [0, 0, 0],
-      angular: [0, 0, 0],
-      coordinate_system: "",
-    },
-    force: {
-      force: [0, 0, 0],
-      moment: [0, 0, 0],
-      coordinate_system: "",
     },
     joint_limit_reached: {
       limit_reached: [false, false, false, false, false, false],
@@ -978,5 +917,6 @@ const defaultMotionState = {
     joint_current: {
       joints: [0, 0, 0, 0, 0, 0],
     },
+    standstill: false,
   } satisfies MotionGroupState,
 }

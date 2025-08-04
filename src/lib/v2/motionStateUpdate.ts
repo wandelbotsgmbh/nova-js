@@ -1,4 +1,4 @@
-import type { TcpPose } from "@wandelbots/nova-api/v2"
+import type { Pose } from "@wandelbots/nova-api/v2"
 
 export function jointValuesEqual(
   oldJointValues: number[],
@@ -22,8 +22,8 @@ export function jointValuesEqual(
 }
 
 export function tcpPoseEqual(
-  oldTcp: TcpPose | undefined,
-  newTcp: TcpPose | undefined,
+  oldTcp: Pose | undefined,
+  newTcp: Pose | undefined,
   changeDeltaThreshold: number,
 ): boolean {
   // undefined -> defined (+reverse) transition
@@ -37,19 +37,20 @@ export function tcpPoseEqual(
   }
 
   let changedDelta = 0
-  changedDelta += Math.abs(oldTcp.orientation[0] - newTcp.orientation[0])
-  changedDelta += Math.abs(oldTcp.orientation[1] - newTcp.orientation[1])
-  changedDelta += Math.abs(oldTcp.orientation[2] - newTcp.orientation[2])
-  changedDelta += Math.abs(oldTcp.position[0] - newTcp.position[0])
-  changedDelta += Math.abs(oldTcp.position[1] - newTcp.position[1])
-  changedDelta += Math.abs(oldTcp.position[2] - newTcp.position[2])
+  if (oldTcp.orientation && newTcp.orientation) {
+    changedDelta += Math.abs(oldTcp.orientation[0] - newTcp.orientation[0])
+    changedDelta += Math.abs(oldTcp.orientation[1] - newTcp.orientation[1])
+    changedDelta += Math.abs(oldTcp.orientation[2] - newTcp.orientation[2])
+  }
+  if (oldTcp.position && newTcp.position) {
+    changedDelta += Math.abs(oldTcp.position[0] - newTcp.position[0])
+    changedDelta += Math.abs(oldTcp.position[1] - newTcp.position[1])
+    changedDelta += Math.abs(oldTcp.position[2] - newTcp.position[2])
+  }
 
   if (changedDelta > changeDeltaThreshold) {
     return false
   }
 
-  return (
-    oldTcp.coordinate_system === newTcp.coordinate_system &&
-    oldTcp.tcp === newTcp.tcp
-  )
+  return true
 }

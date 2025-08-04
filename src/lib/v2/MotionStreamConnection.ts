@@ -1,15 +1,11 @@
-import type {
-  Controller,
-  MotionGroupPhysical,
-  MotionGroupState,
-} from "@wandelbots/nova-api/v2"
+import type { MotionGroupDescription, MotionGroupState } from "@wandelbots/nova-api/v2"
 import { makeAutoObservable, runInAction } from "mobx"
 import * as THREE from "three"
 import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { tryParseJson } from "../converters"
 import { jointValuesEqual, tcpPoseEqual } from "./motionStateUpdate"
 import type { NovaClient } from "./NovaClient"
-import { Vector3d, vector3ToArray } from "./vectorUtils"
+import { type Vector3d, vector3ToArray } from "./vectorUtils"
 
 const MOTION_DELTA_THRESHOLD = 0.0001
 
@@ -57,50 +53,53 @@ function unwrapRotationVector(
  */
 export class MotionStreamConnection {
   static async open(nova: NovaClient, motionGroupId: string) {
-    const { controllers: controllers } =
-      await nova.api.controller.listControllers()
+    const controllerIds = await nova.api.controllerApi.listRobotControllers()
 
     const [_motionGroupIndex, controllerId] = motionGroupId.split("@") as [
       string,
       string,
     ]
-    const controller = controllers.find((c) => c.controller === controllerId)
-    const motionGroup = controller?.motion_groups.find(
-      (mg) => mg.motion_group === motionGroupId,
-    )
-    if (!controller || !motionGroup) {
+
+    if (!controllerIds.includes(controllerId)) {
+      throw new Error(`Controller ${controllerId} not found`)
+    }
+
+    // Verify motion group exists by getting its state
+    let initialMotionState: MotionGroupState
+    try {
+      initialMotionState =
+        await nova.api.motionGroupApi.getCurrentMotionGroupState(
+          controllerId,
+          motionGroupId,
+        )
+    } catch (error) {
       throw new Error(
-        `Controller ${controllerId} or motion group ${motionGroupId} not found`,
+        `Motion group ${motionGroupId} not found on controller ${controllerId}`,
       )
     }
+
+    const motionGroupDescription =
+      await nova.api.motionGroupApi.getMotionGroupDescription(
+        controllerId,
+        motionGroupId,
+      )
 
     const motionStateSocket = nova.openReconnectingWebsocket(
-      `/motion-groups/${motionGroupId}/state-stream`,
+      `/cells/${nova.config.cellId}/controllers/${controllerId}/motion-groups/${motionGroupId}/state-stream`,
     )
 
-    // Wait for the first message to get the initial state
-    const firstMessage = await motionStateSocket.firstMessage()
-    console.log("got first message", firstMessage)
-    const initialMotionState = tryParseJson(firstMessage.data)
-      ?.result as MotionGroupState
-
-    if (!initialMotionState) {
-      throw new Error(
-        `Unable to parse initial motion state message ${firstMessage.data}`,
-      )
-    }
-
     console.log(
-      `Connected motion state websocket to motion group ${motionGroup.motion_group}. Initial state:\n  `,
+      `Connected motion state websocket to motion group ${motionGroupId}. Initial state:\n  `,
       initialMotionState,
     )
 
     return new MotionStreamConnection(
       nova,
-      controller,
-      motionGroup,
+      controllerId,
+      motionGroupId,
       initialMotionState,
       motionStateSocket,
+      motionGroupDescription,
     )
   }
 
@@ -110,10 +109,11 @@ export class MotionStreamConnection {
 
   constructor(
     readonly nova: NovaClient,
-    readonly controller: Controller,
-    readonly motionGroup: MotionGroupPhysical,
+    readonly controllerId: string,
+    readonly motionGroupId: string,
     readonly initialMotionState: MotionGroupState,
     readonly motionStateSocket: AutoReconnectingWebsocket,
+    readonly motionGroupDescription: MotionGroupDescription,
   ) {
     this.rapidlyChangingMotionState = initialMotionState
 
@@ -150,7 +150,7 @@ export class MotionStreamConnection {
         )
       ) {
         runInAction(() => {
-          if (this.rapidlyChangingMotionState.tcp_pose == undefined) {
+          if (this.rapidlyChangingMotionState.tcp_pose === undefined) {
             this.rapidlyChangingMotionState.tcp_pose = motionState.tcp_pose
           } else {
             this.rapidlyChangingMotionState.tcp_pose = {
@@ -160,8 +160,7 @@ export class MotionStreamConnection {
                 this.rapidlyChangingMotionState.tcp_pose!
                   .orientation as Vector3d,
               ),
-              tcp: motionState.tcp_pose!.tcp,
-              coordinate_system: motionState.tcp_pose!.coordinate_system,
+              // reference_coordinate_system removed in v2
             }
           }
         })
@@ -170,16 +169,8 @@ export class MotionStreamConnection {
     makeAutoObservable(this)
   }
 
-  get motionGroupId() {
-    return this.motionGroup.motion_group
-  }
-
-  get controllerId() {
-    return this.controller.controller
-  }
-
   get modelFromController() {
-    return this.motionGroup.model_from_controller
+    return this.motionGroupDescription.motion_group_model || "Unknown"
   }
 
   get wandelscriptIdentifier() {

@@ -1,6 +1,6 @@
 import type {
+  ExecuteJoggingResponse,
   InitializeJoggingRequest,
-  JoggingResponse,
   JointVelocityRequest,
   MotionGroupState,
   TcpVelocityRequest,
@@ -24,7 +24,7 @@ export class JoggerConnection {
   // to merge these for simplicity
   joggingWebsocket: AutoReconnectingWebsocket | null = null
   lastVelocityRequest: JointVelocityRequest | TcpVelocityRequest | null = null
-  lastResponse: JoggingResponse | null = null
+  lastResponse: ExecuteJoggingResponse | null = null
 
   static async open(
     nova: NovaClient,
@@ -32,8 +32,15 @@ export class JoggerConnection {
     motionGroupId: string,
     opts: JoggerConnectionOpts,
   ) {
+    const [_motionGroupIndex, controllerId] = motionGroupId.split("@") as [
+      string,
+      string,
+    ]
     const motionGroupState =
-      await nova.api.motionGroupInfos.getCurrentMotionGroupState(motionGroupId)
+      await nova.api.motionGroupApi.getCurrentMotionGroupState(
+        controllerId,
+        motionGroupId,
+      )
 
     return new JoggerConnection(
       nova,
@@ -55,7 +62,7 @@ export class JoggerConnection {
       `/cells/${cell}/execution/jogging`,
     )
     this.joggingWebsocket.addEventListener("message", (ev: MessageEvent) => {
-      const data = tryParseJson(ev.data) as JoggingResponse
+      const data = tryParseJson(ev.data) as ExecuteJoggingResponse
       if (data && "error" in data) {
         if (this.opts.onError) {
           this.opts.onError(ev.data)

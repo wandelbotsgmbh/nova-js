@@ -1,10 +1,7 @@
 import type {
-  Controller,
-  MotionGroupPhysical,
-  MotionGroupSpecification,
+  MotionGroupDescription,
   MotionGroupState,
   RobotTcp,
-  SafetySetup,
 } from "@wandelbots/nova-api/v2"
 import { AxiosError } from "axios"
 import { makeAutoObservable, runInAction } from "mobx"
@@ -17,7 +14,9 @@ const MOTION_DELTA_THRESHOLD = 0.0001
 
 export type MotionGroupOption = {
   selectionId: string
-} & MotionGroupPhysical
+  motionGroupId: string
+  controllerId: string
+}
 
 /**
  * Store representing the current state of a connected motion group.
@@ -26,39 +25,37 @@ export class ConnectedMotionGroup {
   static async connect(
     nova: NovaClient,
     motionGroupId: string,
-    controllers: Controller[],
+    controllerIds: string[],
   ) {
     const [_motionGroupIndex, controllerId] = motionGroupId.split("@") as [
       string,
       string,
     ]
-    const controller = controllers.find((c) => c.controller === controllerId)
-    const motionGroup = controller?.motion_groups.find(
-      (mg) => mg.motion_group === motionGroupId,
-    )
-    if (!controller || !motionGroup) {
+
+    if (!controllerIds.includes(controllerId)) {
+      throw new Error(`Controller ${controllerId} not found`)
+    }
+
+    // Get motion group state directly to verify it exists
+    let initialMotionState: MotionGroupState
+    try {
+      initialMotionState =
+        await nova.api.motionGroupApi.getCurrentMotionGroupState(
+          controllerId,
+          motionGroupId,
+        )
+    } catch (error) {
       throw new Error(
-        `Controller ${controllerId} or motion group ${motionGroupId} not found`,
+        `Motion group ${motionGroupId} not found on controller ${controllerId}`,
       )
     }
 
     const motionStateSocket = nova.openReconnectingWebsocket(
-      `/motion-groups/${motionGroupId}/state-stream`,
+      `/cells/${nova.config.cellId}/controllers/${controllerId}/motion-groups/${motionGroupId}/state-stream`,
     )
 
-    // Wait for the first message to get the initial state
-    const firstMessage = await motionStateSocket.firstMessage()
-    const initialMotionState = tryParseJson(firstMessage.data)
-      ?.result as MotionGroupState
-
-    if (!initialMotionState) {
-      throw new Error(
-        `Unable to parse initial motion state message ${firstMessage.data}`,
-      )
-    }
-
     console.log(
-      `Connected motion state websocket to motion group ${motionGroup.motion_group}. Initial state:\n  `,
+      `Connected motion state websocket to motion group ${motionGroupId}. Initial state:\n  `,
       initialMotionState,
     )
 
@@ -66,7 +63,7 @@ export class ConnectedMotionGroup {
     let isVirtual = false
     try {
       const opMode =
-        await nova.api.virtualRobotMode.getOperationMode(controllerId)
+        await nova.api.virtualControllerApi.getOperationMode(controllerId)
 
       if (opMode) isVirtual = true
     } catch (err) {
@@ -80,24 +77,32 @@ export class ConnectedMotionGroup {
     }
 
     // Find out what TCPs this motion group has (we need it for jogging)
-    const { tcps } = await nova.api.motionGroupInfos.listTcps(motionGroupId)
+    let tcps: RobotTcp[] = []
+    try {
+      tcps = await nova.api.virtualControllerApi.listVirtualRobotTcps(
+        controllerId,
+        motionGroupId,
+      )
+    } catch (err) {
+      // Physical controllers may not support TCP listing
+      console.log(`Could not list TCPs for ${motionGroupId}:`, err)
+    }
 
-    const motionGroupSpecification =
-      await nova.api.motionGroupInfos.getMotionGroupSpecification(motionGroupId)
-
-    const safetySetup =
-      await nova.api.motionGroupInfos.getSafetySetup(motionGroupId)
+    const motionGroupDescription =
+      await nova.api.motionGroupApi.getMotionGroupDescription(
+        controllerId,
+        motionGroupId,
+      )
 
     return new ConnectedMotionGroup(
       nova,
-      controller,
-      motionGroup,
+      controllerId,
+      motionGroupId,
       initialMotionState,
       motionStateSocket,
       isVirtual,
-      tcps!,
-      motionGroupSpecification,
-      safetySetup,
+      tcps,
+      motionGroupDescription,
     )
   }
 
@@ -112,14 +117,13 @@ export class ConnectedMotionGroup {
 
   constructor(
     readonly nova: NovaClient,
-    readonly controller: Controller,
-    readonly motionGroup: MotionGroupPhysical,
+    readonly controllerId: string,
+    readonly motionGroupId: string,
     readonly initialMotionState: MotionGroupState,
     readonly motionStateSocket: AutoReconnectingWebsocket,
     readonly isVirtual: boolean,
     readonly tcps: RobotTcp[],
-    readonly motionGroupSpecification: MotionGroupSpecification,
-    readonly safetySetup: SafetySetup,
+    readonly motionGroupDescription: MotionGroupDescription,
   ) {
     this.rapidlyChangingMotionState = initialMotionState
 
@@ -164,16 +168,8 @@ export class ConnectedMotionGroup {
     makeAutoObservable(this)
   }
 
-  get motionGroupId() {
-    return this.motionGroup.motion_group
-  }
-
-  get controllerId() {
-    return this.controller.controller
-  }
-
   get modelFromController() {
-    return this.motionGroup.model_from_controller
+    return this.motionGroupDescription.motion_group_model || "Unknown"
   }
 
   get wandelscriptIdentifier() {
@@ -195,11 +191,11 @@ export class ConnectedMotionGroup {
   }
 
   get dhParameters() {
-    return this.motionGroupSpecification.dh_parameters
+    return this.motionGroupDescription.dh_parameters
   }
 
   get safetyZones() {
-    return this.safetySetup.safety_zones
+    return this.motionGroupDescription.safety_zones || []
   }
 
   dispose() {

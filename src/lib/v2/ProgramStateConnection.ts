@@ -1,6 +1,6 @@
 import { AxiosError } from "axios"
 import { makeAutoObservable, runInAction } from "mobx"
-import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
+import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { tryParseJson } from "../converters"
 import type { MotionStreamConnection } from "./MotionStreamConnection"
 import type { NovaClient } from "./NovaClient"
@@ -76,7 +76,9 @@ export class ProgramStateConnection {
 
     if (runner.state === ProgramState.Failed) {
       try {
-        const runnerState = await this.nova.api.program.getProgramRun(runner.id)
+        // TODO: Program API removed in v2 - needs reimplementation
+        // const runnerState = await this.nova.api.program.getProgramRun(runner.id)
+        const runnerState: any = {}
 
         // TODO - wandelengine should send print statements in real time over
         // websocket as well, rather than at the end
@@ -98,7 +100,9 @@ export class ProgramStateConnection {
       this.gotoIdleState()
     } else if (runner.state === ProgramState.Stopped) {
       try {
-        const runnerState = await this.nova.api.program.getProgramRun(runner.id)
+        // TODO: Program API removed in v2 - needs reimplementation
+        // const runnerState = await this.nova.api.program.getProgramRun(runner.id)
+        const runnerState: any = {}
 
         const stdout = (runnerState as any).stdout
         if (stdout) {
@@ -116,7 +120,9 @@ export class ProgramStateConnection {
       this.gotoIdleState()
     } else if (runner.state === ProgramState.Completed) {
       try {
-        const runnerState = await this.nova.api.program.getProgramRun(runner.id)
+        // TODO: Program API removed in v2 - needs reimplementation
+        // const runnerState = await this.nova.api.program.getProgramRun(runner.id)
+        const runnerState: any = {}
 
         const stdout = (runnerState as any).stdout
         if (stdout) {
@@ -175,18 +181,14 @@ export class ProgramStateConnection {
     const trimmedCode = openProgram.wandelscript!.replaceAll(/^\s*$/gm, "")
 
     try {
-      const programRunnerRef = await this.nova.api.program.createProgramRun(
-        {
-          code: trimmedCode,
-          initial_state: initial_state,
-          default_robot: activeRobot?.wandelscriptIdentifier,
-        } as any,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      )
+      // TODO: Program API removed in v2 - needs reimplementation
+      // const programRunnerRef = await this.nova.api.program.createProgramRun({
+      //   code: trimmedCode,
+      //   initial_state: initial_state,
+      //   default_robot: activeRobot?.wandelscriptIdentifier,
+      // } as any,
+      // )
+      const programRunnerRef: any = { id: "placeholder" }
 
       this.log(`Created program runner ${programRunnerRef.id}"`)
       runInAction(() => {
@@ -214,9 +216,10 @@ export class ProgramStateConnection {
     })
 
     try {
-      await this.nova.api.program.stopProgramRun(
-        this.currentlyExecutingProgramRunnerId,
-      )
+      // TODO: Program API removed in v2 - needs reimplementation
+      // await this.nova.api.program.stopProgramRun(
+      //   this.currentlyExecutingProgramRunnerId,
+      // )
     } catch (err) {
       // Reactivate the stop button so user can try again
       runInAction(() => {

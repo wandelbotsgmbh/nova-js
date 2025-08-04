@@ -44,6 +44,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
+    "@types/node": "^24.2.0",
     "husky": "^9.1.7",
     "nodemon": "^3.1.9",
     "prettier-eslint": "^16.3.0",

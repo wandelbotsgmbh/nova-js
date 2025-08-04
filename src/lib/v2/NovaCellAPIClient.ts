@@ -4,23 +4,21 @@ import {
   CellApi,
   ControllerApi,
   ControllerInputsOutputsApi,
-  CoordinateSystemsApi,
   JoggingApi,
+  KinematicsApi,
+  LicenseApi,
   MotionGroupApi,
-  MotionGroupInfoApi,
-  MotionGroupKinematicsApi,
-  ProgramApi,
-  ProgramOperatorApi,
+  MotionGroupModelsApi,
   StoreCollisionComponentsApi,
   StoreCollisionScenesApi,
   StoreObjectApi,
   SystemApi,
+  TrajectoryCachingApi,
   TrajectoryExecutionApi,
   TrajectoryPlanningApi,
-  VirtualRobotApi,
-  VirtualRobotBehaviorApi,
-  VirtualRobotModeApi,
-  VirtualRobotSetupApi,
+  VirtualControllerApi,
+  VirtualControllerBehaviorApi,
+  VirtualControllerInputsOutputsApi,
 } from "@wandelbots/nova-api/v2"
 import type { BaseAPI } from "@wandelbots/nova-api/v2/base"
 import type { AxiosInstance } from "axios"
@@ -137,30 +135,31 @@ export class NovaCellAPIClient {
   readonly cell = this.withUnwrappedResponsesOnly(CellApi)
 
   readonly motionGroup = this.withCellId(MotionGroupApi)
-  readonly motionGroupInfos = this.withCellId(MotionGroupInfoApi)
+  readonly motionGroupApi = this.withCellId(MotionGroupApi)
 
-  readonly controller = this.withCellId(ControllerApi)
-
-  readonly program = this.withCellId(ProgramApi)
-  readonly programOperator = this.withCellId(ProgramOperatorApi)
+  readonly controllerApi = this.withCellId(ControllerApi)
 
   readonly controllerIOs = this.withCellId(ControllerInputsOutputsApi)
 
-  readonly motionGroupKinematic = this.withCellId(MotionGroupKinematicsApi)
+  readonly kinematicsApi = this.withCellId(KinematicsApi)
   readonly trajectoryPlanning = this.withCellId(TrajectoryPlanningApi)
   readonly trajectoryExecution = this.withCellId(TrajectoryExecutionApi)
-
-  readonly coordinateSystems = this.withCellId(CoordinateSystemsApi)
+  readonly trajectoryCachingApi = this.withCellId(TrajectoryCachingApi)
+  readonly motionGroupModelsApi = this.withCellId(MotionGroupModelsApi)
+  readonly licenseApi = this.withCellId(LicenseApi)
 
   readonly application = this.withCellId(ApplicationApi)
   readonly applicationGlobal = this.withUnwrappedResponsesOnly(ApplicationApi)
 
   readonly jogging = this.withCellId(JoggingApi)
 
-  readonly virtualRobot = this.withCellId(VirtualRobotApi)
-  readonly virtualRobotSetup = this.withCellId(VirtualRobotSetupApi)
-  readonly virtualRobotMode = this.withCellId(VirtualRobotModeApi)
-  readonly virtualRobotBehavior = this.withCellId(VirtualRobotBehaviorApi)
+  readonly virtualControllerApi = this.withCellId(VirtualControllerApi)
+  readonly virtualControllerBehaviorApi = this.withCellId(
+    VirtualControllerBehaviorApi,
+  )
+  readonly virtualControllerInputsOutputsApi = this.withCellId(
+    VirtualControllerInputsOutputsApi,
+  )
 
   readonly storeObject = this.withCellId(StoreObjectApi)
   readonly storeCollisionComponents = this.withCellId(
