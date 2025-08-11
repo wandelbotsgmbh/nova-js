@@ -1,6 +1,9 @@
 # @wandelbots/nova-js
 
-[![NPM version](https://img.shields.io/npm/v/@wandelbots/nova-js.svg)](https://npmjs.org/package/@wandelbots/nova-js) [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@wandelbots/nova-js)](https://bundlephobia.com/package/@wandelbots/nova-js) [![Release](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml/badge.svg)](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/wandelbotsgmbh/nova-js)
+[![NPM version](https://img.shields.io/npm/v/@wandelbots/nova-js.svg)](https://npmjs.org/package/@wandelbots/nova-js)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@wandelbots/nova-js)](https://bundlephobia.com/result?p=@wandelbots/nova-js)
+[![Release](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml/badge.svg)](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/wandelbotsgmbh/nova-js)
 
 This library provides convenient access to the Wandelbots API from frontend JavaScript applications. Currently this contains typed methods for each API endpoint. We are also working on providing some higher level abstractions to manage the websocket connection state for tracking robot movement and handling jogging and Wandelscript program execution, which will be included in this package.
 
@@ -13,6 +16,7 @@ If you develop an react application we also provide a set of [react components](
 ## Table of contents
 
 - [Basic usage](#basic-usage)
+- [API Version Support](#api-version-support)
 - [API calls](#api-calls)
 - [Opening websockets](#opening-websockets)
 - [Connect to a motion group](#connect-to-a-motion-group)
@@ -40,6 +44,30 @@ const nova = new NovaClient({
   accessToken: "...",
 })
 ```
+
+## API Version Support
+
+This library primarily supports **Nova API v1**, which provides full functionality including motion group connections, jogging, program execution, and all the features documented below.
+
+**Nova API v2** support is currently **experimental and limited**. While v2 API endpoints are accessible through the NovaCellAPIClient, many of the higher-level abstractions (like `connectMotionGroup`, `connectJogger`, and `ProgramStateConnection`) are not yet available for v2.
+
+For v2 usage:
+
+```ts
+// Note: v2 support is experimental
+import { NovaClient } from "@wandelbots/nova-js/v2"
+
+const nova = new NovaClient({
+  instanceUrl: "https://example.instance.wandelbots.io",
+  cellId: "cell",
+  accessToken: "...",
+})
+
+// Direct API access is available
+const { controllers } = await nova.api.controller.listRobotControllers()
+```
+
+We recommend using **v1** for production applications until v2 support is fully implemented.
 
 ## API calls
 

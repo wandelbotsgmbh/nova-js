@@ -5,9 +5,7 @@ import urlJoin from "url-join"
 import { loginWithAuth0 } from "../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
-import { ConnectedMotionGroup } from "./ConnectedMotionGroup"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
-import { MotionStreamConnection } from "./MotionStreamConnection"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
 export type NovaClientConfig = {
@@ -209,31 +207,5 @@ export class NovaClient {
     return new AutoReconnectingWebsocket(this.makeWebsocketURL(path), {
       mock: this.mock,
     })
-  }
-
-  /**
-   * Connect to the motion state websocket(s) for a given motion group
-   */
-  async connectMotionStream(motionGroupId: string) {
-    return await MotionStreamConnection.open(this, motionGroupId)
-  }
-
-  async connectMotionGroups(
-    motionGroupIds: string[],
-  ): Promise<ConnectedMotionGroup[]> {
-    const { controllers } = await this.api.controller.listControllers()
-
-    return Promise.all(
-      motionGroupIds.map((motionGroupId) =>
-        ConnectedMotionGroup.connect(this, motionGroupId, controllers),
-      ),
-    )
-  }
-
-  async connectMotionGroup(
-    motionGroupId: string,
-  ): Promise<ConnectedMotionGroup> {
-    const motionGroups = await this.connectMotionGroups([motionGroupId])
-    return motionGroups[0]!
   }
 }
