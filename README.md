@@ -64,7 +64,7 @@ const nova = new NovaClient({
 })
 
 // Direct API access is available
-const { controllers } = await nova.api.controller.listControllers()
+const { controllers } = await nova.api.controller.listRobotControllers()
 ```
 
 We recommend using **v1** for production applications until v2 support is fully implemented.
