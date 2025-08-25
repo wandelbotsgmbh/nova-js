@@ -7,9 +7,15 @@ import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket.js"
 import { availableStorage } from "../availableStorage.js"
 import { ConnectedMotionGroup } from "./ConnectedMotionGroup.js"
 import { JoggerConnection } from "./JoggerConnection.js"
+import { MockNovaInstance } from "./mock/MockNovaInstance.js"
 import { MotionStreamConnection } from "./MotionStreamConnection.js"
 import { NovaCellAPIClient } from "./NovaCellAPIClient.js"
-import { MockNovaInstance } from "./mock/MockNovaInstance.js"
+
+// Type declarations for browser globals when not in DOM environment
+declare const window: Window & typeof globalThis
+declare const btoa: (data: string) => string
+declare const fetch: typeof globalThis.fetch
+declare const URL: typeof globalThis.URL
 
 export type NovaClientConfig = {
   /**

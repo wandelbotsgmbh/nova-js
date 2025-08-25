@@ -1,3 +1,6 @@
+// Type declarations for browser globals when not in DOM environment
+declare const window: Window & typeof globalThis
+
 /**
  * Safety wrapper around browser localStorage providing context availability
  * checks and JSON parsing
@@ -13,12 +16,12 @@ class AvailableStorage {
 
     try {
       return JSON.parse(result)
-    } catch (err) {
+    } catch {
       return null
     }
   }
 
-  setJSON(key: string, obj: any) {
+  setJSON(key: string, obj: unknown) {
     if (!this.available) return null
 
     window.localStorage.setItem(key, JSON.stringify(obj))
