@@ -26,6 +26,15 @@ declare global {
     removeEventListener(type: string, listener: EventListener): void
   }
 
+  // WebSocket constructor and constants
+  interface WebSocketConstructor {
+    new (url: string | URL, protocols?: string | string[]): WebSocket
+    readonly CONNECTING: 0
+    readonly OPEN: 1
+    readonly CLOSING: 2
+    readonly CLOSED: 3
+  }
+
   interface CloseEvent extends Event {
     readonly code: number
     readonly reason: string
@@ -109,6 +118,12 @@ declare global {
       },
     ): MessageEvent<T>
   }
+  var WebSocket: WebSocketConstructor
+
+  // Global functions available in non-DOM environments
+  var btoa: (data: string) => string
+  var fetch: typeof globalThis.fetch
+  var console: typeof globalThis.console
 
   // Global instances available in non-DOM environments
   var window: Window & typeof globalThis

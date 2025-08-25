@@ -1,6 +1,3 @@
-// Type declarations for browser globals when not in DOM environment
-declare const window: Window & typeof globalThis
-
 /**
  * Safety wrapper around browser localStorage providing context availability
  * checks and JSON parsing

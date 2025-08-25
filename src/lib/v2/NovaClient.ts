@@ -8,13 +8,6 @@ import { availableStorage } from "../availableStorage"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
-// Type declarations for browser globals when not in DOM environment
-declare const window: Window & typeof globalThis
-declare const btoa: (data: string) => string
-declare const fetch: typeof globalThis.fetch
-declare const URL: typeof globalThis.URL
-declare const console: typeof globalThis.console
-
 export type NovaClientConfig = {
   /**
    * Url of the deployed Nova instance to connect to

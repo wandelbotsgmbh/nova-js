@@ -1,10 +1,5 @@
 const DOMAIN_SUFFIX = "wandelbots.io"
 
-// Type declarations for browser globals when not in DOM environment
-declare const window: Window & typeof globalThis
-declare const document: Document
-declare const URL: typeof globalThis.URL
-
 /** Mapping of stages to Auth0 configurations */
 const auth0ConfigMap = {
   dev: {
