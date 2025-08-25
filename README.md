@@ -17,6 +17,7 @@ If you develop an react application we also provide a set of [react components](
 
 - [Basic usage](#basic-usage)
 - [API Version Support](#api-version-support)
+- [Programs API (v2)](#programs-api-v2)
 - [API calls](#api-calls)
 - [Opening websockets](#opening-websockets)
 - [Connect to a motion group](#connect-to-a-motion-group)
@@ -68,6 +69,42 @@ const { controllers } = await nova.api.controller.listRobotControllers()
 ```
 
 We recommend using **v1** for production applications until v2 support is fully implemented.
+
+## Programs API (v2)
+
+For v2 instances, you can use the enhanced `ProgramsClient` to manage programs:
+
+```ts
+import { NovaClient } from "@wandelbots/nova-js/v2"
+
+const nova = new NovaClient({
+  instanceUrl: "https://example.instance.wandelbots.io",
+  cellId: "cell",
+  accessToken: "...",
+})
+
+// Access the programs client
+const programs = nova.cell("cell-id").programsClient
+
+// List all available programs
+const allPrograms = await programs.list()
+
+// Start a program with arguments
+const run = await programs.start("my-program", {
+  // Add your program-specific arguments here
+})
+
+// Stop a running program
+await programs.stop("my-program")
+
+// Work with a specific program
+const myProgram = programs.forProgram("welding-program")
+const details = await myProgram.getDetails()
+const run = await myProgram.start({ /* program arguments */ })
+await myProgram.stop()
+```
+
+**Note:** Real-time program state tracking via NATS messaging is planned for future releases. Currently, the API provides basic start/stop functionality.
 
 ## API calls
 
