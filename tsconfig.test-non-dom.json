@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "es2021"
+      // Note: DOM lib is intentionally excluded to simulate non-DOM environment
+    ],
+    "skipLibCheck": true,
+    "noEmit": true,
+    // Allow implicit any to handle missing DOM types gracefully
+    "noImplicitAny": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
