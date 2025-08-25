@@ -933,10 +933,12 @@ const defaultMotionState = {
     controller: "universalrobots-ur5e",
     timestamp: new Date().toISOString(),
     sequence_number: 1,
-    joint_position: [
-      1.1699999570846558, -1.5700000524520874, 1.3600000143051147,
-      1.0299999713897705, 1.2899999618530273, 1.2799999713897705,
-    ],
+    joint_position: {
+      joints: [
+        1.1699999570846558, -1.5700000524520874, 1.3600000143051147,
+        1.0299999713897705, 1.2899999618530273, 1.2799999713897705,
+      ],
+    },
     joint_limit_reached: {
       limit_reached: [false, false, false, false, false, false],
     },
