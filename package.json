@@ -45,6 +45,7 @@
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
     "husky": "^9.1.7",
+    "lodash-es": "^4.17.21",
     "nodemon": "^3.1.9",
     "prettier-eslint": "^16.3.0",
     "semantic-release": "^24.2.3",
