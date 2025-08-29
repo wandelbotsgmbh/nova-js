@@ -111,4 +111,4 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           # Publish the snapshot version
-          pnpm publish --tag snapshot
+          pnpm publish --tag snapshot --no-git-checks
