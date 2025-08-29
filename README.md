@@ -5,13 +5,13 @@
 [![Release](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml/badge.svg)](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/wandelbotsgmbh/nova-js)
 
-This library provides convenient access to the Wandelbots API from frontend JavaScript applications. Currently this contains typed methods for each API endpoint. We are also working on providing some higher level abstractions to manage the websocket connection state for tracking robot movement and handling jogging and Wandelscript program execution, which will be included in this package.
+This library provides an idiomatic TypeScript client for working with the Wandelbots NOVA API.
 
 ```bash
 npm install @wandelbots/nova-js
 ```
 
-If you develop an react application we also provide a set of [react components](https://github.com/wandelbotsgmbh/wandelbots-js-react-components) which you can use together with this library.
+If you develop an React application we also provide a set of [React components](https://github.com/wandelbotsgmbh/wandelbots-js-react-components) which you can use together with this library.
 
 ## Table of contents
 
@@ -217,20 +217,4 @@ You can use the [Jogging Panel](https://wandelbotsgmbh.github.io/wandelbots-js-r
 
 ## Contributing
 
-To set up nova-js for development, first clone the repo and run:
-
-```bash
-npm install
-```
-
-Then you can run the tests which will use a mocked Nova API and socket connections:
-
-```bash
-npm run test
-```
-
-Update packages:
-
-```bash
-npx npm-check-updates
-```
+If you would like to contribute a change to this repository, see [CONTRIBUTING.md](CONTRIBUTING.md).
