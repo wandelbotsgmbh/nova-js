@@ -1,5 +1,10 @@
 const DOMAIN_SUFFIX = "wandelbots.io"
 
+/** process.env is injected by tsup --env, so these are inlined at build time */
+declare const process: {
+  env: Record<string, string | undefined>
+}
+
 /** Mapping of stages to Auth0 configurations */
 const auth0ConfigMap = {
   dev: {
