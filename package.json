@@ -63,7 +63,7 @@
     "mobx": "^6.13.6",
     "path-to-regexp": "^8.2.0",
     "reconnecting-websocket": "^4.4.0",
-    "three": "^0.174.0",
+    "three": "^0.179.1",
     "url-join": "^5.0.0"
   }
 }

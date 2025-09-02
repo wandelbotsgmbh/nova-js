@@ -33,8 +33,8 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
       three:
-        specifier: ^0.174.0
-        version: 0.174.0
+        specifier: ^0.179.1
+        version: 0.179.1
       url-join:
         specifier: ^5.0.0
         version: 5.0.0
@@ -2202,8 +2202,8 @@ packages:
   thenify@3.3.1:
     resolution: {integrity: sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==}
 
-  three@0.174.0:
-    resolution: {integrity: sha512-p+WG3W6Ov74alh3geCMkGK9NWuT62ee21cV3jEnun201zodVF4tCE5aZa2U122/mkLRmhJJUQmLLW1BH00uQJQ==}
+  three@0.179.1:
+    resolution: {integrity: sha512-5y/elSIQbrvKOISxpwXCR4sQqHtGiOI+MKLc3SsBdDXA2hz3Mdp3X59aUp8DyybMa34aeBwbFTpdoLJaUDEWSw==}
 
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
@@ -4547,7 +4547,7 @@ snapshots:
     dependencies:
       any-promise: 1.3.0
 
-  three@0.174.0: {}
+  three@0.179.1: {}
 
   through2@2.0.5:
     dependencies:
