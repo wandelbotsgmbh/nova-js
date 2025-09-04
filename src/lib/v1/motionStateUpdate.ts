@@ -11,6 +11,7 @@ export function jointValuesEqual(
 
   for (let jointIndex = 0; jointIndex < newJointValues.length; jointIndex++) {
     if (
+      // biome-ignore lint/style/noNonNullAssertion: legacy code
       Math.abs(newJointValues[jointIndex]! - oldJointValues[jointIndex]!) >
       changeDeltaThreshold
     ) {
