@@ -1,10 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": [
-      "es2021",
-      "DOM"
-    ],
+    "lib": ["es2021", "DOM"],
     "module": "preserve",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -19,10 +16,6 @@
     // https://github.com/microsoft/TypeScript/issues/45995
     "useDefineForClassFields": false
   },
-  "include": [
-    "src",
-  ],
-  "exclude": [
-    "node_modules",
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

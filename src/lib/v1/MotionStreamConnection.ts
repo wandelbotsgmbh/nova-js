@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
 import type {
   ControllerInstance,
   MotionGroupPhysical,
@@ -150,7 +151,7 @@ export class MotionStreamConnection {
         )
       ) {
         runInAction(() => {
-          if (this.rapidlyChangingMotionState.tcp_pose == undefined) {
+          if (this.rapidlyChangingMotionState.tcp_pose == null) {
             this.rapidlyChangingMotionState.tcp_pose =
               motionStateResponse.tcp_pose
           } else {

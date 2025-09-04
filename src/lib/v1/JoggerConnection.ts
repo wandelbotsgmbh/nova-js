@@ -326,9 +326,9 @@ export class JoggerConnection {
 
       // Compute axis and angle of current rotation vector
       const currentRotationVector = new Vector3(
-        currentTcpPose.orientation["x"],
-        currentTcpPose.orientation["y"],
-        currentTcpPose.orientation["z"],
+        currentTcpPose.orientation.x,
+        currentTcpPose.orientation.y,
+        currentTcpPose.orientation.z,
       )
 
       const currentRotationRad = currentRotationVector.length()
@@ -434,6 +434,7 @@ export class JoggerConnection {
     distanceRads: number
   }) {
     const targetJoints = [...currentJoints.joints]
+    // biome-ignore lint/style/noNonNullAssertion: legacy code
     targetJoints[joint]! += distanceRads * (direction === "-" ? -1 : 1)
 
     const jointVelocityLimits: number[] = new Array(

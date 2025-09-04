@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: legacy code */
+/** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import {
   ApplicationApi,

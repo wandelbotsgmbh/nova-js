@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
@@ -91,7 +92,7 @@ export class NovaClient {
         if (this.accessToken) {
           request.headers.Authorization = `Bearer ${this.accessToken}`
         } else if (this.config.username && this.config.password) {
-          request.headers.Authorization = `Basic ${btoa(config.username + ":" + config.password)}`
+          request.headers.Authorization = `Basic ${btoa(`${config.username}:${config.password}`)}`
         }
       }
       return request
