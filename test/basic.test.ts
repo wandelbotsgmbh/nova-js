@@ -1,5 +1,3 @@
-/// <reference types="vite/client" />
-
 import { expect, test } from "vitest"
 import { NovaClient } from "../dist/lib/v1"
 

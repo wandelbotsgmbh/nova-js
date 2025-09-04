@@ -20,6 +20,13 @@ jobs:
       - uses: pnpm/action-setup@v4
       - run: pnpm install
       - run: pnpm run lint
+  knip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install
+      - run: pnpm run knip
   test:
     runs-on: ubuntu-latest
     steps:

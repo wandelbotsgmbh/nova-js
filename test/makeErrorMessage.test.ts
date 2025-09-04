@@ -1,5 +1,3 @@
-/// <reference types="vite/client" />
-
 import axios, { AxiosError, AxiosHeaders } from "axios"
 import { expect, test } from "vitest"
 import { makeErrorMessage } from "../dist"
