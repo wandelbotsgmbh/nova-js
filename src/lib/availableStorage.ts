@@ -18,7 +18,7 @@ class AvailableStorage {
     }
   }
 
-  setJSON(key: string, obj: any) {
+  setJSON(key: string, obj: unknown) {
     if (!this.available) return null
 
     window.localStorage.setItem(key, JSON.stringify(obj))

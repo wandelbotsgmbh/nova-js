@@ -88,7 +88,7 @@ export class NovaClient {
         if (this.accessToken) {
           request.headers.Authorization = `Bearer ${this.accessToken}`
         } else if (this.config.username && this.config.password) {
-          request.headers.Authorization = `Basic ${btoa(config.username + ":" + config.password)}`
+          request.headers.Authorization = `Basic ${btoa(`${config.username}:${config.password}`)}`
         }
       }
       return request
@@ -141,6 +141,7 @@ export class NovaClient {
         ...(this.mock
           ? ({
               adapter: (config) => {
+                // biome-ignore lint/style/noNonNullAssertion: legacy code
                 return this.mock!.handleAPIRequest(config)
               },
             } satisfies AxiosRequestConfig)
@@ -236,6 +237,7 @@ export class NovaClient {
     motionGroupId: string,
   ): Promise<ConnectedMotionGroup> {
     const motionGroups = await this.connectMotionGroups([motionGroupId])
+    // biome-ignore lint/style/noNonNullAssertion: legacy code
     return motionGroups[0]!
   }
 }

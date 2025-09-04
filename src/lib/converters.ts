@@ -1,6 +1,7 @@
 import type { Pose } from "@wandelbots/nova-api/v1"
 
 /** Try to parse something as JSON; return undefined if we can't */
+// biome-ignore lint/suspicious/noExplicitAny: it's json
 export function tryParseJson(json: unknown): any {
   try {
     return JSON.parse(json as string)

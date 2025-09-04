@@ -126,6 +126,7 @@ export class ConnectedMotionGroup {
       initialMotionState,
       motionStateSocket,
       isVirtual,
+      // biome-ignore lint/style/noNonNullAssertion: legacy code
       tcps!,
       motionGroupSpecification,
       safetySetup,
@@ -137,6 +138,7 @@ export class ConnectedMotionGroup {
 
   connectedJoggingCartesianSocket: WebSocket | null = null
   connectedJoggingJointsSocket: WebSocket | null = null
+  // biome-ignore lint/suspicious/noExplicitAny: legacy code
   planData: any | null // tmp
   joggingVelocity: number = 10
 

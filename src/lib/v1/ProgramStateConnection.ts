@@ -1,6 +1,8 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
+import type { CollectionValue } from "@wandelbots/nova-api/v1"
 import { AxiosError } from "axios"
 import { makeAutoObservable, runInAction } from "mobx"
-import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
+import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { tryParseJson } from "../converters"
 import type { MotionStreamConnection } from "./MotionStreamConnection"
 import type { NovaClient } from "./NovaClient"
@@ -82,7 +84,7 @@ export class ProgramStateConnection {
 
         // TODO - wandelengine should send print statements in real time over
         // websocket as well, rather than at the end
-        const stdout = (runnerState as any).stdout
+        const stdout = runnerState.stdout
         if (stdout) {
           this.log(stdout)
         }
@@ -104,7 +106,7 @@ export class ProgramStateConnection {
           runner.id,
         )
 
-        const stdout = (runnerState as any).stdout
+        const stdout = runnerState.stdout
         if (stdout) {
           this.log(stdout)
         }
@@ -124,7 +126,7 @@ export class ProgramStateConnection {
           runner.id,
         )
 
-        const stdout = (runnerState as any).stdout
+        const stdout = runnerState.stdout
         if (stdout) {
           this.log(stdout)
         }
@@ -163,7 +165,7 @@ export class ProgramStateConnection {
 
   async executeProgram(
     wandelscript: string,
-    initial_state?: Object,
+    initial_state?: { [key: string]: CollectionValue },
     activeRobot?: MotionStreamConnection,
   ) {
     this.currentProgram = {
@@ -197,8 +199,9 @@ export class ProgramStateConnection {
         {
           code: trimmedCode,
           initial_state: initial_state,
+          // @ts-expect-error legacy code - check if param still used
           default_robot: activeRobot?.wandelscriptIdentifier,
-        } as any,
+        },
         {
           headers: {
             "Content-Type": "application/json",

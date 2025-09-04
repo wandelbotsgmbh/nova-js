@@ -555,9 +555,7 @@ export class MockNovaInstance {
                   },
                   init_pose: {
                     position: [-450, 40, 170],
-                    orientation: [
-                      0, -0.7071067811865475, 0, 0.7071067811865476,
-                    ],
+                    orientation: [0, -Math.SQRT1_2, 0, Math.SQRT1_2],
                   },
                   id: "link2_capsule",
                 },
@@ -584,9 +582,7 @@ export class MockNovaInstance {
                   },
                   init_pose: {
                     position: [0, 300, 40],
-                    orientation: [
-                      -0.7071067811865475, 0, 0, 0.7071067811865476,
-                    ],
+                    orientation: [-Math.SQRT1_2, 0, 0, Math.SQRT1_2],
                   },
                   id: "link4_capsule",
                 },
@@ -663,7 +659,7 @@ export class MockNovaInstance {
     ]
 
     const method = config.method?.toUpperCase() || "GET"
-    const path = "/cells" + config.url?.split("/cells")[1]?.split("?")[0]
+    const path = `/cells${config.url?.split("/cells")[1]?.split("?")[0]}`
 
     for (const handler of apiHandlers) {
       const match = pathToRegexp.match(handler.path)(path || "")
