@@ -1,5 +1,3 @@
-/// <reference types="vite/client" />
-
 import { expect, test } from "vitest"
 import { poseToWandelscriptString } from "../dist"
 
