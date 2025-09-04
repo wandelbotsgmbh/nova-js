@@ -1,5 +1,4 @@
 import type { Command, Joints, TcpPose } from "@wandelbots/nova-api/v1"
-import isEqual from "lodash-es/isEqual"
 import { Vector3 } from "three/src/math/Vector3.js"
 import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { isSameCoordinateSystem, tryParseJson } from "../converters"
@@ -107,7 +106,10 @@ export class JoggerConnection {
     console.log("Setting jogging mode to", mode)
     if (cartesianJoggingOpts) {
       // Websocket needs to be reopened to change options
-      if (!isEqual(this.cartesianJoggingOpts, cartesianJoggingOpts)) {
+      if (
+        JSON.stringify(this.cartesianJoggingOpts) !==
+        JSON.stringify(cartesianJoggingOpts)
+      ) {
         if (this.cartesianWebsocket) {
           this.cartesianWebsocket.dispose()
           this.cartesianWebsocket = null
