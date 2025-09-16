@@ -728,13 +728,11 @@ export class MockNovaInstance {
                     {
                       motion_group: "0@ur",
                       controller: "ur",
-                      joint_position: {
-                        joints: [
-                          1.3492152690887451, -1.5659207105636597,
-                          1.6653711795806885, -1.0991662740707397,
-                          -1.829018235206604, 1.264623761177063,
-                        ],
-                      },
+                      joint_position: [
+                        1.3492152690887451, -1.5659207105636597,
+                        1.6653711795806885, -1.0991662740707397,
+                        -1.829018235206604, 1.264623761177063,
+                      ],
                       joint_velocity: {
                         joints: [0, 0, 0, 0, 0, 0],
                       },
@@ -929,12 +927,10 @@ const defaultMotionState = {
     controller: "universalrobots-ur5e",
     timestamp: new Date().toISOString(),
     sequence_number: 1,
-    joint_position: {
-      joints: [
-        1.1699999570846558, -1.5700000524520874, 1.3600000143051147,
-        1.0299999713897705, 1.2899999618530273, 1.2799999713897705,
-      ],
-    },
+    joint_position: [
+      1.1699999570846558, -1.5700000524520874, 1.3600000143051147,
+      1.0299999713897705, 1.2899999618530273, 1.2799999713897705,
+    ],
     joint_limit_reached: {
       limit_reached: [false, false, false, false, false, false],
     },

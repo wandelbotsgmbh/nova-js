@@ -1,6 +1,9 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
 /** biome-ignore-all lint/suspicious/noExplicitAny: legacy code */
-import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v1"
+import type {
+  BaseAPI,
+  Configuration as BaseConfiguration,
+} from "@wandelbots/nova-api/v1"
 import {
   ApplicationApi,
   CellApi,
@@ -28,7 +31,6 @@ import {
   VirtualRobotModeApi,
   VirtualRobotSetupApi,
 } from "@wandelbots/nova-api/v1"
-import type { BaseAPI } from "@wandelbots/nova-api/v1/base"
 import type { AxiosInstance } from "axios"
 import axios from "axios"
 

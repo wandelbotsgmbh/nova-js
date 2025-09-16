@@ -1,6 +1,9 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: legacy code */
 /** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
-import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
+import type {
+  BaseAPI,
+  Configuration as BaseConfiguration,
+} from "@wandelbots/nova-api/v2"
 import {
   ApplicationApi,
   BUSInputsOutputsApi,
@@ -23,7 +26,6 @@ import {
   VirtualControllerBehaviorApi,
   VirtualControllerInputsOutputsApi,
 } from "@wandelbots/nova-api/v2"
-import type { BaseAPI } from "@wandelbots/nova-api/v2/base"
 import type { AxiosInstance } from "axios"
 import axios from "axios"
 import { ProgramsClient } from "./ProgramsClient.js"
