@@ -47,7 +47,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@antfu/ni": "^25.0.0",
-    "@biomejs/biome": "^2.2.2",
+    "@biomejs/biome": "^2.2.4",
     "knip": "^5.63.1",
     "nodemon": "^3.1.9",
     "semantic-release": "^24.2.7",
