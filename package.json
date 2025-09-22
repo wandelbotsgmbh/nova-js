@@ -46,7 +46,7 @@
   "author": "Wandelbots",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@antfu/ni": "^25.0.0",
+    "@antfu/ni": "^26.0.1",
     "@biomejs/biome": "^2.2.2",
     "knip": "^5.63.1",
     "nodemon": "^3.1.9",
