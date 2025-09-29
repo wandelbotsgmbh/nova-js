@@ -26,13 +26,13 @@
     "src"
   ],
   "scripts": {
-    "dev:pack": "nodemon -w \".\" -e ts -i *.tgz -i dist -x \"nr build && npm pack\"",
+    "dev:pack": "nodemon -w \".\" -e ts -i *.tgz -i dist -x \"pnpm run build && pnpm pack\"",
     "tsc": "tsc --pretty --noEmit",
     "lint": "biome check --error-on-warnings .",
     "format": "biome format . --write",
     "knip": "knip",
     "build": "tsdown src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
-    "test": "nr build && vitest run"
+    "test": "pnpm run build && vitest run"
   },
   "repository": {
     "type": "git",
