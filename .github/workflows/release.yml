@@ -28,10 +28,6 @@ jobs:
       - name: Check for issues in dependencies
         run: pnpm audit --audit-level high
       - name: Build
-        env:
-          NOVA_AUTH0_DEV_CLIENT_ID: ${{ secrets.NOVA_AUTH0_DEV_CLIENT_ID }}
-          NOVA_AUTH0_STG_CLIENT_ID: ${{ secrets.NOVA_AUTH0_STG_CLIENT_ID }}
-          NOVA_AUTH0_PROD_CLIENT_ID: ${{ secrets.NOVA_AUTH0_PROD_CLIENT_ID }}
         run: pnpm run build
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
