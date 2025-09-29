@@ -4,7 +4,7 @@
   "version": "0.0.0-semantically-released",
   "description": "Official JS client for the Wandelbots API",
   "sideEffects": false,
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@10.17.1",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -31,7 +31,7 @@
     "lint": "biome check --error-on-warnings .",
     "format": "biome format . --write",
     "knip": "knip",
-    "build": "tsup src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap && tsc --declaration --emitDeclarationOnly",
+    "build": "tsdown src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
     "test": "nr build && vitest run"
   },
   "repository": {
@@ -50,7 +50,7 @@
     "knip": "^5.63.1",
     "nodemon": "^3.1.9",
     "semantic-release": "^24.2.7",
-    "tsup": "^8.5.0",
+    "tsdown": "^0.15.5",
     "typescript": "^5.8.2",
     "vitest": "^3.2.4",
     "ws": "^8.18.1"
