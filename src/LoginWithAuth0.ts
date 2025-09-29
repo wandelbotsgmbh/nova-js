@@ -1,23 +1,23 @@
 const DOMAIN_SUFFIX = "wandelbots.io"
 
-/** process.env is injected by tsup --env, so these are inlined at build time */
-declare const process: {
-  env: Record<string, string | undefined>
-}
-
-/** Mapping of stages to Auth0 configurations */
+/**
+ * Mapping of stages to Auth0 configurations.
+ * The client ids are public identifiers for a specific auth0 application
+ * and are safe to include in client-side code.
+ * https://auth0.com/docs/get-started/applications/application-settings
+ */
 const auth0ConfigMap = {
   dev: {
     domain: `https://auth.portal.dev.${DOMAIN_SUFFIX}`,
-    clientId: process.env.NOVA_AUTH0_DEV_CLIENT_ID,
+    clientId: "fLbJD0RLp5r2Dpucm5j8BjwMR6Hunfha",
   },
   stg: {
     domain: `https://auth.portal.stg.${DOMAIN_SUFFIX}`,
-    clientId: process.env.NOVA_AUTH0_STG_CLIENT_ID,
+    clientId: "joVDeD9e786WzFNSGCqoVq7HNkWt5j6s",
   },
   prod: {
     domain: `https://auth.portal.${DOMAIN_SUFFIX}`,
-    clientId: process.env.NOVA_AUTH0_PROD_CLIENT_ID,
+    clientId: "J7WJUi38xVQdJAEBNRT9Xw1b0fXDb4J2",
   },
 }
 
