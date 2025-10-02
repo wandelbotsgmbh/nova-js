@@ -44,6 +44,14 @@ export type NovaClientConfig = {
 
 type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
 
+function permissiveInstanceUrlParse(url: string): string {
+  if (!url.startsWith("http")) {
+    url = `http://${url}`
+  }
+
+  return new URL(url).toString()
+}
+
 /**
  * Client for connecting to a Nova instance and controlling robots.
  */
@@ -59,6 +67,7 @@ export class NovaClient {
     this.config = {
       cellId,
       ...config,
+      instanceUrl: permissiveInstanceUrlParse(config.instanceUrl),
     }
     this.accessToken =
       config.accessToken ||

@@ -48,7 +48,9 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@biomejs/biome": "^2.2.2",
+    "@types/lodash-es": "^4.17.12",
     "knip": "^5.63.1",
+    "lodash-es": "^4.17.21",
     "nodemon": "^3.1.9",
     "semantic-release": "^24.2.7",
     "tsdown": "^0.15.5",
