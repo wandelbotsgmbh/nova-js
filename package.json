@@ -32,7 +32,8 @@
     "format": "biome format . --write",
     "knip": "knip",
     "build": "tsdown src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
-    "test": "pnpm run build && vitest run"
+    "test": "pnpm run build && vitest run",
+    "e2e": "vitest run --config vitest.e2e.config.ts"
   },
   "repository": {
     "type": "git",
