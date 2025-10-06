@@ -32,7 +32,8 @@
     "format": "biome format . --write",
     "knip": "knip",
     "build": "tsdown src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
-    "test": "pnpm run build && vitest run"
+    "test": "pnpm run build && vitest run",
+    "e2e": "vitest run --config vitest.e2e.config.ts"
   },
   "repository": {
     "type": "git",
@@ -47,7 +48,9 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@biomejs/biome": "^2.2.2",
+    "@types/lodash-es": "^4.17.12",
     "knip": "^5.63.1",
+    "lodash-es": "^4.17.21",
     "nodemon": "^3.1.9",
     "semantic-release": "^24.2.7",
     "tsdown": "^0.15.5",

@@ -19,3 +19,13 @@ Then you can run the unit tests against a mocked NOVA API and socket connections
 ```bash
 pnpm run test
 ```
+
+## e2e tests
+
+To run basic e2e tests against a live NOVA instance during development:
+
+```bash
+NOVA=SOME_IP_ADDRESS pnpm run e2e 
+```
+
+This is just for development right now, the tests are not integrated with CI yet. You will need to create a virtual robot (any robot) on the instance first for the jogging test to work.
