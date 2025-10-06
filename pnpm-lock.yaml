@@ -15,8 +15,8 @@ importers:
         specifier: ^0.174.0
         version: 0.174.0
       '@wandelbots/nova-api':
-        specifier: ^25.9.0-dev.13
-        version: 25.9.0-dev.13
+        specifier: ^25.9.0-dev.29
+        version: 25.9.0-dev.29
       axios:
         specifier: ^1.12.2
         version: 1.12.2
@@ -334,6 +334,9 @@ packages:
 
   '@napi-rs/wasm-runtime@1.0.5':
     resolution: {integrity: sha512-TBr9Cf9onSAS2LQ2+QHx6XcC6h9+RIzJgbqG3++9TUZSH204AwEy5jg3BTQ0VATsyoGj4ee49tN/y6rvaOOtcg==}
+
+  '@napi-rs/wasm-runtime@1.0.6':
+    resolution: {integrity: sha512-DXj75ewm11LIWUk198QSKUTxjyRjsBwk09MuMk5DGK+GDUtyPhhEHOGP/Xwwj3DjQXXkivoBirmOnKrLfc0+9g==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -802,8 +805,8 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@wandelbots/nova-api@25.9.0-dev.13':
-    resolution: {integrity: sha512-m5X/tltm7/DDjk5cmb8PEHp6qdXr7eLKORA4GyxQxuos4VccLuR3UHOLEXiwL0nEvbT4mC0AOQI7T/imjBPYFQ==}
+  '@wandelbots/nova-api@25.9.0-dev.29':
+    resolution: {integrity: sha512-JfSsQ1PtyjOWWaSPWsDjRnWY0HxFQLNUsWreyuK9Z+e0pS9kSct1G4K90WlKhap9yqCZh/rpYegQXxjimXNFGw==}
 
   '@webgpu/types@0.1.64':
     resolution: {integrity: sha512-84kRIAGV46LJTlJZWxShiOrNL30A+9KokD7RB3dRCIqODFjodS5tCD5yyiZ8kIReGVZSDfA3XkkwyyOIF6K62A==}
@@ -2573,6 +2576,13 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
+  '@napi-rs/wasm-runtime@1.0.6':
+    dependencies:
+      '@emnapi/core': 1.5.0
+      '@emnapi/runtime': 1.5.0
+      '@tybys/wasm-util': 0.10.1
+    optional: true
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -2753,7 +2763,7 @@ snapshots:
 
   '@rolldown/binding-wasm32-wasi@1.0.0-beta.41':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.0.5
+      '@napi-rs/wasm-runtime': 1.0.6
     optional: true
 
   '@rolldown/binding-win32-arm64-msvc@1.0.0-beta.41':
@@ -2988,7 +2998,7 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@wandelbots/nova-api@25.9.0-dev.13':
+  '@wandelbots/nova-api@25.9.0-dev.29':
     dependencies:
       axios: 1.12.2
     transitivePeerDependencies:
