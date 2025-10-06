@@ -67,7 +67,6 @@ export class NovaClient {
     this.config = {
       cellId,
       ...config,
-      instanceUrl: permissiveInstanceUrlParse(config.instanceUrl),
     }
     this.accessToken =
       config.accessToken ||
@@ -76,6 +75,10 @@ export class NovaClient {
 
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
+    } else {
+      this.config.instanceUrl = permissiveInstanceUrlParse(
+        this.config.instanceUrl,
+      )
     }
 
     // Set up Axios instance with interceptor for token fetching
