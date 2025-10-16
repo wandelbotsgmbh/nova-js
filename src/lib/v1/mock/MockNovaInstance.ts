@@ -11,7 +11,6 @@ import * as pathToRegexp from "path-to-regexp"
 import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
 
 /**
- * EXPERIMENTAL
  * Ultra-simplified mock Nova server for testing stuff
  */
 export class MockNovaInstance {
