@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { NovaClient } from "../dist/lib/v1"
+import { NovaClient } from "../../dist/lib/v2"
 
 test("motion stream", async () => {
   const nova = new NovaClient({
@@ -17,6 +17,6 @@ test("motion stream", async () => {
   await motionStream.motionStateSocket.firstMessage()
 
   expect(motionStream.motionStateSocket.url).toBe(
-    "wss://mock.example.com/api/v1/cells/cell/motion-groups/0@mock-ur5e/state-stream?tcp=foo",
+    "wss://mock.example.com/api/v2/cells/cell/motion-groups/0@mock-ur5e/state-stream?tcp=foo",
   )
 })

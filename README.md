@@ -20,26 +20,26 @@ If you develop an React application we also provide a set of [React components](
 - [API calls](#api-calls)
 - [Opening websockets](#opening-websockets)
 - [Connect to a motion group](#connect-to-a-motion-group)
-- [Execute Wandelscript](#execute-wandelscript)
 - [Jogging](#jogging)
   - [Stopping the jogger](#stopping-the-jogger)
-  - [Rotating a joint](#rotating-a-joint)
-  - [Moving a TCP](#moving-the-tcp)
-  - [Rotating a TCP](#rotating-the-tcp)
+  - [Jogging: Rotating a joint](#jogging-rotating-a-joint-rotatejoints)
+  - [Jogging: Moving a TCP](#jogging-moving-a-tcp-translatetcp)
+  - [Jogging: Rotating a TCP](#jogging-rotating-a-tcp-rotatetcp)
+  - [Trajectory: Plan and run incremental motion](#trajectory-plan-and-run-incremental-motion-runincrementalcartesianmotion)
   - [Post-jogging cleanup](#post-jogging-cleanup)
   - [Jogging UI Panel](#jogging-ui-panel)
+- [Execute Wandelscript (V1)](#execute-wandelscript-v1)
 
 ## Basic usage
 
 The core of this package is the `NovaClient`, which represents a connection to a configured robot cell on a given Nova instance:
 
 ```ts
-import { NovaClient } from "@wandelbots/nova-js"
+import { NovaClient } from "@wandelbots/nova-js/v2"
 
 const nova = new NovaClient({
   instanceUrl: "https://example.instance.wandelbots.io",
   cellId: "cell",
-
   // Access token is given in the developer portal UI when you create an instance
   accessToken: "...",
 })
@@ -47,15 +47,12 @@ const nova = new NovaClient({
 
 ## API Version Support
 
-This library primarily supports **Nova API v1**, which provides full functionality including motion group connections, jogging, program execution, and all the features documented below.
+This library supports **Nova API v1** and **v2**, which provides extra functionality including motion group connections, jogging, and all the features documented below. Please note that except for Wandelscript execution, usage of **API v1** is deprecated and not recommended.
 
-**Nova API v2** support is currently **experimental and limited**. While v2 API endpoints are accessible through the NovaCellAPIClient, many of the higher-level abstractions (like `connectMotionGroup`, `connectJogger`, and `ProgramStateConnection`) are not yet available for v2.
-
-For v2 usage:
+V1 usage:
 
 ```ts
-// Note: v2 support is experimental
-import { NovaClient } from "@wandelbots/nova-js/v2"
+import { NovaClient } from "@wandelbots/nova-js/v1"
 
 const nova = new NovaClient({
   instanceUrl: "https://example.instance.wandelbots.io",
@@ -63,11 +60,9 @@ const nova = new NovaClient({
   accessToken: "...",
 })
 
-// Direct API access is available
-const { controllers } = await nova.api.controller.listRobotControllers()
+// Deprecated API version is still callable
+const { instances } = await nova.api.controller.listControllers()
 ```
-
-We recommend using **v1** for production applications until v2 support is fully implemented.
 
 ## API calls
 
@@ -76,11 +71,11 @@ You can make calls to the REST API via `nova.api`, which contains a bunch of nam
 For example, to list the controllers configured in your cell:
 
 ```ts
-const { instances } = await nova.api.controller.listControllers()
-// -> e.g. [{ controller: "ur5e", model_name: "UniversalRobots::Controller", ... }, ...]
+const controllerIds = await nova.api.controller.listRobotControllers()
+// -> e.g. ["ur5e", ...]
 ```
 
-Documentation for the various API endpoints is available on your Nova instance at `/api/v1/ui` (public documentation site is in the works)
+Documentation for the various API endpoints is available on your Nova instance at `/api/v2/ui` or on [portal.wandelbots.io](https://portal.wandelbots.io/docs/api/v2/ui/)
 
 ## Opening websockets
 
@@ -107,50 +102,47 @@ The reconnecting websocket interface is fairly low-level and you won't get type 
 The library provides an easy to use way to access properties of a motion group.
 
 ```ts
-activeRobot = await this.nova.connectMotionGroup(`some-motion-group-id`)
+activeRobot = await nova.connectMotionGroup(`some-motion-group-id`)
 ```
 
 This connected motion group opens a websocket and listens to changes of the current joints and the TCP pose. You can read out those values by using the `rapidlyChangingMotionState` of the object. Along other properties it also provides the current `safetySetup` and `tcps`.
 
 ```ts
 const newJoints =
-  activeRobot.rapidlyChangingMotionState.state.joint_position.joints
+  activeRobot.rapidlyChangingMotionState.joint_position
 ```
+
+**Api V2 change:** Please not that joints are now directly accessible in `rapidlyChangingMotionState.joint_position`, previously there were nested in `.rapidlyChangingMotionState.state.joint_position.joints`.
 
 To render a visual representation, you can use the `robot` component of the [react components](https://wandelbotsgmbh.github.io/wandelbots-js-react-components/?path=/docs/3d-view-robot--docs).
-
-## Execute Wandelscript
-
-The `ProgramStateConnection` provides an object which allows to execute and stop a given Wandelscript.
-
-```ts
-import script from "./example.ws"
-...
-programRunner.executeProgram(script)
-```
-
-You can `stop` the current execution or listen to state updates of your wandelscript code by observing the `programRunner.executionState`.
 
 ## Jogging
 
 Jogging in a robotics context generally refers to the manual movement of the robot via direct human input. The Wandelbots platform provides websocket-based jogging methods which can be used to build similar jogging interfaces to those found on teach pendants.
 
 ```ts
-const jogger = await nova.connectJogger(`some-motion-group-id`)
+const jogger = await nova.connectJogger(`some-motion-group-id`) // or to set options
+// const jogger = await nova.connectJogger(`some-motion-group-id`, { options })
 ```
 
-The jogger has two mutually exclusive modes. You must set the appropriate jogging mode before starting a jogging motion; this ensures that the motion is ready to start immediately when called with minimal delay.
+The jogger's mode is set to "off" first. You'll need to set it to "jogging" or "trajectory" to be able to
+send movement commands
 
 ```ts
-// Set the jogger to "joint" mode, enabling continuous joint rotations.
-await jogger.setJoggingMode("joint")
+// Set jogger to "jogging" mode and sends InitializeJoggingRequest to API
+await jogger.setJoggingMode("jogging")
 
-// Set the jogger to "tcp" mode, enabling continuous translation
-// and rotation movements of the tool center point.
-await jogger.setJoggingMode("tcp", {
-  tcpId: "flange",
-  coordSystemId: "world",
+// You can update options ater initializing like this:
+await jogger.setOptions({
+  tcp: "Flange", // TCP id
+  timeout: 3000 // How long the promise should wait when server does not respond to init request
+  orientation: "mode",
 })
+
+// For planned motions, use "trajectory" mode
+await jogger.setJoggingMode("trajectory")
+await jogger.rotateTCP({...}) // Error: Continuous jogging websocket not connected; ...
+await jogger.runIncrementalCartesianMotion({...}) // Plan and run trajectory
 ```
 
 ### Stopping the jogger
@@ -165,40 +157,46 @@ As a failsafe, the server will also stop any jogging motions when it detects the
 
 However, you should never totally rely on any software being able to stop the robot: always have the hardware emergency stop button within reach just in case!
 
-### Rotating a joint
+### Jogging: Rotating a joint `rotateJoints`
 
-Requires `joint` mode. This example starts joint 0 of the robot rotating in a positive direction at 1 radian per second:
+This example starts joint 0 of the robot rotating in a positive direction at 1 radian per second:
 
 ```ts
-await jogger.startJointRotation({
+await jogger.rotateJoints({
   joint: 0,
   direction: "+",
   velocityRadsPerSec: 1,
 })
 ```
 
-### Moving a TCP
+### Jogging: Moving a TCP `translateTCP`
 
-Requires `tcp` mode. This example starts moving a TCP in a positive direction along the X axis of the specified coordinate system, at a velocity of 10 millimeters per second:
+This example starts moving a TCP in a positive direction along the X axis of the specified coordinate system, at a velocity of 10 millimeters per second:
 
 ```ts
-await jogger.startTCPTranslation({
+await jogger.translateTCP({
   axis: "x",
   direction: "+",
   velocityMmPerSec: 10,
 })
 ```
 
-### Rotating a TCP
+### Jogging: Rotating a TCP `rotateTCP`
 
-Requires `tcp` mode. This example starts rotating the TCP in a positive direction around the X axis of the specified coordinate system, at a velocity of 1 radians per second:
+This example starts rotating the TCP in a positive direction around the X axis of the specified coordinate system, at a velocity of 1 radians per second:
 
 ```ts
-await jogger.startTCPRotation({
+await jogger.rotateTCP({
   axis: "x",
   direction: "+",
   velocityRadsPerSec: 1,
 })
+```
+
+### Trajectory: Plan and run incremental motion `runIncrementalCartesianMotion`
+
+```ts
+await jogger.runIncrementalCartesianMotion({...})
 ```
 
 ### Post-jogging cleanup
@@ -214,6 +212,18 @@ This will close any open websockets and ensure things are left in a good state.
 ### Jogging UI Panel
 
 You can use the [Jogging Panel](https://wandelbotsgmbh.github.io/wandelbots-js-react-components/?path=/docs/jogging-joggingpanel--docs) from the [react components](https://github.com/wandelbotsgmbh/wandelbots-js-react-components) library to get a easy to use visualization component.
+
+## Execute Wandelscript (V1)
+
+The `ProgramStateConnection` provides an object which allows to execute and stop a given Wandelscript.
+
+```ts
+import script from "./example.ws"
+...
+programRunner.executeProgram(script)
+```
+
+You can `stop` the current execution or listen to state updates of your wandelscript code by observing the `programRunner.executionState`.
 
 ## Contributing
 

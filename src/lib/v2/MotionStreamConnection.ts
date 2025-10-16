@@ -1,33 +1,32 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
 import type {
-  ControllerInstance,
-  MotionGroupPhysical,
-  MotionGroupStateResponse,
-  Vector3d,
-} from "@wandelbots/nova-api/v1"
+  MotionGroupDescription,
+  MotionGroupState,
+  RobotControllerState,
+} from "@wandelbots/nova-api/v2"
 import { makeAutoObservable, runInAction } from "mobx"
 import { Vector3 } from "three"
 import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { tryParseJson } from "../converters"
-import { jointValuesEqual, tcpPoseEqual } from "./motionStateUpdate"
+import { jointValuesEqual, tcpMotionEqual } from "./motionStateUpdate"
 import type { NovaClient } from "./NovaClient"
+import type { Vector3Simple } from "./types/vector3"
 
 const MOTION_DELTA_THRESHOLD = 0.0001
 
 function unwrapRotationVector(
-  newRotationVectorApi: Vector3d,
-  currentRotationVectorApi: Vector3d,
-): Vector3d {
+  newRotationVectorApi: Vector3Simple,
+  currentRotationVectorApi: Vector3Simple,
+): Vector3Simple {
   const currentRotationVector = new Vector3(
-    currentRotationVectorApi.x,
-    currentRotationVectorApi.y,
-    currentRotationVectorApi.z,
+    currentRotationVectorApi[0],
+    currentRotationVectorApi[1],
+    currentRotationVectorApi[2],
   )
 
   const newRotationVector = new Vector3(
-    newRotationVectorApi.x,
-    newRotationVectorApi.y,
-    newRotationVectorApi.z,
+    newRotationVectorApi[0],
+    newRotationVectorApi[1],
+    newRotationVectorApi[2],
   )
 
   const currentAngle = currentRotationVector.length()
@@ -50,7 +49,7 @@ function unwrapRotationVector(
 
   newAngle = currentAngle + angleDifference
 
-  return newAxis.multiplyScalar(newAngle)
+  return [...newAxis.multiplyScalar(newAngle)] as Vector3Simple
 }
 
 /**
@@ -58,15 +57,14 @@ function unwrapRotationVector(
  */
 export class MotionStreamConnection {
   static async open(nova: NovaClient, motionGroupId: string) {
-    const { instances: controllers } =
-      await nova.api.controller.listControllers()
-
     const [_motionGroupIndex, controllerId] = motionGroupId.split("@") as [
       string,
       string,
     ]
-    const controller = controllers.find((c) => c.controller === controllerId)
-    const motionGroup = controller?.physical_motion_groups.find(
+
+    const controller =
+      await nova.api.controller.getCurrentRobotControllerState(controllerId)
+    const motionGroup = controller?.motion_groups.find(
       (mg) => mg.motion_group === motionGroupId,
     )
     if (!controller || !motionGroup) {
@@ -76,14 +74,13 @@ export class MotionStreamConnection {
     }
 
     const motionStateSocket = nova.openReconnectingWebsocket(
-      `/motion-groups/${motionGroupId}/state-stream`,
+      `/controllers/${controllerId}/motion-groups/${motionGroupId}/state-stream`,
     )
 
     // Wait for the first message to get the initial state
     const firstMessage = await motionStateSocket.firstMessage()
-    console.log("got first message", tryParseJson(firstMessage.data))
     const initialMotionState = tryParseJson(firstMessage.data)
-      ?.result as MotionGroupStateResponse
+      ?.result as MotionGroupState
 
     if (!initialMotionState) {
       throw new Error(
@@ -96,10 +93,17 @@ export class MotionStreamConnection {
       initialMotionState,
     )
 
+    // Get the motion group description for later usage in jogging
+    const description = await nova.api.motionGroup.getMotionGroupDescription(
+      controllerId,
+      motionGroup.motion_group,
+    )
+
     return new MotionStreamConnection(
       nova,
       controller,
       motionGroup,
+      description,
       initialMotionState,
       motionStateSocket,
     )
@@ -107,65 +111,84 @@ export class MotionStreamConnection {
 
   // Not mobx-observable as this changes very fast; should be observed
   // using animation frames
-  rapidlyChangingMotionState: MotionGroupStateResponse
+  rapidlyChangingMotionState: MotionGroupState
 
   constructor(
     readonly nova: NovaClient,
-    readonly controller: ControllerInstance,
-    readonly motionGroup: MotionGroupPhysical,
-    readonly initialMotionState: MotionGroupStateResponse,
+    readonly controller: RobotControllerState,
+    readonly motionGroup: MotionGroupState,
+    readonly description: MotionGroupDescription,
+    readonly initialMotionState: MotionGroupState,
     readonly motionStateSocket: AutoReconnectingWebsocket,
   ) {
     this.rapidlyChangingMotionState = initialMotionState
 
     motionStateSocket.addEventListener("message", (event) => {
-      const motionStateResponse = tryParseJson(event.data)?.result as
-        | MotionGroupStateResponse
+      const latestMotionState = tryParseJson(event.data)?.result as
+        | MotionGroupState
         | undefined
 
-      if (!motionStateResponse) {
+      if (!latestMotionState) {
         throw new Error(
           `Failed to get motion state for ${this.motionGroupId}: ${event.data}`,
         )
       }
 
-      // handle motionState message
+      // handle joint position changes
       if (
         !jointValuesEqual(
-          this.rapidlyChangingMotionState.state.joint_position.joints,
-          motionStateResponse.state.joint_position.joints,
+          this.rapidlyChangingMotionState.joint_position,
+          latestMotionState.joint_position,
           MOTION_DELTA_THRESHOLD,
         )
       ) {
         runInAction(() => {
-          this.rapidlyChangingMotionState.state = motionStateResponse.state
+          this.rapidlyChangingMotionState = latestMotionState
         })
       }
 
-      // handle tcpPose message
+      // handle tcp pose changes
       if (
-        !tcpPoseEqual(
-          this.rapidlyChangingMotionState.tcp_pose,
-          motionStateResponse.tcp_pose,
+        !tcpMotionEqual(
+          this.rapidlyChangingMotionState,
+          latestMotionState,
           MOTION_DELTA_THRESHOLD,
         )
       ) {
         runInAction(() => {
           if (this.rapidlyChangingMotionState.tcp_pose == null) {
             this.rapidlyChangingMotionState.tcp_pose =
-              motionStateResponse.tcp_pose
-          } else {
+              latestMotionState.tcp_pose
+          } else if (
+            latestMotionState.tcp_pose?.orientation &&
+            latestMotionState.tcp_pose?.position &&
+            this.rapidlyChangingMotionState.tcp_pose?.orientation
+          ) {
             this.rapidlyChangingMotionState.tcp_pose = {
-              position: motionStateResponse.tcp_pose!.position,
+              position: latestMotionState.tcp_pose.position,
               orientation: unwrapRotationVector(
-                motionStateResponse.tcp_pose!.orientation,
-                this.rapidlyChangingMotionState.tcp_pose!.orientation,
+                latestMotionState.tcp_pose.orientation as Vector3Simple,
+                this.rapidlyChangingMotionState.tcp_pose
+                  .orientation as Vector3Simple,
               ),
-              tcp: motionStateResponse.tcp_pose!.tcp,
-              coordinate_system:
-                motionStateResponse.tcp_pose!.coordinate_system,
             }
+          } else {
+            console.warn(
+              "Received incomplete tcp_pose, ignoring",
+              latestMotionState.tcp_pose,
+            )
           }
+        })
+      }
+
+      // handle standstill changes
+      if (
+        this.rapidlyChangingMotionState.standstill !==
+        latestMotionState.standstill
+      ) {
+        runInAction(() => {
+          this.rapidlyChangingMotionState.standstill =
+            latestMotionState.standstill
         })
       }
     })
@@ -180,17 +203,13 @@ export class MotionStreamConnection {
     return this.controller.controller
   }
 
-  get modelFromController() {
-    return this.motionGroup.model_from_controller
-  }
-
   get wandelscriptIdentifier() {
     const num = this.motionGroupId.split("@")[0]
     return `${this.controllerId.replaceAll("-", "_")}_${num}`
   }
 
   get joints() {
-    return this.initialMotionState.state.joint_position.joints.map((_, i) => {
+    return this.initialMotionState.joint_position.map((_, i) => {
       return {
         index: i,
       }
