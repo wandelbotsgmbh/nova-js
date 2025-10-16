@@ -23,9 +23,9 @@ const auth0ConfigMap = {
 
 /** Determine which Auth0 configuration to use based on instance URL  */
 const getAuth0Config = (instanceUrl: string) => {
-  if (instanceUrl.includes(`dev.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.dev
-  if (instanceUrl.includes(`stg.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.stg
-  if (instanceUrl.includes(DOMAIN_SUFFIX)) return auth0ConfigMap.prod
+  if (instanceUrl.endsWith(`dev.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.dev
+  if (instanceUrl.endsWith(`stg.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.stg
+  if (instanceUrl.endsWith(DOMAIN_SUFFIX)) return auth0ConfigMap.prod
   throw new Error(
     "Unsupported instance URL. Cannot determine Auth0 configuration.",
   )

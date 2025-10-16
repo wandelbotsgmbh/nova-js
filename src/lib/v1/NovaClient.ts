@@ -1,3 +1,8 @@
+/**
+ * @fileoverview
+ * @deprecated The nova v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
+ */
+
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v1"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
@@ -54,6 +59,7 @@ function permissiveInstanceUrlParse(url: string): string {
 
 /**
  * Client for connecting to a Nova instance and controlling robots.
+ * @deprecated The nova v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
  */
 export class NovaClient {
   readonly api: NovaCellAPIClient

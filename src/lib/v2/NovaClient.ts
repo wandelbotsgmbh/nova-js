@@ -8,6 +8,12 @@ import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
+import { MotionStreamConnection } from "./MotionStreamConnection"
+import {
+  JoggerConnection,
+  type JoggerConnectionOptions,
+} from "./JoggerConnection"
+import { ConnectedMotionGroup } from "./ConnectedMotionGroup"
 
 export type NovaClientConfig = {
   /**
@@ -51,10 +57,6 @@ function permissiveInstanceUrlParse(url: string): string {
 }
 
 /**
- * EXPERIMENTAL
- *
- * This client provides a starting point to migrate NOVA api v2.
- * As v2 is still in development, this client has to be considered unstable
  *
  * Client for connecting to a Nova instance and controlling robots.
  */
@@ -66,12 +68,10 @@ export class NovaClient {
   accessToken: string | null = null
 
   constructor(config: NovaClientConfig) {
-    console.warn("Using experimental NOVA v2 client")
     const cellId = config.cellId ?? "cell"
     this.config = {
       cellId,
       ...config,
-      instanceUrl: permissiveInstanceUrlParse(config.instanceUrl),
     }
     this.accessToken =
       config.accessToken ||
@@ -80,6 +80,10 @@ export class NovaClient {
 
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
+    } else {
+      this.config.instanceUrl = permissiveInstanceUrlParse(
+        this.config.instanceUrl,
+      )
     }
 
     // Set up Axios instance with interceptor for token fetching
@@ -146,7 +150,7 @@ export class NovaClient {
 
     this.api = new NovaCellAPIClient(cellId, {
       ...config,
-      basePath: urlJoin(this.config.instanceUrl, "/api/v1"),
+      basePath: urlJoin(this.config.instanceUrl, "/api/v2"),
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -188,7 +192,7 @@ export class NovaClient {
     const url = new URL(
       urlJoin(
         this.config.instanceUrl,
-        `/api/v1/cells/${this.config.cellId}`,
+        `/api/v2/cells/${this.config.cellId}`,
         path,
       ),
     )
@@ -217,5 +221,39 @@ export class NovaClient {
     return new AutoReconnectingWebsocket(this.makeWebsocketURL(path), {
       mock: this.mock,
     })
+  }
+
+  /**
+   * Connect to the motion state websocket(s) for a given motion group
+   */
+  async connectMotionStream(motionGroupId: string) {
+    return await MotionStreamConnection.open(this, motionGroupId)
+  }
+
+  /**
+   * Connect to the jogging websocket(s) for a given motion group
+   */
+  async connectJogger(
+    motionGroupId: string,
+    options: JoggerConnectionOptions = {},
+  ) {
+    return await JoggerConnection.open(this, motionGroupId, options)
+  }
+
+  async connectMotionGroups(
+    motionGroupIds: string[],
+  ): Promise<ConnectedMotionGroup[]> {
+    return Promise.all(
+      motionGroupIds.map((motionGroupId) =>
+        ConnectedMotionGroup.connect(this, motionGroupId),
+      ),
+    )
+  }
+
+  async connectMotionGroup(
+    motionGroupId: string,
+  ): Promise<ConnectedMotionGroup> {
+    const motionGroups = await this.connectMotionGroups([motionGroupId])
+    return motionGroups[0]!
   }
 }

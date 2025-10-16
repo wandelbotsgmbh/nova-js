@@ -1,9 +1,11 @@
 import { keyBy } from "lodash-es"
 import { expect, test, vi } from "vitest"
-import { delay } from "../src/lib/errorHandling"
-import { NovaClient } from "../src/lib/v1"
-import { jointValuesEqual } from "../src/lib/v1/motionStateUpdate"
-import { env } from "./env"
+import { delay } from "../../src/lib/errorHandling"
+import { NovaClient } from "../../src/lib/v1"
+import { jointValuesEqual } from "../../src/lib/v1/motionStateUpdate"
+import { env } from "../env"
+
+// Note: Requires a robot on the instance to work
 
 test("jog a robot somewhat", async () => {
   const nova = new NovaClient({
@@ -80,7 +82,7 @@ test("jog a robot somewhat", async () => {
   await vi.waitUntil(
     async () => {
       const joints = getJoints()
-      await jogger.activeWebsocket?.nextMessage()
+      await jogger.motionStream.motionStateSocket.nextMessage()
       return jointValuesEqual(joints, getJoints(), 0.0001)
     },
     {
