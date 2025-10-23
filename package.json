@@ -4,7 +4,7 @@
   "version": "0.0.0-semantically-released",
   "description": "Official JS client for the Wandelbots API",
   "sideEffects": false,
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.19.0",
   "exports": {
     ".": {
       "import": "./dist/index.js",
