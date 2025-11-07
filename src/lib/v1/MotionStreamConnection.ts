@@ -81,7 +81,6 @@ export class MotionStreamConnection {
 
     // Wait for the first message to get the initial state
     const firstMessage = await motionStateSocket.firstMessage()
-    console.log("got first message", firstMessage)
     const initialMotionState = tryParseJson(firstMessage.data)
       ?.result as MotionGroupStateResponse
 

@@ -1,5 +1,3 @@
-import type { Pose } from "@wandelbots/nova-api/v1"
-
 /** Try to parse something as JSON; return undefined if we can't */
 // biome-ignore lint/suspicious/noExplicitAny: it's json
 export function tryParseJson(json: unknown): any {
@@ -40,27 +38,6 @@ export function degreesToRadians(degrees: number): number {
 }
 
 /**
- * Convert a Pose object representing a motion group position
- * into a string which represents that pose in Wandelscript.
- */
-export function poseToWandelscriptString(
-  pose: Pick<Pose, "position" | "orientation">,
-) {
-  const position = [pose.position.x, pose.position.y, pose.position.z]
-  const orientation = [
-    pose.orientation?.x ?? 0,
-    pose.orientation?.y ?? 0,
-    pose.orientation?.z ?? 0,
-  ]
-
-  const positionValues = position.map((v) => v.toFixed(1))
-  // Rotation needs more precision since it's in radians
-  const rotationValues = orientation.map((v) => v.toFixed(4))
-
-  return `(${positionValues.concat(rotationValues).join(", ")})`
-}
-
-/**
  * Check for coordinate system id equivalence, accounting for the "world" default
  * on empty/undefined values.
  */
@@ -73,3 +50,8 @@ export function isSameCoordinateSystem(
 
   return firstCoordSystem === secondCoordSystem
 }
+
+/**
+ * Helpful const for converting {x, y, z} to [x, y, z] and vice versa
+ */
+export const XYZ_TO_VECTOR = { x: 0, y: 1, z: 2 }
