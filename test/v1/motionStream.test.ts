@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { NovaClient } from "../dist/lib/v1"
+import { NovaClient } from "../../dist/lib/v1"
 
 test("motion stream", async () => {
   const nova = new NovaClient({

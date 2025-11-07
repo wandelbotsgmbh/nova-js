@@ -1,4 +1,5 @@
 export * from "@wandelbots/nova-api/v2"
 export * from "./NovaCellAPIClient"
 export * from "./NovaClient"
+export * from "./wandelscriptUtils"
 export * from "./ProgramsClient"

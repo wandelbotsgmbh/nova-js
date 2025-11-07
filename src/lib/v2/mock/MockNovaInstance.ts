@@ -5,7 +5,6 @@ import * as pathToRegexp from "path-to-regexp"
 import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
 
 /**
- * EXPERIMENTAL
  * Ultra-simplified mock Nova server for testing stuff
  */
 export class MockNovaInstance {
@@ -15,6 +14,417 @@ export class MockNovaInstance {
     config: InternalAxiosRequestConfig,
   ): Promise<AxiosResponse> {
     const apiHandlers = [
+      {
+        method: "GET",
+        path: "/cells/:cellId/controllers/:controllerId/state",
+        handle() {
+          return {
+            mode: "MODE_CONTROL",
+            last_error: [],
+            timestamp: "2025-10-16T09:19:26.634534092Z",
+            sequence_number: 1054764,
+            controller: "mock-ur5e",
+            operation_mode: "OPERATION_MODE_AUTO",
+            safety_state: "SAFETY_STATE_NORMAL",
+            velocity_override: 100,
+            motion_groups: [
+              {
+                timestamp: "2025-10-16T09:19:26.634534092Z",
+                sequence_number: 1054764,
+                motion_group: "0@mock-ur5e",
+                controller: "mock-ur5e",
+                joint_position: [
+                  1.487959623336792, -1.8501918315887451, 1.8003005981445312,
+                  6.034560203552246, 1.4921919107437134, 1.593459963798523,
+                ],
+                joint_limit_reached: {
+                  limit_reached: [false, false, false, false, false, false],
+                },
+                joint_torque: [],
+                joint_current: [0, 0, 0, 0, 0, 0],
+                flange_pose: {
+                  position: [
+                    107.6452433732927, -409.0402987746852, 524.2402132330305,
+                  ],
+                  orientation: [
+                    0.9874434028353319, -0.986571714997442, 1.3336589451098142,
+                  ],
+                },
+                tcp: "Flange",
+                tcp_pose: {
+                  position: [
+                    107.6452433732927, -409.0402987746852, 524.2402132330305,
+                  ],
+                  orientation: [
+                    0.9874434028353319, -0.986571714997442, 1.3336589451098142,
+                  ],
+                },
+                payload: "",
+                coordinate_system: "",
+                standstill: true,
+              },
+            ],
+          }
+        },
+      },
+      {
+        method: "GET",
+        path: "/cells/:cellId/controllers/:controllerId/coordinate-systems",
+        handle() {
+          return [
+            {
+              coordinate_system: "",
+              name: "world",
+              reference_coordinate_system: "",
+              position: [0, 0, 0],
+              orientation: [0, 0, 0],
+              orientation_type: "ROTATION_VECTOR",
+            },
+            {
+              coordinate_system: "CS-0",
+              name: "Default-CS",
+              reference_coordinate_system: "",
+              position: [0, 0, 0],
+              orientation: [0, 0, 0],
+              orientation_type: "ROTATION_VECTOR",
+            },
+          ] //satisfies CoordinateSystems
+        },
+      },
+
+      // As you need, add more mock requests here...
+      // Below is mostly V1:
+      {
+        method: "GET",
+        path: "/cells/:cellId/controllers/:controllerId/motion-groups/:motionGroupId/description",
+        handle() {
+          return {
+            motion_group_model: "UniversalRobots_UR5e",
+            mounting: {
+              position: [0, 0, 0],
+              orientation: [0, 0, 0],
+            },
+            tcps: {
+              Flange: {
+                name: "Default-Flange",
+                pose: {
+                  position: [0, 0, 0],
+                  orientation: [0, 0, 0],
+                },
+              },
+              "complex-tcp-position": {
+                name: "Complex TCP Position",
+                pose: {
+                  position: [-200, 300, 150],
+                  orientation: [
+                    -0.12139440409113832, -0.06356210998212003,
+                    -0.2023240068185639,
+                  ],
+                },
+              },
+              "offset-150mm-xy": {
+                name: "-150mm XY Offset",
+                pose: {
+                  position: [-150, -150, 0],
+                  orientation: [0, 0, 0],
+                },
+              },
+              "rotated-90deg-z": {
+                name: "90° Z Axis Rotation",
+                pose: {
+                  position: [0, 0, 0],
+                  orientation: [0, 0, 1.5708],
+                },
+              },
+            },
+            payloads: {
+              "FPay-0": {
+                name: "FPay-0",
+                payload: 0,
+                center_of_mass: [0, 0, 0],
+                moment_of_inertia: [0, 0, 0],
+              },
+            },
+            cycle_time: 8,
+            dh_parameters: [
+              {
+                alpha: 1.5707963267948966,
+                d: 162.25,
+              },
+              {
+                a: -425,
+              },
+              {
+                a: -392.2,
+              },
+              {
+                alpha: 1.5707963267948966,
+                d: 133.3,
+              },
+              {
+                alpha: -1.5707963267948966,
+                d: 99.7,
+              },
+              {
+                d: 99.6,
+              },
+            ],
+            operation_limits: {
+              auto_limits: {
+                joints: [
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                ],
+                tcp: {
+                  velocity: 5000,
+                },
+                elbow: {
+                  velocity: 5000,
+                },
+                flange: {
+                  velocity: 5000,
+                },
+              },
+              manual_limits: {
+                joints: [
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                ],
+                tcp: {
+                  velocity: 5000,
+                },
+              },
+              manual_t1_limits: {
+                joints: [
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                ],
+                tcp: {
+                  velocity: 5000,
+                },
+              },
+              manual_t2_limits: {
+                joints: [
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 150,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                  {
+                    position: {
+                      lower_limit: -6.283185307179586,
+                      upper_limit: 6.283185307179586,
+                    },
+                    velocity: 3.34159255027771,
+                    acceleration: 40,
+                    torque: 28,
+                  },
+                ],
+                tcp: {
+                  velocity: 5000,
+                },
+              },
+            },
+            serial_number: "WBVirtualRobot",
+          }
+        },
+      },
       {
         method: "GET",
         path: "/cells/:cellId/controllers",
@@ -603,26 +1013,6 @@ export class MockNovaInstance {
             ],
             tool_geometries: [],
           } // Mock safety setup
-        },
-      },
-      {
-        method: "GET",
-        path: "/cells/:cellId/coordinate-systems",
-        handle() {
-          return {
-            coordinatesystems: [
-              {
-                coordinate_system: "",
-                name: "world",
-                reference_uid: "",
-                position: [0, 0, 0],
-                rotation: {
-                  angles: [0, 0, 0],
-                  type: "ROTATION_VECTOR",
-                },
-              },
-            ],
-          } //satisfies CoordinateSystems
         },
       },
       {

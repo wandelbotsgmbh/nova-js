@@ -51,10 +51,6 @@ function permissiveInstanceUrlParse(url: string): string {
 }
 
 /**
- * EXPERIMENTAL
- *
- * This client provides a starting point to migrate NOVA api v2.
- * As v2 is still in development, this client has to be considered unstable
  *
  * Client for connecting to a Nova instance and controlling robots.
  */
@@ -66,12 +62,10 @@ export class NovaClient {
   accessToken: string | null = null
 
   constructor(config: NovaClientConfig) {
-    console.warn("Using experimental NOVA v2 client")
     const cellId = config.cellId ?? "cell"
     this.config = {
       cellId,
       ...config,
-      instanceUrl: permissiveInstanceUrlParse(config.instanceUrl),
     }
     this.accessToken =
       config.accessToken ||
@@ -80,6 +74,10 @@ export class NovaClient {
 
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
+    } else {
+      this.config.instanceUrl = permissiveInstanceUrlParse(
+        this.config.instanceUrl,
+      )
     }
 
     // Set up Axios instance with interceptor for token fetching
@@ -146,7 +144,7 @@ export class NovaClient {
 
     this.api = new NovaCellAPIClient(cellId, {
       ...config,
-      basePath: urlJoin(this.config.instanceUrl, "/api/v1"),
+      basePath: urlJoin(this.config.instanceUrl, "/api/v2"),
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -188,7 +186,7 @@ export class NovaClient {
     const url = new URL(
       urlJoin(
         this.config.instanceUrl,
-        `/api/v1/cells/${this.config.cellId}`,
+        `/api/v2/cells/${this.config.cellId}`,
         path,
       ),
     )
