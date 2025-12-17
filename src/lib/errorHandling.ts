@@ -1,4 +1,4 @@
-import { AxiosError } from "axios"
+import { isAxiosError } from "axios"
 import { tryStringifyJson } from "./converters"
 
 export function delay(ms: number) {
@@ -21,7 +21,7 @@ export function makeShortErrorMessage(err: unknown) {
  * the specific error code and provide a localized app-specific error message.
  */
 export function makeErrorMessage(err: unknown): string {
-  if (err instanceof AxiosError) {
+  if (isAxiosError(err)) {
     if (err.response) {
       return `${err.response?.status} ${err.response?.statusText} from ${err.response?.config.method?.toUpperCase() || "accessing"} ${err.response?.config.url}: ${JSON.stringify(err.response?.data)}`
     } else if (err.config) {
