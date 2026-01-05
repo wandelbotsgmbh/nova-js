@@ -1,4 +1,4 @@
-const DOMAIN_SUFFIX = "wandelbots.io"
+import { tryParseUrl } from "./lib/converters"
 
 /**
  * Mapping of stages to Auth0 configurations.
@@ -8,26 +8,27 @@ const DOMAIN_SUFFIX = "wandelbots.io"
  */
 const auth0ConfigMap = {
   dev: {
-    domain: `https://auth.portal.dev.${DOMAIN_SUFFIX}`,
+    domain: `https://auth.portal.dev.wandelbots.io`,
     clientId: "fLbJD0RLp5r2Dpucm5j8BjwMR6Hunfha",
   },
   stg: {
-    domain: `https://auth.portal.stg.${DOMAIN_SUFFIX}`,
+    domain: `https://auth.portal.stg.wandelbots.io`,
     clientId: "joVDeD9e786WzFNSGCqoVq7HNkWt5j6s",
   },
   prod: {
-    domain: `https://auth.portal.${DOMAIN_SUFFIX}`,
+    domain: `https://auth.portal.wandelbots.io`,
     clientId: "J7WJUi38xVQdJAEBNRT9Xw1b0fXDb4J2",
   },
 }
 
 /** Determine which Auth0 configuration to use based on instance URL  */
-const getAuth0Config = (instanceUrl: string) => {
-  if (instanceUrl.endsWith(`dev.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.dev
-  if (instanceUrl.endsWith(`stg.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.stg
-  if (instanceUrl.endsWith(DOMAIN_SUFFIX)) return auth0ConfigMap.prod
+export const getAuth0Config = (instanceUrl: string) => {
+  const url = tryParseUrl(instanceUrl)
+  if (url?.host.endsWith("dev.wandelbots.io")) return auth0ConfigMap.dev
+  if (url?.host.endsWith("stg.wandelbots.io")) return auth0ConfigMap.stg
+  if (url?.host.endsWith("wandelbots.io")) return auth0ConfigMap.prod
   throw new Error(
-    "Unsupported instance URL. Cannot determine Auth0 configuration.",
+    `Unsupported instance URL "${instanceUrl}". Auth0 login is only supported for urls of the form "https://*.wandelbots.io".`,
   )
 }
 

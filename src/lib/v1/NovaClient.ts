@@ -15,6 +15,7 @@ import { JoggerConnection } from "./JoggerConnection.js"
 import { MotionStreamConnection } from "./MotionStreamConnection.js"
 import { NovaCellAPIClient } from "./NovaCellAPIClient.js"
 import { MockNovaInstance } from "./mock/MockNovaInstance.js"
+import { parseUrl } from "../converters.js"
 
 export type NovaClientConfig = {
   /**
@@ -49,14 +50,6 @@ export type NovaClientConfig = {
 
 type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
 
-function permissiveInstanceUrlParse(url: string): string {
-  if (!url.startsWith("http")) {
-    url = `http://${url}`
-  }
-
-  return new URL(url).toString()
-}
-
 /**
  * Client for connecting to a Nova instance and controlling robots.
  * @deprecated The nova v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
@@ -82,9 +75,10 @@ export class NovaClient {
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
     } else {
-      this.config.instanceUrl = permissiveInstanceUrlParse(
+      this.config.instanceUrl = parseUrl(
         this.config.instanceUrl,
-      )
+        { defaultScheme: "http" }
+      ).toString()
     }
 
     // Set up Axios instance with interceptor for token fetching
