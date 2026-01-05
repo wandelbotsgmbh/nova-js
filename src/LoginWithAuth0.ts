@@ -24,9 +24,9 @@ const auth0ConfigMap = {
 /** Determine which Auth0 configuration to use based on instance URL  */
 export const getAuth0Config = (instanceUrl: string) => {
   const url = tryParseUrl(instanceUrl)
-  if (url?.host.endsWith("dev.wandelbots.io")) return auth0ConfigMap.dev
-  if (url?.host.endsWith("stg.wandelbots.io")) return auth0ConfigMap.stg
-  if (url?.host.endsWith("wandelbots.io")) return auth0ConfigMap.prod
+  if (url?.host.endsWith(".dev.wandelbots.io")) return auth0ConfigMap.dev
+  if (url?.host.endsWith(".stg.wandelbots.io")) return auth0ConfigMap.stg
+  if (url?.host.endsWith(".wandelbots.io")) return auth0ConfigMap.prod
   throw new Error(
     `Unsupported instance URL "${instanceUrl}". Auth0 login is only supported for urls of the form "https://*.wandelbots.io".`,
   )
