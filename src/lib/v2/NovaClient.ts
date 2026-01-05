@@ -3,7 +3,7 @@ import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
 import urlJoin from "url-join"
-import { parseUrl } from "../.."
+import { parseUrl } from "../converters"
 import { loginWithAuth0 } from "../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
