@@ -44,6 +44,21 @@ export function tryParseUrl(
   }
 }
 
+/**
+ * Permissively parse a NOVA instance URL from a config variable.
+ * If scheme is not specified, defaults to https for *.wandelbots.io hosts,
+ * and http otherwise.
+ * Throws an error if a valid URL could not be determined.
+ */
+export function parseNovaInstanceUrl(url: string): URL {
+  const testUrl = tryParseUrl(url, { defaultScheme: "http" })
+  if (testUrl?.host.endsWith(".wandelbots.io")) {
+    return parseUrl(url, { defaultScheme: "https" })
+  } else {
+    return parseUrl(url, { defaultScheme: "http" })
+  }
+}
+
 /** Try to parse something as JSON; return undefined if we can't */
 // biome-ignore lint/suspicious/noExplicitAny: it's json
 export function tryParseJson(json: unknown): any {

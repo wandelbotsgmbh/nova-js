@@ -1,5 +1,3 @@
-import { parseUrl, tryParseUrl } from "./lib/converters"
-
 /**
  * Mapping of stages to Auth0 configurations.
  * The client ids are public identifiers for a specific auth0 application
@@ -22,13 +20,12 @@ const auth0ConfigMap = {
 }
 
 /** Determine which Auth0 configuration to use based on instance URL */
-export const getAuth0Config = (instanceUrl: string) => {
-  const url = tryParseUrl(instanceUrl, { defaultScheme: "https" })
-  if (url?.host.endsWith(".dev.wandelbots.io")) return auth0ConfigMap.dev
-  if (url?.host.endsWith(".stg.wandelbots.io")) return auth0ConfigMap.stg
-  if (url?.host.endsWith(".wandelbots.io")) return auth0ConfigMap.prod
+export const getAuth0Config = (instanceUrl: URL) => {
+  if (instanceUrl.host.endsWith(".dev.wandelbots.io")) return auth0ConfigMap.dev
+  if (instanceUrl.host.endsWith(".stg.wandelbots.io")) return auth0ConfigMap.stg
+  if (instanceUrl.host.endsWith(".wandelbots.io")) return auth0ConfigMap.prod
   throw new Error(
-    `Unsupported instance URL "${instanceUrl}". Auth0 login is only supported for urls of the form "https://*.wandelbots.io".`,
+    `Unable to authenticate with NOVA instance "${instanceUrl}". Auth0 login is only supported for cloud instances with hosts of the form "**.wandelbots.io".`,
   )
 }
 
@@ -38,7 +35,7 @@ export const getAuth0Config = (instanceUrl: string) => {
  * when deployed on the instance domain)
  */
 export const loginWithAuth0 = async (
-  instanceUrl: string,
+  instanceUrl: URL,
 ): Promise<string | null> => {
   if (typeof window === "undefined") {
     throw new Error(
@@ -46,7 +43,7 @@ export const loginWithAuth0 = async (
     )
   }
 
-  if (parseUrl(instanceUrl).origin === window.location.origin) {
+  if (instanceUrl.origin === window.location.origin) {
     // When deployed on the instance itself, our auth is handled by cookies
     // and no access token is needed-- just need to reload the page and it'll
     // login again / set cookie as needed

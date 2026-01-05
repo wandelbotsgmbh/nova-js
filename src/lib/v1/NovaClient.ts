@@ -10,12 +10,12 @@ import urlJoin from "url-join"
 import { loginWithAuth0 } from "../../LoginWithAuth0.js"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket.js"
 import { availableStorage } from "../availableStorage.js"
+import { parseNovaInstanceUrl } from "../converters.js"
 import { ConnectedMotionGroup } from "./ConnectedMotionGroup.js"
 import { JoggerConnection } from "./JoggerConnection.js"
 import { MotionStreamConnection } from "./MotionStreamConnection.js"
 import { NovaCellAPIClient } from "./NovaCellAPIClient.js"
 import { MockNovaInstance } from "./mock/MockNovaInstance.js"
-import { parseUrl } from "../converters.js"
 
 export type NovaClientConfig = {
   /**
@@ -58,6 +58,7 @@ export class NovaClient {
   readonly api: NovaCellAPIClient
   readonly config: NovaClientConfigWithDefaults
   readonly mock?: MockNovaInstance
+  readonly instanceUrl: URL
   authPromise: Promise<string | null> | null = null
   accessToken: string | null = null
 
@@ -74,11 +75,8 @@ export class NovaClient {
 
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
-    } else {
-      this.config.instanceUrl = parseUrl(this.config.instanceUrl, {
-        defaultScheme: "http",
-      }).toString()
     }
+    this.instanceUrl = parseNovaInstanceUrl(this.config.instanceUrl)
 
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
@@ -144,7 +142,7 @@ export class NovaClient {
 
     this.api = new NovaCellAPIClient(cellId, {
       ...config,
-      basePath: urlJoin(this.config.instanceUrl, "/api/v1"),
+      basePath: urlJoin(this.instanceUrl.href, "/api/v1"),
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -169,7 +167,7 @@ export class NovaClient {
       return
     }
 
-    this.authPromise = loginWithAuth0(this.config.instanceUrl)
+    this.authPromise = loginWithAuth0(this.instanceUrl)
     try {
       this.accessToken = await this.authPromise
       if (this.accessToken) {
@@ -186,7 +184,7 @@ export class NovaClient {
   makeWebsocketURL(path: string): string {
     const url = new URL(
       urlJoin(
-        this.config.instanceUrl,
+        this.instanceUrl.href,
         `/api/v1/cells/${this.config.cellId}`,
         path,
       ),

@@ -3,10 +3,10 @@ import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
 import urlJoin from "url-join"
-import { parseUrl } from "../converters"
 import { loginWithAuth0 } from "../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
+import { parseNovaInstanceUrl } from "../converters"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
@@ -51,6 +51,7 @@ export class NovaClient {
   readonly api: NovaCellAPIClient
   readonly config: NovaClientConfigWithDefaults
   readonly mock?: MockNovaInstance
+  readonly instanceUrl: URL
   authPromise: Promise<string | null> | null = null
   accessToken: string | null = null
 
@@ -67,15 +68,12 @@ export class NovaClient {
 
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
-    } else {
-      this.config.instanceUrl = parseUrl(this.config.instanceUrl, {
-        defaultScheme: "http",
-      }).toString()
     }
+    this.instanceUrl = parseNovaInstanceUrl(this.config.instanceUrl)
 
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
-      baseURL: urlJoin(this.config.instanceUrl, "/api/v2"),
+      baseURL: urlJoin(this.instanceUrl.href, "/api/v2"),
       // TODO - backend needs to set proper CORS headers for this
       headers:
         typeof window !== "undefined" &&
@@ -137,7 +135,7 @@ export class NovaClient {
 
     this.api = new NovaCellAPIClient(cellId, {
       ...config,
-      basePath: urlJoin(this.config.instanceUrl, "/api/v2"),
+      basePath: urlJoin(this.instanceUrl.href, "/api/v2"),
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -161,7 +159,7 @@ export class NovaClient {
       return
     }
 
-    this.authPromise = loginWithAuth0(this.config.instanceUrl)
+    this.authPromise = loginWithAuth0(this.instanceUrl)
     try {
       this.accessToken = await this.authPromise
       if (this.accessToken) {
@@ -178,7 +176,7 @@ export class NovaClient {
   makeWebsocketURL(path: string): string {
     const url = new URL(
       urlJoin(
-        this.config.instanceUrl,
+        this.instanceUrl.href,
         `/api/v2/cells/${this.config.cellId}`,
         path,
       ),
