@@ -1,5 +1,3 @@
-const DOMAIN_SUFFIX = "wandelbots.io"
-
 /**
  * Mapping of stages to Auth0 configurations.
  * The client ids are public identifiers for a specific auth0 application
@@ -8,26 +6,26 @@ const DOMAIN_SUFFIX = "wandelbots.io"
  */
 const auth0ConfigMap = {
   dev: {
-    domain: `https://auth.portal.dev.${DOMAIN_SUFFIX}`,
+    domain: `https://auth.portal.dev.wandelbots.io`,
     clientId: "fLbJD0RLp5r2Dpucm5j8BjwMR6Hunfha",
   },
   stg: {
-    domain: `https://auth.portal.stg.${DOMAIN_SUFFIX}`,
+    domain: `https://auth.portal.stg.wandelbots.io`,
     clientId: "joVDeD9e786WzFNSGCqoVq7HNkWt5j6s",
   },
   prod: {
-    domain: `https://auth.portal.${DOMAIN_SUFFIX}`,
+    domain: `https://auth.portal.wandelbots.io`,
     clientId: "J7WJUi38xVQdJAEBNRT9Xw1b0fXDb4J2",
   },
 }
 
-/** Determine which Auth0 configuration to use based on instance URL  */
-const getAuth0Config = (instanceUrl: string) => {
-  if (instanceUrl.endsWith(`dev.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.dev
-  if (instanceUrl.endsWith(`stg.${DOMAIN_SUFFIX}`)) return auth0ConfigMap.stg
-  if (instanceUrl.endsWith(DOMAIN_SUFFIX)) return auth0ConfigMap.prod
+/** Determine which Auth0 configuration to use based on instance URL */
+export const getAuth0Config = (instanceUrl: URL) => {
+  if (instanceUrl.host.endsWith(".dev.wandelbots.io")) return auth0ConfigMap.dev
+  if (instanceUrl.host.endsWith(".stg.wandelbots.io")) return auth0ConfigMap.stg
+  if (instanceUrl.host.endsWith(".wandelbots.io")) return auth0ConfigMap.prod
   throw new Error(
-    "Unsupported instance URL. Cannot determine Auth0 configuration.",
+    `Unable to authenticate with NOVA instance "${instanceUrl}". Auth0 login is only supported for cloud instances with hosts of the form "**.wandelbots.io".`,
   )
 }
 
@@ -37,7 +35,7 @@ const getAuth0Config = (instanceUrl: string) => {
  * when deployed on the instance domain)
  */
 export const loginWithAuth0 = async (
-  instanceUrl: string,
+  instanceUrl: URL,
 ): Promise<string | null> => {
   if (typeof window === "undefined") {
     throw new Error(
@@ -45,9 +43,7 @@ export const loginWithAuth0 = async (
     )
   }
 
-  const auth0Config = getAuth0Config(instanceUrl)
-
-  if (new URL(instanceUrl).origin === window.location.origin) {
+  if (instanceUrl.origin === window.location.origin) {
     // When deployed on the instance itself, our auth is handled by cookies
     // and no access token is needed-- just need to reload the page and it'll
     // login again / set cookie as needed
@@ -61,6 +57,8 @@ export const loginWithAuth0 = async (
   // Note this will ONLY work for origins which are whitelisted as a redirect_uri
   // in the auth0 config, currently
   const { Auth0Client } = await import("@auth0/auth0-spa-js")
+
+  const auth0Config = getAuth0Config(instanceUrl)
 
   const auth0Client = new Auth0Client({
     domain: auth0Config.domain,
