@@ -159,6 +159,14 @@ export class NovaClient {
       return
     }
 
+    const storedToken = availableStorage.getString("wbjs.access_token")
+    if (storedToken && this.accessToken !== storedToken) {
+      // Might be newer than the one we have
+      this.accessToken = storedToken
+      return
+    }
+
+    // Otherwise, perform login flow
     this.authPromise = loginWithAuth0(this.instanceUrl)
     try {
       this.accessToken = await this.authPromise
