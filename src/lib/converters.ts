@@ -1,9 +1,9 @@
 export type URLParseOptions = {
-  /** 
+  /**
    * Ignore any scheme in the input string and force this scheme instead.
    */
   scheme?: "http" | "https"
-  /** 
+  /**
    * If the input string does not include a scheme, use this as the default
    * scheme.
    */
@@ -26,14 +26,17 @@ export function parseUrl(url: string, options: URLParseOptions = {}): URL {
     // No scheme is present, add the default one
     url = `${defaultScheme}://${url}`
   }
-  
+
   return new URL(url)
 }
 
 /**
  * Attempt to parse a string as a URL; return undefined if we can't
  */
-export function tryParseUrl(url: string, options: URLParseOptions = {}): URL | undefined {
+export function tryParseUrl(
+  url: string,
+  options: URLParseOptions = {},
+): URL | undefined {
   try {
     return parseUrl(url, options)
   } catch {

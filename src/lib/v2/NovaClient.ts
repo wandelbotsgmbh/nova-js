@@ -3,12 +3,12 @@ import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
 import urlJoin from "url-join"
+import { parseUrl } from "../.."
 import { loginWithAuth0 } from "../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
-import { parseUrl } from "../.."
 
 export type NovaClientConfig = {
   /**
@@ -68,10 +68,9 @@ export class NovaClient {
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
     } else {
-      this.config.instanceUrl = parseUrl(
-        this.config.instanceUrl,
-        { defaultScheme: "http" }
-      ).toString()
+      this.config.instanceUrl = parseUrl(this.config.instanceUrl, {
+        defaultScheme: "http",
+      }).toString()
     }
 
     // Set up Axios instance with interceptor for token fetching

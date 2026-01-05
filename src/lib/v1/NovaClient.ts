@@ -75,10 +75,9 @@ export class NovaClient {
     if (this.config.instanceUrl === "https://mock.example.com") {
       this.mock = new MockNovaInstance()
     } else {
-      this.config.instanceUrl = parseUrl(
-        this.config.instanceUrl,
-        { defaultScheme: "http" }
-      ).toString()
+      this.config.instanceUrl = parseUrl(this.config.instanceUrl, {
+        defaultScheme: "http",
+      }).toString()
     }
 
     // Set up Axios instance with interceptor for token fetching
