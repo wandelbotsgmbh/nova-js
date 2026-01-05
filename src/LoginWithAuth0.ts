@@ -1,4 +1,4 @@
-import { tryParseUrl } from "./lib/converters"
+import { parseUrl, tryParseUrl } from "./lib/converters"
 
 /**
  * Mapping of stages to Auth0 configurations.
@@ -21,9 +21,9 @@ const auth0ConfigMap = {
   },
 }
 
-/** Determine which Auth0 configuration to use based on instance URL  */
+/** Determine which Auth0 configuration to use based on instance URL */
 export const getAuth0Config = (instanceUrl: string) => {
-  const url = tryParseUrl(instanceUrl)
+  const url = tryParseUrl(instanceUrl, { defaultScheme: "https" })
   if (url?.host.endsWith(".dev.wandelbots.io")) return auth0ConfigMap.dev
   if (url?.host.endsWith(".stg.wandelbots.io")) return auth0ConfigMap.stg
   if (url?.host.endsWith(".wandelbots.io")) return auth0ConfigMap.prod
@@ -46,9 +46,7 @@ export const loginWithAuth0 = async (
     )
   }
 
-  const auth0Config = getAuth0Config(instanceUrl)
-
-  if (new URL(instanceUrl).origin === window.location.origin) {
+  if (parseUrl(instanceUrl).origin === window.location.origin) {
     // When deployed on the instance itself, our auth is handled by cookies
     // and no access token is needed-- just need to reload the page and it'll
     // login again / set cookie as needed
@@ -62,6 +60,8 @@ export const loginWithAuth0 = async (
   // Note this will ONLY work for origins which are whitelisted as a redirect_uri
   // in the auth0 config, currently
   const { Auth0Client } = await import("@auth0/auth0-spa-js")
+
+  const auth0Config = getAuth0Config(instanceUrl)
 
   const auth0Client = new Auth0Client({
     domain: auth0Config.domain,
