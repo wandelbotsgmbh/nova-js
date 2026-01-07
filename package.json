@@ -50,7 +50,7 @@
     "@biomejs/biome": "^2.3.11",
     "@types/lodash-es": "^4.17.12",
     "knip": "^5.76.3",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.22",
     "nodemon": "^3.1.9",
     "semantic-release": "^25.0.2",
     "tsdown": "^0.18.2",
