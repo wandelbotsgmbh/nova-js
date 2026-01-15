@@ -61,7 +61,7 @@
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.11.0",
     "@types/three": "^0.182.0",
-    "@wandelbots/nova-api": "^25.10.0",
+    "@wandelbots/nova-api": "26.1.0-dev.62",
     "axios": "^1.13.2",
     "mobx": "^6.15.0",
     "path-to-regexp": "^8.2.0",
