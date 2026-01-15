@@ -139,7 +139,7 @@ export class NovaCellAPIClient {
   readonly cell = this.withUnwrappedResponsesOnly(CellApi)
 
   readonly motionGroup = this.withCellId(MotionGroupApi)
-  readonly motionGroupModels = this.withCellId(MotionGroupModelsApi)
+  readonly motionGroupModels = this.withUnwrappedResponsesOnly(MotionGroupModelsApi)
 
   readonly controller = this.withCellId(ControllerApi)
 
