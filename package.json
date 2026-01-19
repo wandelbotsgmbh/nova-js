@@ -56,7 +56,7 @@
     "tsdown": "^0.18.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.17",
-    "ws": "^8.18.1"
+    "ws": "^8.19.0"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.11.2",
