@@ -52,7 +52,7 @@
     "knip": "^5.76.3",
     "lodash-es": "^4.17.23",
     "nodemon": "^3.1.11",
-    "semantic-release": "^25.0.2",
+    "semantic-release": "^25.0.3",
     "tsdown": "^0.19.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.17",
