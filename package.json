@@ -62,7 +62,7 @@
     "@auth0/auth0-spa-js": "^2.14.0",
     "@types/three": "^0.182.0",
     "@wandelbots/nova-api": "26.1.0-rc.8",
-    "axios": "^1.13.4",
+    "axios": "^1.13.5",
     "mobx": "^6.15.0",
     "path-to-regexp": "^8.3.0",
     "reconnecting-websocket": "^4.4.0",
