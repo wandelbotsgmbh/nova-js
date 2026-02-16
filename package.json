@@ -59,7 +59,7 @@
     "ws": "^8.19.0"
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^2.14.0",
+    "@auth0/auth0-spa-js": "^2.15.0",
     "@types/three": "^0.182.0",
     "@wandelbots/nova-api": "26.1.0-rc.8",
     "axios": "^1.13.5",

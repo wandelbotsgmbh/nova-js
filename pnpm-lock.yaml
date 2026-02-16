@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@auth0/auth0-spa-js':
-        specifier: ^2.14.0
-        version: 2.14.0
+        specifier: ^2.15.0
+        version: 2.15.0
       '@types/three':
         specifier: ^0.182.0
         version: 0.182.0
@@ -84,8 +84,8 @@ packages:
   '@auth0/auth0-auth-js@1.4.0':
     resolution: {integrity: sha512-ShA7KT4KvcBEtxsXZTcrmoNxai5q1JXhB2aEBFnZD1L6LNLzzmiUWiFTtGMsaaITCylr8TJ/onEQk6XZmUHXbg==}
 
-  '@auth0/auth0-spa-js@2.14.0':
-    resolution: {integrity: sha512-2XGd3j7SCTMWBTCAU6Xk9ZtQxcgz9mjMs28t0BMv3y1GfoO7qA9VAgElYb52CyCeiTGlOYAVZFsioojFdRwxcA==}
+  '@auth0/auth0-spa-js@2.15.0':
+    resolution: {integrity: sha512-cXv1Isyy4JEc+GxesQPFj3SEbDSnCVQTGiardY9WLSoYTsMMU585Kgm9TJFPJO4dDq3wi+DSJoy3IUcB3rr9nA==}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -1840,8 +1840,8 @@ packages:
       - validate-npm-package-name
       - which
 
-  oauth4webapi@3.8.3:
-    resolution: {integrity: sha512-pQ5BsX3QRTgnt5HxgHwgunIRaDXBdkT23tf8dfzmtTIL2LTpdmxgbpbBm0VgFWAIDlezQvQCTgnVIUmHupXHxw==}
+  oauth4webapi@3.8.5:
+    resolution: {integrity: sha512-A8jmyUckVhRJj5lspguklcl90Ydqk61H3dcU0oLhH3Yv13KpAliKTt5hknpGGPZSSfOwGyraNEFmofDYH+1kSg==}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -1854,8 +1854,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openid-client@6.8.1:
-    resolution: {integrity: sha512-VoYT6enBo6Vj2j3Q5Ec0AezS+9YGzQo1f5Xc42lreMGlfP4ljiXPKVDvCADh+XHCV/bqPu/wWSiCVXbJKvrODw==}
+  openid-client@6.8.2:
+    resolution: {integrity: sha512-uOvTCndr4udZsKihJ68H9bUICrriHdUVJ6Az+4Ns6cW55rwM5h0bjVIzDz2SxgOI84LKjFyjOFvERLzdTUROGA==}
 
   oxc-resolver@11.16.2:
     resolution: {integrity: sha512-Uy76u47vwhhF7VAmVY61Srn+ouiOobf45MU9vGct9GD2ARy6hKoqEElyHDB0L+4JOM6VLuZ431KiLwyjI/A21g==}
@@ -2562,9 +2562,9 @@ snapshots:
   '@auth0/auth0-auth-js@1.4.0':
     dependencies:
       jose: 6.1.3
-      openid-client: 6.8.1
+      openid-client: 6.8.2
 
-  '@auth0/auth0-spa-js@2.14.0':
+  '@auth0/auth0-spa-js@2.15.0':
     dependencies:
       '@auth0/auth0-auth-js': 1.4.0
       browser-tabs-lock: 1.3.0
@@ -4055,7 +4055,7 @@ snapshots:
 
   npm@11.9.0: {}
 
-  oauth4webapi@3.8.3: {}
+  oauth4webapi@3.8.5: {}
 
   object-assign@4.1.1: {}
 
@@ -4065,10 +4065,10 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openid-client@6.8.1:
+  openid-client@6.8.2:
     dependencies:
       jose: 6.1.3
-      oauth4webapi: 3.8.3
+      oauth4webapi: 3.8.5
 
   oxc-resolver@11.16.2:
     optionalDependencies:
