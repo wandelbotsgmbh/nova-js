@@ -68,5 +68,10 @@
     "reconnecting-websocket": "^4.4.0",
     "three": "^0.182.0",
     "url-join": "^5.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "nodemon>minimatch": "10.2.1"
+    }
   }
 }
