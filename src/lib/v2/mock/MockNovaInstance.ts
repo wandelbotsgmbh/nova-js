@@ -424,10 +424,13 @@ export class MockNovaInstance {
     ]
 
     const method = config.method?.toUpperCase() || "GET"
-    const path = `/cells${config.url?.split("/cells")[1]?.split("?")[0]}`
+    if (!config.url) {
+      throw new Error("No url sent with request")
+    }
+    const path = config.url
 
     for (const handler of apiHandlers) {
-      const match = pathToRegexp.match(handler.path)(path || "")
+      const match = pathToRegexp.match(handler.path)(path)
       if (method === handler.method && match) {
         const json = handler.handle()
         return {
@@ -448,17 +451,6 @@ export class MockNovaInstance {
       "404",
       config,
     )
-
-    // return {
-    //   status: 404,
-    //   statusText: "Not Found",
-    //   data: "",
-    //   headers: {},
-    //   config,
-    //   request: {
-    //     responseURL: config.url,
-    //   },
-    // }
   }
 
   // Please note: Only very basic websocket mocking is done here, needs to be extended as needed
