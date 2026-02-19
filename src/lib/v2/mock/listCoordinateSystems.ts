@@ -19,6 +19,6 @@ export const listCoordinateSystems = {
         orientation: [0, 0, 0],
         orientation_type: "ROTATION_VECTOR",
       },
-    ] //satisfies CoordinateSystems
+    ]
   },
 }
