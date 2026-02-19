@@ -5,6 +5,7 @@ import * as pathToRegexp from "path-to-regexp"
 import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
 import { getCurrentRobotControllerState } from "./getCurrentRobotControllerState"
 import { getMotionGroupDescription } from "./getMotionGroupDescription"
+import { getMotionGroupKinematicModel } from "./getMotionGroupKinematicModel"
 import { getRobotController } from "./getRobotController"
 import { listCoordinateSystems } from "./listCoordinateSystems"
 import { listRobotControllers } from "./listRobotControllers"
@@ -24,6 +25,7 @@ export class MockNovaInstance {
       getMotionGroupDescription,
       getCurrentRobotControllerState,
       listCoordinateSystems,
+      getMotionGroupKinematicModel,
     ]
 
     const method = config.method?.toUpperCase() || "GET"
