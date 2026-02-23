@@ -26,11 +26,14 @@ test("mock correctly reports missing functionality", async () => {
 })
 
 test("mock correctly handles query parameters", async () => {
-    const nova = new NovaClient({
-        instanceUrl: "https://mock.example.com",
-    })
+  const nova = new NovaClient({
+    instanceUrl: "https://mock.example.com",
+  })
 
   // this endpoints uses a query parameter
-  const data = await nova.api.controller.listCoordinateSystems("0@mock-ur5e", "ROTATION_VECTOR");
-    expect(data != null)
+  const data = await nova.api.controller.listCoordinateSystems(
+    "0@mock-ur5e",
+    "ROTATION_VECTOR",
+  )
+  expect(data != null)
 })
