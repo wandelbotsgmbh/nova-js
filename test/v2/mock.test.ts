@@ -24,3 +24,17 @@ test("mock correctly reports missing functionality", async () => {
     `No mock handler matched this request: GET /motion-group-models/0%40mock-ur5e/collision`,
   )
 })
+
+test("mock correctly handles query parameters", async () => {
+  const nova = new NovaClient({
+    instanceUrl: "https://mock.example.com",
+  })
+
+  // this endpoint uses a query parameter
+  const data = await nova.api.controller.listCoordinateSystems(
+    "0@mock-ur5e",
+    "ROTATION_VECTOR",
+  )
+  expect(data).not.toBeNull()
+  expect(data).not.toBeUndefined()
+})

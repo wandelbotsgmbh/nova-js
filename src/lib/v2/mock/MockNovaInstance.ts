@@ -32,7 +32,7 @@ export class MockNovaInstance {
     if (!config.url) {
       throw new Error("No url sent with request")
     }
-    const path = config.url
+    const path = config.url.split("?")[0]
 
     for (const handler of apiHandlers) {
       const match = pathToRegexp.match(handler.path)(path)
