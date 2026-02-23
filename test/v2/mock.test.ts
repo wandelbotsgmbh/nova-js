@@ -30,10 +30,11 @@ test("mock correctly handles query parameters", async () => {
     instanceUrl: "https://mock.example.com",
   })
 
-  // this endpoints uses a query parameter
+  // this endpoint uses a query parameter
   const data = await nova.api.controller.listCoordinateSystems(
     "0@mock-ur5e",
     "ROTATION_VECTOR",
   )
-  expect(data != null)
+  expect(data).not.toBeNull()
+  expect(data).not.toBeUndefined()
 })
