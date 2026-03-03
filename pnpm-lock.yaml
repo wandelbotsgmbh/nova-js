@@ -19,8 +19,8 @@ importers:
         specifier: ^0.183.1
         version: 0.183.1
       '@wandelbots/nova-api':
-        specifier: 26.2.0-dev.57
-        version: 26.2.0-dev.57
+        specifier: 26.2.0-rc.2
+        version: 26.2.0-rc.2
       axios:
         specifier: ^1.13.5
         version: 1.13.5
@@ -940,8 +940,8 @@ packages:
   '@vitest/utils@4.0.18':
     resolution: {integrity: sha512-msMRKLMVLWygpK3u2Hybgi4MNjcYJvwTb0Ru09+fOyCXIgT5raYP041DRRdiJiI3k/2U6SEbAETB3YtBrUkCFA==}
 
-  '@wandelbots/nova-api@26.2.0-dev.57':
-    resolution: {integrity: sha512-o3tb9pIHJyWhQJLPv1t1rp2fkGiqOBdWQpugbu3m13iCX9j7MZCspMitQDKZgPDGx/dywU3Bh5SSH3sVA/VsWg==}
+  '@wandelbots/nova-api@26.2.0-rc.2':
+    resolution: {integrity: sha512-ucfWITdDar3+qlb3qsHHwB4CRSuKCzZqm7uuxPDZlT7bMqknQl460gNOvUe7i5KIcuAj+Ah2xRlpyRUaF3iJQA==}
 
   '@webgpu/types@0.1.69':
     resolution: {integrity: sha512-RPmm6kgRbI8e98zSD3RVACvnuktIja5+yLgDAkTmxLr90BEwdTXRQWNLF3ETTTyH/8mKhznZuN5AveXYFEsMGQ==}
@@ -3242,7 +3242,7 @@ snapshots:
       '@vitest/pretty-format': 4.0.18
       tinyrainbow: 3.0.3
 
-  '@wandelbots/nova-api@26.2.0-dev.57':
+  '@wandelbots/nova-api@26.2.0-rc.2':
     dependencies:
       axios: 1.13.5
     transitivePeerDependencies:
