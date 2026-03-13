@@ -14,6 +14,7 @@ import {
   KinematicsApi,
   MotionGroupApi,
   MotionGroupModelsApi,
+  ProgramApi,
   StoreCollisionComponentsApi,
   StoreCollisionSetupsApi,
   StoreObjectApi,
@@ -27,6 +28,7 @@ import {
 } from "@wandelbots/nova-api/v2"
 import type { AxiosInstance } from "axios"
 import axios from "axios"
+import { ProgramsClient } from "./ProgramsClient.js"
 
 type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R
   ? (...args: P) => R
@@ -150,6 +152,8 @@ export class NovaCellAPIClient {
   readonly trajectoryExecution = this.withCellId(TrajectoryExecutionApi)
   readonly trajectoryCaching = this.withCellId(TrajectoryCachingApi)
 
+  readonly programs = this.withCellId(ProgramApi)
+
   readonly application = this.withCellId(ApplicationApi)
   readonly applicationGlobal = this.withUnwrappedResponsesOnly(ApplicationApi)
 
@@ -172,4 +176,13 @@ export class NovaCellAPIClient {
     StoreCollisionComponentsApi,
   )
   readonly storeCollisionSetups = this.withCellId(StoreCollisionSetupsApi)
+
+  // Enhanced programs client with convenient methods
+  private _programsClient?: ProgramsClient
+  get programsClient(): ProgramsClient {
+    if (!this._programsClient) {
+      this._programsClient = new ProgramsClient(this)
+    }
+    return this._programsClient
+  }
 }
