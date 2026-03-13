@@ -10,10 +10,6 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
-    "./v1": {
-      "import": "./dist/lib/v1/index.mjs",
-      "require": "./dist/lib/v1/index.cjs"
-    },
     "./v2": {
       "import": "./dist/lib/v2/index.mjs",
       "require": "./dist/lib/v2/index.cjs"
@@ -31,7 +27,7 @@
     "lint": "biome check --error-on-warnings .",
     "format": "biome format . --write",
     "knip": "knip",
-    "build": "tsdown src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
+    "build": "tsdown src/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
     "test": "pnpm run build && vitest run",
     "e2e": "vitest run --config vitest.e2e.config.ts"
   },
@@ -48,9 +44,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
-    "@types/lodash-es": "^4.17.12",
     "knip": "^5.86.0",
-    "lodash-es": "^4.17.23",
     "nodemon": "^3.1.14",
     "semantic-release": "^25.0.3",
     "tsdown": "^0.21.2",
@@ -60,13 +54,10 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.17.0",
-    "@types/three": "^0.183.1",
     "@wandelbots/nova-api": "26.2.0-rc.4",
     "axios": "^1.13.6",
-    "mobx": "^6.15.0",
     "path-to-regexp": "^8.3.0",
     "reconnecting-websocket": "^4.4.0",
-    "three": "^0.183.2",
     "url-join": "^5.0.0"
   },
   "pnpm": {

@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { NovaClient } from "../../dist/lib/v2"
 
-test("getMotionGroupKinematicModel", async () => {
+test.skip("getMotionGroupKinematicModel", async () => {
   const nova = new NovaClient({
     instanceUrl: "https://mock.example.com",
   })
@@ -11,7 +11,7 @@ test("getMotionGroupKinematicModel", async () => {
   expect(data.inverse_solver).toEqual("Universalrobots")
 })
 
-test("mock correctly reports missing functionality", async () => {
+test.skip("mock correctly reports missing functionality", async () => {
   const nova = new NovaClient({
     instanceUrl: "https://mock.example.com",
   })

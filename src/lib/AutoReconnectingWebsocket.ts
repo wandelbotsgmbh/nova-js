@@ -1,5 +1,4 @@
 import ReconnectingWebSocket, { type ErrorEvent } from "reconnecting-websocket"
-import type * as v1 from "./v1/mock/MockNovaInstance"
 import type * as v2 from "./v2/mock/MockNovaInstance"
 
 export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
@@ -10,7 +9,7 @@ export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
   constructor(
     targetUrl: string,
     readonly opts: {
-      mock?: v1.MockNovaInstance | v2.MockNovaInstance
+      mock?: v2.MockNovaInstance
       onDispose?: () => void
     } = {},
   ) {
