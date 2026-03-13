@@ -33,7 +33,7 @@ NOVA_INSTANCE_PROVIDER=your-instance-provider-host
 Then run:
 
 ```bash
-pnpm run td
+pnpm run test-deploy
 ```
 
 This will provision a new instance, configure a test cell with a virtual robot, and save the `NOVA` URL to `.env.local`. On subsequent runs, the existing instance will be extended instead of creating a new one.
@@ -43,7 +43,15 @@ This will provision a new instance, configure a test cell with a virtual robot, 
 To run basic E2E tests against a live NOVA instance during development:
 
 ```bash
-NOVA=SOME_IP_ADDRESS pnpm run e2e 
+NOVA=<nova-instance> pnpm run e2e 
 ```
 
 This is just for development right now, the tests are not integrated with CI yet. You will need to create a virtual robot (any robot) on the instance first for the jogging test to work.
+
+## Reregenrate Websocket Endpoints
+
+To update the list of Websocket endpoints, run:
+
+```bash
+NOVA=<nova-instance> pnpm run generate:websocket-endpoints
+```

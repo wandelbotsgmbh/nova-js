@@ -3,5 +3,8 @@
 ## BREAKING CHANGES
 - Drop API v1
 
+## New Features
+- Introduce `nova.ws` to simplify connecting to known WebSocket endpoints
+
 ## Tooling
-- Include test deploy script for spinning up nova instaces required for testing
+- Include test deploy script for spinning up nova instaces required for testing and other tasks

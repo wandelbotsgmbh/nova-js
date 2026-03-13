@@ -30,7 +30,8 @@
     "build": "tsdown src/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
     "test": "pnpm run build && vitest run",
     "e2e": "vitest run --config vitest.e2e.config.ts",
-    "td": "tsx scripts/test-deploy.ts"
+    "test-deploy": "tsx scripts/test-deploy.ts",
+    "generate:websocket-endpoints": "tsx scripts/generate-websocket-endpoints.ts"
   },
   "repository": {
     "type": "git",
@@ -52,7 +53,8 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0",
-    "ws": "^8.19.0"
+    "ws": "^8.19.0",
+    "yaml": "^2.8.2"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.17.0",

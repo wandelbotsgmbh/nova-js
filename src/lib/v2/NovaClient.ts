@@ -9,6 +9,28 @@ import { availableStorage } from "../availableStorage"
 import { parseNovaInstanceUrl } from "../converters"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
+import { websocketEndpoints } from "./websocketEndpoints"
+
+/**
+ * Extract `{param}` placeholders from a URL template string as a union type.
+ * e.g. "/cells/{cell}/controllers/{controller}" -> "cell" | "controller"
+ */
+type ExtractParams<T extends string> =
+  T extends `${string}{${infer Param}}${infer Rest}`
+    ? Param | ExtractParams<Rest>
+    : never
+
+type WebsocketConnector<Template extends string> = {
+  connect(
+    params: Record<ExtractParams<Template>, string>,
+  ): AutoReconnectingWebsocket
+}
+
+type WebsocketNamespace = {
+  [K in keyof typeof websocketEndpoints]: WebsocketConnector<
+    (typeof websocketEndpoints)[K]
+  >
+}
 
 export type NovaClientConfig = {
   /**
@@ -49,6 +71,7 @@ type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
  */
 export class NovaClient {
   readonly api: NovaCellAPIClient
+  readonly ws: WebsocketNamespace
   readonly config: NovaClientConfigWithDefaults
   readonly mock?: MockNovaInstance
   readonly instanceUrl: URL
@@ -151,6 +174,8 @@ export class NovaClient {
       },
       axiosInstance,
     })
+
+    this.ws = this.buildWsNamespace()
   }
 
   async renewAuthentication(): Promise<void> {
@@ -214,5 +239,55 @@ export class NovaClient {
     return new AutoReconnectingWebsocket(this.makeWebsocketURL(path), {
       mock: this.mock,
     })
+  }
+
+  /**
+   * Build a websocket URL from an endpoint template, substituting path parameters.
+   */
+  private resolveEndpointPath(
+    template: string,
+    params: Record<string, string>,
+  ): string {
+    return template.replace(/\{([^}]+)\}/g, (_, key: string) => {
+      const value = params[key]
+      if (value === undefined) {
+        throw new Error(
+          `Missing parameter "${key}" for websocket endpoint "${template}"`,
+        )
+      }
+      return encodeURIComponent(value)
+    })
+  }
+
+  private buildWsNamespace(): WebsocketNamespace {
+    const ns = {} as Record<string, WebsocketConnector<string>>
+    for (const [operationId, template] of Object.entries(websocketEndpoints)) {
+      ns[operationId] = {
+        connect: (params: Record<string, string>) => {
+          const paramsWithCell = { cell: this.config.cellId, ...params }
+          const path = this.resolveEndpointPath(template, paramsWithCell)
+          return new AutoReconnectingWebsocket(
+            this.makeFullWebsocketURL(path),
+            { mock: this.mock },
+          )
+        },
+      }
+    }
+    return ns as WebsocketNamespace
+  }
+
+  private makeFullWebsocketURL(path: string): string {
+    const url = new URL(urlJoin(this.instanceUrl.href, "/api/v2", path))
+    url.protocol = url.protocol.replace("http", "ws")
+    url.protocol = url.protocol.replace("https", "wss")
+
+    if (this.accessToken) {
+      url.searchParams.append("token", this.accessToken)
+    } else if (this.config.username && this.config.password) {
+      url.username = this.config.username
+      url.password = this.config.password
+    }
+
+    return url.toString()
   }
 }

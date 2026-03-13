@@ -1,0 +1,22 @@
+import fs from "node:fs"
+import path from "node:path"
+
+/**
+ * Load .env.local and set any KEY=VALUE pairs into process.env
+ */
+export function loadEnvLocal() {
+  const envPath = path.resolve(process.cwd(), ".env.local")
+  if (!fs.existsSync(envPath)) return
+  const lines = fs.readFileSync(envPath, "utf-8").split("\n")
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith("#")) continue
+    const eqIndex = trimmed.indexOf("=")
+    if (eqIndex === -1) continue
+    const key = trimmed.slice(0, eqIndex)
+    const value = trimmed.slice(eqIndex + 1)
+    if (!(key in process.env)) {
+      process.env[key] = value
+    }
+  }
+}
