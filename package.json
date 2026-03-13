@@ -29,7 +29,8 @@
     "knip": "knip",
     "build": "tsdown src/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
     "test": "pnpm run build && vitest run",
-    "e2e": "vitest run --config vitest.e2e.config.ts"
+    "e2e": "vitest run --config vitest.e2e.config.ts",
+    "td": "tsx scripts/test-deploy.ts"
   },
   "repository": {
     "type": "git",
@@ -48,6 +49,7 @@
     "nodemon": "^3.1.14",
     "semantic-release": "^25.0.3",
     "tsdown": "^0.21.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0",
     "ws": "^8.19.0"

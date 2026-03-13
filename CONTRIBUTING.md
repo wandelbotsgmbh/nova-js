@@ -20,9 +20,27 @@ Then you can run the unit tests against a mocked NOVA API and socket connections
 pnpm run test
 ```
 
-## e2e tests
+## Connecting NOVA
 
-To run basic e2e tests against a live NOVA instance during development:
+The library provides some tooling to set up a NOVA instance for testing and development.
+
+Configure `NOVA_INSTANCE_PROVIDER` in `.env.local`:
+
+```
+NOVA_INSTANCE_PROVIDER=your-instance-provider-host
+```
+
+Then run:
+
+```bash
+pnpm run td
+```
+
+This will provision a new instance, configure a test cell with a virtual robot, and save the `NOVA` URL to `.env.local`. On subsequent runs, the existing instance will be extended instead of creating a new one.
+
+## E2E tests
+
+To run basic E2E tests against a live NOVA instance during development:
 
 ```bash
 NOVA=SOME_IP_ADDRESS pnpm run e2e 

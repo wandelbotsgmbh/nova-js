@@ -5,3 +5,5 @@ node_modules
 tsconfig.tsbuildinfo
 wandelbots-nova-js-*.tgz
 .pnpm-store
+.env.local
+kubeconfig.yml
