@@ -30,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Install dependencies
         run: pnpm install
       - name: Check for issues in dependencies
