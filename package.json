@@ -50,11 +50,12 @@
     "@biomejs/biome": "^2.4.6",
     "@types/lodash-es": "^4.17.12",
     "knip": "^5.86.0",
-    "lodash-es": "^4.17.23",
+    "lodash-es": "^4.18.0",
     "nodemon": "^3.1.14",
     "semantic-release": "^25.0.3",
     "tsdown": "^0.21.2",
     "typescript": "^5.9.3",
+    "vite": "^7.3.2",
     "vitest": "^4.1.0",
     "ws": "^8.19.0"
   },
@@ -62,17 +63,21 @@
     "@auth0/auth0-spa-js": "^2.17.0",
     "@types/three": "^0.183.1",
     "@wandelbots/nova-api": "26.2.0-rc.4",
-    "axios": "^1.13.6",
+    "axios": "^1.15.0",
     "mobx": "^6.15.0",
-    "path-to-regexp": "^8.3.0",
+    "path-to-regexp": "^8.4.0",
     "reconnecting-websocket": "^4.4.0",
     "three": "^0.183.2",
     "url-join": "^5.0.0"
   },
   "pnpm": {
     "overrides": {
-      "nodemon>minimatch": ">=10.2.3",
-      "rollup": ">=4.59.0"
+      "nodemon>minimatch": "^10.2.3",
+      "rollup": "^4.59.0",
+      "handlebars": "^4.7.9",
+      "picomatch": "^4.0.4",
+      "lodash": "^4.18.0",
+      "defu": "^6.1.5"
     }
   }
 }
