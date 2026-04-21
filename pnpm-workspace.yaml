@@ -12,9 +12,3 @@ verifyDepsBeforeRun: prompt
 
 # Support pnpm scripts on non-POSIX systems (e.g. Windows)
 shellEmulator: true
-
-overrides:
-  "foo": "^1.0.0"
-  "quux": "npm:@myorg/quux@^1.0.0"
-  "bar@^2.1.0": "3.0.0"
-  "qar@1>zoo": "2"
