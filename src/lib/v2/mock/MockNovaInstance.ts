@@ -121,5 +121,6 @@ const defaultMotionState = {
         1.7564919306270736, -1.7542521568325058, 0.7326972590614671,
       ],
     },
+    description_revision: 0,
   } satisfies MotionGroupState,
 }
