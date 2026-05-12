@@ -17,8 +17,8 @@ importers:
   .:
     dependencies:
       '@auth0/auth0-spa-js':
-        specifier: ^2.17.0
-        version: 2.17.0
+        specifier: ^2.19.2
+        version: 2.19.2
       '@types/three':
         specifier: ^0.183.1
         version: 0.183.1
@@ -26,11 +26,11 @@ importers:
         specifier: 26.3.0-rc.2
         version: 26.3.0-rc.2
       axios:
-        specifier: ^1.15.0
-        version: 1.15.0
+        specifier: ^1.16.0
+        version: 1.16.0
       mobx:
-        specifier: ^6.15.0
-        version: 6.15.0
+        specifier: ^6.15.3
+        version: 6.15.3
       path-to-regexp:
         specifier: ^8.4.0
         version: 8.4.2
@@ -38,8 +38,8 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
       three:
-        specifier: ^0.183.2
-        version: 0.183.2
+        specifier: ^0.184.0
+        version: 0.184.0
       url-join:
         specifier: ^5.0.0
         version: 5.0.0
@@ -92,11 +92,11 @@ packages:
   '@actions/io@3.0.2':
     resolution: {integrity: sha512-nRBchcMM+QK1pdjO7/idu86rbJI5YHUKCvKs0KxnSYbVe3F51UfGxuZX4Qy/fWlp6l7gWFwIkrOzN+oUK03kfw==}
 
-  '@auth0/auth0-auth-js@1.4.0':
-    resolution: {integrity: sha512-ShA7KT4KvcBEtxsXZTcrmoNxai5q1JXhB2aEBFnZD1L6LNLzzmiUWiFTtGMsaaITCylr8TJ/onEQk6XZmUHXbg==}
+  '@auth0/auth0-auth-js@1.6.0':
+    resolution: {integrity: sha512-/WYYNlsqhWA6I60pMVLFVeOgjOUCLdJThEAsjN8pAgYY09BTxbPaRIEVDgGu6ckoJpkmKvEYlHPO/vwRNrvX6w==}
 
-  '@auth0/auth0-spa-js@2.17.0':
-    resolution: {integrity: sha512-Zdpu4qdOlBXBUDIxSOFAAK6bhs3WlJl1LzkL6kDvamJYDgImi4pMFSzGjS0lobFdotDX1KBnxuyiDSEV0nEBMA==}
+  '@auth0/auth0-spa-js@2.19.2':
+    resolution: {integrity: sha512-NJOjPQZjZ8g2LXkBjNiYtf614WGVhwCg+q9L2MXcEQqey+ign9CG/wnl9OxYDz7XuItWecfYQLbiVTjIGNZ/Dw==}
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -977,8 +977,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios@1.15.0:
-    resolution: {integrity: sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==}
+  axios@1.16.0:
+    resolution: {integrity: sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==}
 
   balanced-match@4.0.4:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
@@ -1314,8 +1314,8 @@ packages:
     resolution: {integrity: sha512-2kCCtc+JvcZ86IGAz3Z2Y0A1baIz9fL31pH/0S1IqZr9Iwnjq8izfPtrCyQKO6TLMPELLsQMre7VDqeIKCsHkA==}
     engines: {node: '>=18'}
 
-  follow-redirects@1.15.11:
-    resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
+  follow-redirects@1.16.0:
+    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -1424,8 +1424,8 @@ packages:
     resolution: {integrity: sha512-NqADB8VjPFLM2V0VvHUewwwsw0ZWBaIdgo+ieHtK3hasLz4qeCRjYcqfB6AQrBggRKppKF8L52/VqdVsO47Dlw==}
     engines: {node: '>= 0.4'}
 
-  hasown@2.0.2:
-    resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
+  hasown@2.0.3:
+    resolution: {integrity: sha512-ej4AhfhfL2Q2zpMmLo7U1Uv9+PyhIZpgQLGT1F9miIGmiCJIoCgSmczFdrc97mWT4kVY72KA+WnnhJ5pghSvSg==}
     engines: {node: '>= 0.4'}
 
   highlight.js@10.7.3:
@@ -1559,8 +1559,8 @@ packages:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
 
-  jose@6.1.3:
-    resolution: {integrity: sha512-0TpaTfihd4QMNwrz/ob2Bp7X04yuxJkjRGi4aKmOqwhov54i6u79oCv7T+C7lo70MKH6BesI3vscD1yb/yzKXQ==}
+  jose@6.2.3:
+    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -1771,8 +1771,8 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  mobx@6.15.0:
-    resolution: {integrity: sha512-UczzB+0nnwGotYSgllfARAqWCJ5e/skuV2K/l+Zyck/H6pJIhLXuBnz+6vn2i211o7DtbE78HQtsYEKICHGI+g==}
+  mobx@6.15.3:
+    resolution: {integrity: sha512-6+ZSYDs5zgH5CdGfEU2q2Lsa5PztVryL1ys7kAImTU25n2A9LAMj/yneVsQpd03MfwMLDQF+7kakJR9Z+cQxSw==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -1895,8 +1895,8 @@ packages:
       - validate-npm-package-name
       - which
 
-  oauth4webapi@3.8.5:
-    resolution: {integrity: sha512-A8jmyUckVhRJj5lspguklcl90Ydqk61H3dcU0oLhH3Yv13KpAliKTt5hknpGGPZSSfOwGyraNEFmofDYH+1kSg==}
+  oauth4webapi@3.8.6:
+    resolution: {integrity: sha512-iwemM91xz8nryHti2yTmg5fhyEMVOkOXwHNqbvcATjyajb5oQxCQzrNOA6uElRHuMhQQTKUyFKV9y/CNyg25BQ==}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -1909,8 +1909,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openid-client@6.8.2:
-    resolution: {integrity: sha512-uOvTCndr4udZsKihJ68H9bUICrriHdUVJ6Az+4Ns6cW55rwM5h0bjVIzDz2SxgOI84LKjFyjOFvERLzdTUROGA==}
+  openid-client@6.8.4:
+    resolution: {integrity: sha512-QSw0BA08piujetEwfZsHoTrDpMEha7GDZDicQqVwX4u0ChCjefvjDB++TZ8BTg76UpwhzIQgdvvfgfl3HpCSAw==}
 
   oxc-resolver@11.19.1:
     resolution: {integrity: sha512-qE/CIg/spwrTBFt5aKmwe3ifeDdLfA2NESN30E42X/lII5ClF8V7Wt6WIJhcGZjp0/Q+nQ+9vgxGk//xZNX2hg==}
@@ -2290,8 +2290,8 @@ packages:
   thenify@3.3.1:
     resolution: {integrity: sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==}
 
-  three@0.183.2:
-    resolution: {integrity: sha512-di3BsL2FEQ1PA7Hcvn4fyJOlxRRgFYBpMTcyOgkwJIaDOdJMebEFPA+t98EvjuljDx4hNulAGwF6KIjtwI5jgQ==}
+  three@0.184.0:
+    resolution: {integrity: sha512-wtTRjG92pM5eUg/KuUnHsqSAlPM296brTOcLgMRqEeylYTh/CdtvKUvCyyCQTzFuStieWxvZb8mVTMvdPyUpxg==}
 
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
@@ -2629,14 +2629,14 @@ snapshots:
 
   '@actions/io@3.0.2': {}
 
-  '@auth0/auth0-auth-js@1.4.0':
+  '@auth0/auth0-auth-js@1.6.0':
     dependencies:
-      jose: 6.1.3
-      openid-client: 6.8.2
+      jose: 6.2.3
+      openid-client: 6.8.4
 
-  '@auth0/auth0-spa-js@2.17.0':
+  '@auth0/auth0-spa-js@2.19.2':
     dependencies:
-      '@auth0/auth0-auth-js': 1.4.0
+      '@auth0/auth0-auth-js': 1.6.0
       browser-tabs-lock: 1.3.0
       dpop: 2.1.1
       es-cookie: 1.3.2
@@ -3273,7 +3273,7 @@ snapshots:
 
   '@wandelbots/nova-api@26.3.0-rc.2':
     dependencies:
-      axios: 1.15.0
+      axios: 1.16.0
     transitivePeerDependencies:
       - debug
 
@@ -3329,9 +3329,9 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios@1.15.0:
+  axios@1.16.0:
     dependencies:
-      follow-redirects: 1.15.11
+      follow-redirects: 1.16.0
       form-data: 4.0.5
       proxy-from-env: 2.1.0
     transitivePeerDependencies:
@@ -3575,7 +3575,7 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.2
+      hasown: 2.0.3
 
   esbuild@0.27.4:
     optionalDependencies:
@@ -3692,14 +3692,14 @@ snapshots:
       semver-regex: 4.0.5
       super-regex: 1.1.0
 
-  follow-redirects@1.15.11: {}
+  follow-redirects@1.16.0: {}
 
   form-data@4.0.5:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
-      hasown: 2.0.2
+      hasown: 2.0.3
       mime-types: 2.1.35
 
   formatly@0.3.0:
@@ -3738,7 +3738,7 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.2
+      hasown: 2.0.3
       math-intrinsics: 1.1.0
 
   get-proto@1.0.1:
@@ -3799,7 +3799,7 @@ snapshots:
     dependencies:
       has-symbols: 1.1.0
 
-  hasown@2.0.2:
+  hasown@2.0.3:
     dependencies:
       function-bind: 1.1.2
 
@@ -3908,7 +3908,7 @@ snapshots:
 
   jiti@2.6.1: {}
 
-  jose@6.1.3: {}
+  jose@6.2.3: {}
 
   js-tokens@4.0.0: {}
 
@@ -4084,7 +4084,7 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  mobx@6.15.0: {}
+  mobx@6.15.3: {}
 
   ms@2.1.3: {}
 
@@ -4147,7 +4147,7 @@ snapshots:
 
   npm@11.11.1: {}
 
-  oauth4webapi@3.8.5: {}
+  oauth4webapi@3.8.6: {}
 
   object-assign@4.1.1: {}
 
@@ -4157,10 +4157,10 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openid-client@6.8.2:
+  openid-client@6.8.4:
     dependencies:
-      jose: 6.1.3
-      oauth4webapi: 3.8.5
+      jose: 6.2.3
+      oauth4webapi: 3.8.6
 
   oxc-resolver@11.19.1:
     optionalDependencies:
@@ -4599,7 +4599,7 @@ snapshots:
     dependencies:
       any-promise: 1.3.0
 
-  three@0.183.2: {}
+  three@0.184.0: {}
 
   through2@2.0.5:
     dependencies:
