@@ -33,7 +33,8 @@
     "knip": "knip",
     "build": "tsdown src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
     "test": "pnpm run build && vitest run",
-    "e2e": "vitest run --config vitest.e2e.config.ts"
+    "e2e": "vitest run --config vitest.e2e.config.ts",
+    "checks": "pnpm format && concurrently --group --timings --names audit,lint,tsc,knip,test \"pnpm audit\" \"pnpm lint\" \"pnpm tsc\" \"pnpm knip\" \"pnpm test\""
   },
   "repository": {
     "type": "git",
@@ -57,27 +58,17 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.2",
     "vitest": "^4.1.0",
-    "ws": "^8.19.0"
+    "ws": "^8.20.1"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.17.0",
     "@types/three": "^0.183.1",
-    "@wandelbots/nova-api": "26.2.0-rc.4",
-    "axios": "^1.15.0",
+    "@wandelbots/nova-api": "26.3.0-rc.2",
+    "axios": "^1.15.2",
     "mobx": "^6.15.0",
     "path-to-regexp": "^8.4.0",
     "reconnecting-websocket": "^4.4.0",
     "three": "^0.183.2",
     "url-join": "^5.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "nodemon>minimatch": "^10.2.3",
-      "rollup": "^4.59.0",
-      "handlebars": "^4.7.9",
-      "picomatch": "^4.0.4",
-      "lodash": "^4.18.0",
-      "defu": "^6.1.5"
-    }
   }
 }
