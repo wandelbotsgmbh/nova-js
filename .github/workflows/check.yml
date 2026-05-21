@@ -10,27 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install
+      - uses: ./.github/actions/setup-node
       - run: pnpm run tsc
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install
+      - uses: ./.github/actions/setup-node
       - run: pnpm run lint
   knip:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install
+      - uses: ./.github/actions/setup-node
       - run: pnpm run knip
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install
+      - uses: ./.github/actions/setup-node
       - run: pnpm run test
