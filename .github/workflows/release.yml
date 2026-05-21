@@ -29,10 +29,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/setup-node
       - name: Check for issues in dependencies
         run: pnpm audit --audit-level high
       - name: Build
