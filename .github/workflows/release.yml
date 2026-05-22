@@ -81,6 +81,7 @@ jobs:
         id: next-version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: dry-run-dummy
         run: |
           # Simulate a squash merge: create a single commit on the base branch
           # with the PR title as the message, matching what GitHub does on merge
