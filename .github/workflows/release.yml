@@ -96,8 +96,7 @@ jobs:
           # https://github.com/semantic-release/semantic-release/issues/1890)
           unset GITHUB_ACTIONS
 
-          pnpm exec semantic-release --no-ci --dry-run \
-            --plugins semantic-release-export-data,@semantic-release/commit-analyzer
+          pnpm exec semantic-release --no-ci --dry-run
       - name: Download build artifacts
         if: steps.next-version.outputs.new-release-published == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
