@@ -98,6 +98,7 @@ jobs:
           COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
           # Create a snapshot version with branch name, PR number, and commit SHA
           SNAPSHOT_VERSION="${LATEST_VERSION}-pr.${BRANCH_NAME}.${PR_NUMBER}.${COMMIT_SHA}"
+          echo "SNAPSHOT_VERSION=$SNAPSHOT_VERSION" >> $GITHUB_ENV
           # Update the package.json with the new version
           jq --arg version "$SNAPSHOT_VERSION" '.version = $version' package.json > package.tmp.json && mv package.tmp.json package.json
       - name: Install Node.js
@@ -108,3 +109,44 @@ jobs:
         run: |
           # Publish the snapshot version
           npm publish --tag snapshot
+      - name: Comment on PR with install instructions
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            const version = process.env.SNAPSHOT_VERSION;
+            const body = [
+              `### 📦 Snapshot published`,
+              ``,
+              `\`\`\``,
+              `pnpm add @wandelbots/nova-js@${version}`,
+              `\`\`\``,
+              ``,
+              `> **Note:** If your project uses pnpm's \`minimumReleaseAge\` (enabled by default since pnpm v10), this freshly published snapshot will be blocked. Add the following to your \`pnpm-workspace.yaml\` to allow it:`,
+              `> \`\`\`yaml`,
+              `> minimumReleaseAgeExclude:`,
+              `>   - "@wandelbots/nova-js"`,
+              `> \`\`\``,
+            ].join('\n');
+
+            // Delete previous snapshot comments to avoid clutter
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            for (const comment of comments) {
+              if (comment.user.type === 'Bot' && comment.body.includes('Snapshot published')) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: comment.id,
+                });
+              }
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
