@@ -79,6 +79,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: ./.github/actions/setup-node
       - name: Determine next version via semantic-release dry-run
         id: next-version
         env:
@@ -93,7 +94,7 @@ jobs:
           # https://github.com/semantic-release/semantic-release/issues/1890)
           unset GITHUB_ACTIONS
 
-          npx semantic-release --no-ci --dry-run \
+          pnpm exec semantic-release --no-ci --dry-run \
             --plugins semantic-release-export-data,@semantic-release/commit-analyzer
       - name: Download build artifacts
         if: steps.next-version.outputs.new-release-published == 'true'
