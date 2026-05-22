@@ -58,16 +58,13 @@ jobs:
         with:
           name: build-artifacts
           path: dist/
-      - name: Install Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24 # Need a recent npm version for npm trusted publishers
+      - uses: ./.github/actions/setup-node
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Run semantic-release
-          npx semantic-release
+          pnpm exec semantic-release
 
   publish-snapshot:
     runs-on: ubuntu-latest
