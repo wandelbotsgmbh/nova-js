@@ -115,7 +115,12 @@ jobs:
           node-version: 24 # Need a recent npm version for npm trusted publishers
       - name: Publish snapshot to npm
         if: steps.next-version.outputs.new-release-published == 'true'
-        run: npm publish --tag snapshot
+        run: |
+          if npm view "@wandelbots/nova-js@$SNAPSHOT_VERSION" version &>/dev/null; then
+            echo "Version $SNAPSHOT_VERSION already published, skipping"
+          else
+            npm publish --tag snapshot
+          fi
       - name: Comment on PR with install instructions
         if: steps.next-version.outputs.new-release-published == 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
