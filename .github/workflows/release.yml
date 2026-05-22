@@ -72,7 +72,8 @@ jobs:
   publish-snapshot:
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' }}
+    # Only run for PRs from the same repo (not forks) to prevent unauthorized publishing
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
