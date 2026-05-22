@@ -81,10 +81,10 @@ jobs:
         id: next-version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           # Simulate a squash merge: create a single commit on the base branch
           # with the PR title as the message, matching what GitHub does on merge
-          PR_TITLE="${{ github.event.pull_request.title }}"
           git config user.name "ci"
           git config user.email "ci@users.noreply.github.com"
           git checkout -b ${{ github.base_ref }} origin/${{ github.base_ref }}
