@@ -10,6 +10,6 @@ runs:
     - uses: actions/setup-node@v6
       with:
         node-version: ${{ steps.node-version.outputs.version }}
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v5
     - shell: bash
       run: pnpm install --frozen-lockfile
