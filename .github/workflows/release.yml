@@ -58,58 +58,81 @@ jobs:
         with:
           name: build-artifacts
           path: dist/
-      - name: Install Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24 # Need a recent npm version for npm trusted publishers
+      - uses: ./.github/actions/setup-node
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Run semantic-release
-          npx semantic-release
+          pnpm exec semantic-release
 
   publish-snapshot:
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' }}
+    # Only run for PRs from the same repo (not forks) to prevent unauthorized publishing
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-node
+      - name: Determine next version via semantic-release dry-run
+        id: next-version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # Simulate a squash merge: create a single commit on the base branch
+          # with the PR title as the message, matching what GitHub does on merge
+          git config user.name "ci"
+          git config user.email "ci@users.noreply.github.com"
+          git checkout -b ${{ github.base_ref }} origin/${{ github.base_ref }}
+          git merge --squash "$GITHUB_SHA"
+          git commit -m "$PR_TITLE" --no-verify
+
+          # Strip npm plugin since it demands an auth token even on dry-run
+          yq -i 'del(.plugins[] | select(
+            . == "@semantic-release/npm" or
+            (type == "!!seq" and .[0] == "@semantic-release/npm")
+          ))' .releaserc
+
+          # Unset GITHUB_ACTIONS so env-ci falls back to git for branch
+          # detection instead of seeing the PR ref (workaround for
+          # https://github.com/semantic-release/semantic-release/issues/1890)
+          unset GITHUB_ACTIONS
+
+          pnpm exec semantic-release --no-ci --dry-run
       - name: Download build artifacts
+        if: steps.next-version.outputs.new-release-published == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: build-artifacts
           path: dist/
-      - name: Fetch latest release version
-        id: fetch_latest_release
-        run: |
-          LATEST_VERSION=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
-          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
       - name: Update package.json version
-        env:
-          LATEST_VERSION: ${{ env.LATEST_VERSION }}
+        if: steps.next-version.outputs.new-release-published == 'true'
         run: |
-          # Extract the pull request number
-          PR_NUMBER=$(echo $GITHUB_REF | sed 's/refs\/pull\/\([0-9]*\)\/.*/\1/')
-          # Extract the branch name
-          BRANCH_NAME=$(echo $GITHUB_HEAD_REF | sed 's/[/_]/-/g')
-          # Get the short commit SHA
-          COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
-          # Create a snapshot version with branch name, PR number, and commit SHA
-          SNAPSHOT_VERSION="${LATEST_VERSION}-pr.${BRANCH_NAME}.${PR_NUMBER}.${COMMIT_SHA}"
-          echo "SNAPSHOT_VERSION=$SNAPSHOT_VERSION" >> $GITHUB_ENV
-          # Update the package.json with the new version
+          NEXT_VERSION="${{ steps.next-version.outputs.new-release-version }}"
+          PR_NUMBER=$(echo "$GITHUB_REF" | sed 's/refs\/pull\/\([0-9]*\)\/.*/\1/')
+          COMMIT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+          SNAPSHOT_VERSION="${NEXT_VERSION}-pr.${PR_NUMBER}.${COMMIT_SHA}"
+          echo "SNAPSHOT_VERSION=$SNAPSHOT_VERSION" >> "$GITHUB_ENV"
           jq --arg version "$SNAPSHOT_VERSION" '.version = $version' package.json > package.tmp.json && mv package.tmp.json package.json
       - name: Install Node.js
+        if: steps.next-version.outputs.new-release-published == 'true'
         uses: actions/setup-node@v6
-        with: 
-          node-version: 24 # Need a recent Node.js for npm trusted publishers
+        with:
+          node-version: 24 # Need a recent npm version for npm trusted publishers
       - name: Publish snapshot to npm
+        if: steps.next-version.outputs.new-release-published == 'true'
         run: |
-          # Publish the snapshot version
-          npm publish --tag snapshot
+          if npm view "@wandelbots/nova-js@$SNAPSHOT_VERSION" version &>/dev/null; then
+            echo "Version $SNAPSHOT_VERSION already published, skipping"
+          else
+            npm publish --tag snapshot
+          fi
       - name: Comment on PR with install instructions
+        if: steps.next-version.outputs.new-release-published == 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
           script: |
