@@ -81,7 +81,6 @@ jobs:
         id: next-version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: dry-run-dummy
         run: |
           # Simulate a squash merge: create a single commit on the base branch
           # with the PR title as the message, matching what GitHub does on merge
@@ -91,6 +90,12 @@ jobs:
           git checkout -b ${{ github.base_ref }} origin/${{ github.base_ref }}
           git merge --squash "$GITHUB_SHA"
           git commit -m "$PR_TITLE" --no-verify
+
+          # Strip npm plugin since it demands an auth token even on dry-run
+          yq -i 'del(.plugins[] | select(
+            . == "@semantic-release/npm" or
+            (type == "!!seq" and .[0] == "@semantic-release/npm")
+          ))' .releaserc
 
           # Unset GITHUB_ACTIONS so env-ci falls back to git for branch
           # detection instead of seeing the PR ref (workaround for
