@@ -5,7 +5,7 @@
 [![Release](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml/badge.svg)](https://github.com/wandelbotsgmbh/nova-js/actions/workflows/release.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/wandelbotsgmbh/nova-js)
 
-This library provides an idiomatic TypeScript client for working with the Wandelbots NOVA API.
+This library provides an idiomatic TypeScript client for working with the [Wandelbots NOVA](https://docs.wandelbots.io) robotics software platform API.
 
 ```bash
 npm install @wandelbots/nova-js
@@ -60,7 +60,7 @@ this.programStateSocket.addEventListener("message", (ev) => {
 })
 ```
 
-Websockets on a given Nova client are deduplicated by path, so if you call `openReconnectingWebsocket` twice with the same path you'll get the same object. The exception is if you called `dispose`, which you may do to permanently clean up a reconnecting websocket and free its resources:
+Websockets on a given NOVA client are deduplicated by path, so if you call `openReconnectingWebsocket` twice with the same path you'll get the same object. The exception is if you called `dispose`, which you may do to permanently clean up a reconnecting websocket and free its resources:
 
 ```ts
 programStateSocket.dispose()
