@@ -12,8 +12,12 @@ import {
   ControllerInputsOutputsApi,
   JoggingApi,
   KinematicsApi,
+  LicenseApi,
   MotionGroupApi,
   MotionGroupModelsApi,
+  NOVACloudApi,
+  ProgramApi,
+  RobotConfigurationsApi,
   StoreCollisionComponentsApi,
   StoreCollisionSetupsApi,
   StoreObjectApi,
@@ -21,6 +25,7 @@ import {
   TrajectoryCachingApi,
   TrajectoryExecutionApi,
   TrajectoryPlanningApi,
+  VersionApi,
   VirtualControllerApi,
   VirtualControllerBehaviorApi,
   VirtualControllerInputsOutputsApi,
@@ -172,4 +177,13 @@ export class NovaCellAPIClient {
     StoreCollisionComponentsApi,
   )
   readonly storeCollisionSetups = this.withCellId(StoreCollisionSetupsApi)
+
+  readonly program = this.withCellId(ProgramApi)
+
+  readonly license = this.withUnwrappedResponsesOnly(LicenseApi)
+  readonly novaCloud = this.withUnwrappedResponsesOnly(NOVACloudApi)
+  readonly robotConfigurations = this.withUnwrappedResponsesOnly(
+    RobotConfigurationsApi,
+  )
+  readonly version = this.withUnwrappedResponsesOnly(VersionApi)
 }
