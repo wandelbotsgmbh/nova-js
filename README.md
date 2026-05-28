@@ -13,13 +13,6 @@ npm install @wandelbots/nova-js
 
 If you develop a React application we also provide a set of [React components](https://github.com/wandelbotsgmbh/wandelbots-js-react-components). It includes a [Robot Jogging Panel](https://wandelbotsgmbh.github.io/wandelbots-js-react-components/?path=/docs/jogging-joggingpanel--docs), a [Robot Visualization](https://wandelbotsgmbh.github.io/wandelbots-js-react-components/?path=/docs/3d-view-robot-robot--docs) and other useful UI widgets.
 
-## Table of contents
-
-- [Basic usage](#basic-usage)
-- [API calls](#api-calls)
-- [API version support](#api-version-support)
-- [Opening websockets](#opening-websockets)
-
 ## Basic usage
 
 The core of this package is the `NovaClient`, which represents a connection to a configured robot cell on a given NOVA instance:
