@@ -7,7 +7,7 @@ updates:
       day: "monday"
     commit-message:
       prefix: "feat"
-      prefix-development: "chore"
+      prefix-development: "dev"
     versioning-strategy: increase
     groups:
       nova-api:
