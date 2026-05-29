@@ -6,7 +6,7 @@ updates:
       interval: "weekly"
       day: "monday"
     commit-message:
-      prefix: "fix"
+      prefix: "feat"
       prefix-development: "chore"
     versioning-strategy: increase
     groups:
