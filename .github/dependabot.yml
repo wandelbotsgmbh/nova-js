@@ -1,7 +1,5 @@
 version: 2
 updates:
-  # nova-api updates when new NOVA OS version is released
-  # Will be automatically merged by a github action if tests pass
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -10,28 +8,18 @@ updates:
       prefix: "feat"
       prefix-development: "dev"
     versioning-strategy: increase
-    allow:
-      - dependency-name: "@wandelbots/nova-api"
-    open-pull-requests-limit: 99
-
-  # General updates for other dependencies
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    commit-message:
-      prefix: "fix"
-      prefix-development: "dev"
-    versioning-strategy: increase
-    ignore:
-      - dependency-name: "@wandelbots/nova-api"
     groups:
+      nova-api:
+        patterns:
+          - "@wandelbots/nova-api"
       dev-dependencies:
         dependency-type: "development"
       production-dependencies:
         dependency-type: "production"
-    open-pull-requests-limit: 3
+        exclude-patterns:
+          - "@wandelbots/nova-api"
+    # Important that the nova-api one gets in there for new NOVA OS releases
+    open-pull-requests-limit: 99
 
   # Github Actions updates
   - package-ecosystem: "github-actions"
