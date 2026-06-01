@@ -7,60 +7,38 @@ import { loginWithAuth0 } from "../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
 import { parseNovaInstanceUrl } from "../converters"
+import { NovaCellAPIClient } from "../deprecated/v2/NovaCellAPIClient"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
-import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
 export type NovaClientConfig = {
   /**
-   * Url of the deployed Nova instance to connect to
+   * Url of the deployed NOVA instance to connect to
    * e.g. https://saeattii.instance.wandelbots.io
    */
-  instanceUrl: string | "https://mock.example.com"
-
-  /**
-   * Identifier of the cell on the Nova instance to connect this client to.
-   * If omitted, the default identifier "cell" is used.
-   **/
-  cellId?: string
-
-  /**
-   * Username for basic auth to the Nova instance.
-   * @deprecated use accessToken instead
-   */
-  username?: string
-
-  /**
-   * Password for basic auth to the Nova instance.
-   * @deprecated use accessToken instead
-   */
-  password?: string
+  instanceUrl: string
 
   /**
    * Access token for Bearer authentication.
+   * If running on a NOVA instance, this can be automatically retrieved from
+   * the current session when omitted.
    */
   accessToken?: string
 } & Omit<BaseConfiguration, "isJsonMime" | "basePath">
 
-type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
-
 /**
  *
- * Client for connecting to a Nova instance and controlling robots.
+ * Client for connecting to a NOVA instance and controlling robots.
  */
-export class NovaClient {
+export class Nova {
   readonly api: NovaCellAPIClient
-  readonly config: NovaClientConfigWithDefaults
+  readonly config: NovaClientConfig
   readonly mock?: MockNovaInstance
   readonly instanceUrl: URL
   authPromise: Promise<string | null> | null = null
   accessToken: string | null = null
 
   constructor(config: NovaClientConfig) {
-    const cellId = config.cellId ?? "cell"
-    this.config = {
-      cellId,
-      ...config,
-    }
+    this.config = config
     this.accessToken =
       config.accessToken ||
       availableStorage.getString("wbjs.access_token") ||
