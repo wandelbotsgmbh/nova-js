@@ -10,7 +10,7 @@ jobs:
   auto-merge:
     runs-on: ubuntu-latest
     if: >-
-      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
       contains(github.event.pull_request.title, '@wandelbots/nova-api')
     steps:
       - name: Enable auto-merge
