@@ -1,28 +1,14 @@
 version: 2
 updates:
+  # Configure dependabot to check daily for updates to @wandelbots/nova-api 
+  # The PR then gets automatically merged by a workflow if tests pass
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
     commit-message:
       prefix: "feat"
-      prefix-development: "dev"
     versioning-strategy: increase
-    groups:
-      nova-api:
-        patterns:
-          - "@wandelbots/nova-api"
-      dev-dependencies:
-        dependency-type: "development"
-      production-dependencies:
-        dependency-type: "production"
-        exclude-patterns:
-          - "@wandelbots/nova-api"
-    open-pull-requests-limit: 3
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 3
+    allow:
+      - dependency-name: "@wandelbots/nova-api"
+    open-pull-requests-limit: 99
