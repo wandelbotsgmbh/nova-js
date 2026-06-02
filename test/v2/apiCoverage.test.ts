@@ -1,6 +1,6 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: dynamic API class discovery
 import * as novaApiV2 from "@wandelbots/nova-api/v2"
-import { NovaAPIClient } from "@wandelbots/nova-js/v2"
+import { Nova, NovaAPIClient } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
 
 /**
@@ -55,12 +55,11 @@ test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => 
 })
 
 test("NovaAPIClient aliases InputsOutputs to IOs in property names", () => {
-  const client = new NovaAPIClient({
-    basePath: "https://mock.example.com",
-    isJsonMime: (mime: string) => mime === "application/json",
+  const nova = new Nova({
+    instanceUrl: "https://mock.example.com",
   })
 
-  const keys = Object.keys(client)
+  const keys = Object.keys(nova.api)
 
   // Should have the short aliases
   expect(keys).toContain("controllerIOs")
@@ -75,8 +74,8 @@ test("NovaAPIClient aliases InputsOutputs to IOs in property names", () => {
   expect(keys).not.toContain("NovaCloud")
 
   // Verify the types also resolve these properties
-  client.controllerIOs satisfies object
-  client.busIOs satisfies object
-  client.virtualControllerIOs satisfies object
-  client.novaCloud satisfies object
+  nova.api.controllerIOs satisfies object
+  nova.api.busIOs satisfies object
+  nova.api.virtualControllerIOs satisfies object
+  nova.api.novaCloud satisfies object
 })
