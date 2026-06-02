@@ -1,4 +1,6 @@
+/// <reference types="node" />
 import { defineConfig } from "tsdown"
+import ApiSnapshot from "tsnapi/rolldown"
 
 export default defineConfig({
   entry: [
@@ -9,4 +11,5 @@ export default defineConfig({
   format: ["esm", "cjs"],
   clean: true,
   sourcemap: true,
+  plugins: [ApiSnapshot({ update: !process.env.CI })],
 })
