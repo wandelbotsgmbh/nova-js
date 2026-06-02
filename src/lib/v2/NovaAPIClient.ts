@@ -48,7 +48,7 @@ type NovaAPIClientOpts = BaseConfiguration & {
   mock?: boolean
 }
 
-function wrapApi<T extends BaseAPI>(
+function unwrap<T extends BaseAPI>(
   ApiConstructor: new (
     config: BaseConfiguration,
     basePath: string,
@@ -116,30 +116,30 @@ export class NovaAPIClient {
   constructor(opts: NovaAPIClientOpts) {
     this.opts = opts
 
-    this.application = wrapApi(ApplicationApi, opts)
-    this.busIOs = wrapApi(BUSInputsOutputsApi, opts)
-    this.cell = wrapApi(CellApi, opts)
-    this.controller = wrapApi(ControllerApi, opts)
-    this.controllerIOs = wrapApi(ControllerInputsOutputsApi, opts)
-    this.jogging = wrapApi(JoggingApi, opts)
-    this.kinematics = wrapApi(KinematicsApi, opts)
-    this.license = wrapApi(LicenseApi, opts)
-    this.motionGroup = wrapApi(MotionGroupApi, opts)
-    this.motionGroupModels = wrapApi(MotionGroupModelsApi, opts)
-    this.novaCloud = wrapApi(NOVACloudApi, opts)
-    this.program = wrapApi(ProgramApi, opts)
-    this.robotConfigurations = wrapApi(RobotConfigurationsApi, opts)
-    this.session = wrapApi(SessionApi, opts)
-    this.storeCollisionComponents = wrapApi(StoreCollisionComponentsApi, opts)
-    this.storeCollisionSetups = wrapApi(StoreCollisionSetupsApi, opts)
-    this.storeObject = wrapApi(StoreObjectApi, opts)
-    this.system = wrapApi(SystemApi, opts)
-    this.trajectoryCaching = wrapApi(TrajectoryCachingApi, opts)
-    this.trajectoryExecution = wrapApi(TrajectoryExecutionApi, opts)
-    this.trajectoryPlanning = wrapApi(TrajectoryPlanningApi, opts)
-    this.version = wrapApi(VersionApi, opts)
-    this.virtualController = wrapApi(VirtualControllerApi, opts)
-    this.virtualControllerBehavior = wrapApi(VirtualControllerBehaviorApi, opts)
-    this.virtualControllerIOs = wrapApi(VirtualControllerInputsOutputsApi, opts)
+    this.application = unwrap(ApplicationApi, opts)
+    this.busIOs = unwrap(BUSInputsOutputsApi, opts)
+    this.cell = unwrap(CellApi, opts)
+    this.controller = unwrap(ControllerApi, opts)
+    this.controllerIOs = unwrap(ControllerInputsOutputsApi, opts)
+    this.jogging = unwrap(JoggingApi, opts)
+    this.kinematics = unwrap(KinematicsApi, opts)
+    this.license = unwrap(LicenseApi, opts)
+    this.motionGroup = unwrap(MotionGroupApi, opts)
+    this.motionGroupModels = unwrap(MotionGroupModelsApi, opts)
+    this.novaCloud = unwrap(NOVACloudApi, opts)
+    this.program = unwrap(ProgramApi, opts)
+    this.robotConfigurations = unwrap(RobotConfigurationsApi, opts)
+    this.session = unwrap(SessionApi, opts)
+    this.storeCollisionComponents = unwrap(StoreCollisionComponentsApi, opts)
+    this.storeCollisionSetups = unwrap(StoreCollisionSetupsApi, opts)
+    this.storeObject = unwrap(StoreObjectApi, opts)
+    this.system = unwrap(SystemApi, opts)
+    this.trajectoryCaching = unwrap(TrajectoryCachingApi, opts)
+    this.trajectoryExecution = unwrap(TrajectoryExecutionApi, opts)
+    this.trajectoryPlanning = unwrap(TrajectoryPlanningApi, opts)
+    this.version = unwrap(VersionApi, opts)
+    this.virtualController = unwrap(VirtualControllerApi, opts)
+    this.virtualControllerBehavior = unwrap(VirtualControllerBehaviorApi, opts)
+    this.virtualControllerIOs = unwrap(VirtualControllerInputsOutputsApi, opts)
   }
 }
