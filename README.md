@@ -22,7 +22,10 @@ import { Nova } from "@wandelbots/nova-js/v2"
 
 const nova = new Nova({
   instanceUrl: "https://example.instance.wandelbots.io",
+
   // Access token is given in the developer portal UI when you create an instance
+  // This can be omitted when the frontend is hosted by the instance itself
+  // (i.e. when running as a NOVA app)
   accessToken: "...",
 })
 ```

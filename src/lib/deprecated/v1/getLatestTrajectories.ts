@@ -3,6 +3,7 @@ import type { NovaCellAPIClient } from "./NovaCellAPIClient"
 
 let lastMotionIds: Set<string> = new Set()
 
+/** @deprecated */
 export async function getLatestTrajectories(
   apiClient: NovaCellAPIClient,
   sampleTime: number = 50,

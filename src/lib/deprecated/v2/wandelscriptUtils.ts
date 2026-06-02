@@ -3,6 +3,7 @@ import type { Pose } from "@wandelbots/nova-api/v2"
 /**
  * Convert a Pose object representing a motion group position
  * into a string which represents that pose in Wandelscript.
+ * @deprecated Wandelscript usage is deprecated; switching to Python is recommended.
  */
 export function poseToWandelscriptString(
   pose: Pick<Pose, "position" | "orientation">,

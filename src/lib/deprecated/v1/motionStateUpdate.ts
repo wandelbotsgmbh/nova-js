@@ -1,5 +1,6 @@
 import type { TcpPose } from "@wandelbots/nova-api/v1"
 
+/** @deprecated */
 export function jointValuesEqual(
   oldJointValues: number[],
   newJointValues: number[],
@@ -22,6 +23,7 @@ export function jointValuesEqual(
   return true
 }
 
+/** @deprecated */
 export function tcpPoseEqual(
   oldTcp: TcpPose | undefined,
   newTcp: TcpPose | undefined,

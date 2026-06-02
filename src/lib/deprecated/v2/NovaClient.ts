@@ -10,6 +10,7 @@ import { parseNovaInstanceUrl } from "../../converters"
 import { MockNovaInstance } from "../../v2/mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
+/** @deprecated Use `NovaClientConfig` from `Nova` instead. */
 export type NovaClientConfig = {
   /**
    * Url of the deployed Nova instance to connect to
@@ -44,8 +45,8 @@ export type NovaClientConfig = {
 type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
 
 /**
- *
  * Client for connecting to a Nova instance and controlling robots.
+ * @deprecated Use `Nova` from `@wandelbots/nova-js/v2` instead.
  */
 export class NovaClient {
   readonly api: NovaCellAPIClient

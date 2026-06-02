@@ -55,6 +55,7 @@ function unwrapRotationVector(
 
 /**
  * Store representing the current state of a connected motion group.
+ * @deprecated
  */
 export class MotionStreamConnection {
   static async open(nova: NovaClient, motionGroupId: string) {

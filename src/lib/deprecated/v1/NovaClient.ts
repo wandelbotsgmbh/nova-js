@@ -17,6 +17,7 @@ import { MotionStreamConnection } from "./MotionStreamConnection.js"
 import { NovaCellAPIClient } from "./NovaCellAPIClient.js"
 import { MockNovaInstance } from "./mock/MockNovaInstance.js"
 
+/** @deprecated Use `NovaConfig` from `@wandelbots/nova-js/v2` instead. */
 export type NovaClientConfig = {
   /**
    * Url of the deployed Nova instance to connect to
@@ -44,6 +45,7 @@ export type NovaClientConfig = {
 
   /**
    * Access token for Bearer authentication.
+   * @deprecated use accessToken instead
    */
   accessToken?: string
 } & Omit<BaseConfiguration, "isJsonMime" | "basePath">

@@ -5,6 +5,7 @@ import { isSameCoordinateSystem, tryParseJson } from "../../converters"
 import type { MotionStreamConnection } from "./MotionStreamConnection"
 import type { NovaClient } from "./NovaClient"
 
+/** @deprecated */
 export type JoggerConnectionOpts = {
   /**
    * When an error message is received from the jogging websocket, it
@@ -14,6 +15,7 @@ export type JoggerConnectionOpts = {
   onError?: (err: unknown) => void
 }
 
+/** @deprecated */
 export class JoggerConnection {
   // Currently a separate websocket is needed for each mode, pester API people
   // to merge these for simplicity
