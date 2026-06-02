@@ -4,6 +4,13 @@
 // #region Types
 export type NovaAPIClient = InstanceType<typeof NovaAPIClient>;
 export type NovaClientConfig = {
+  instanceUrl: string | "https://mock.example.com";
+  cellId?: string;
+  username?: string;
+  password?: string;
+  accessToken?: string;
+} & Omit<Configuration, "isJsonMime" | "basePath">;
+export type NovaConfig = {
   instanceUrl: string;
   accessToken?: string;
 } & Omit<Configuration, "isJsonMime" | "basePath">;
@@ -14,12 +21,12 @@ export type WithUnwrappedAxiosResponse<T> = { [P in keyof T]: UnwrapAxiosRespons
 // #region Classes
 export declare class Nova {
   readonly api: NovaAPIClient;
-  readonly config: NovaClientConfig;
+  readonly config: NovaConfig;
   readonly mock?: MockNovaInstance;
   readonly instanceUrl: URL;
   authPromise: Promise<string | null> | null;
   accessToken: string | null;
-  constructor(_: NovaClientConfig);
+  constructor(_: NovaConfig);
   renewAuthentication(): Promise<void>;
   makeWebsocketURL(_: string): string;
   openReconnectingWebsocket(_: string): AutoReconnectingWebsocket;
@@ -70,7 +77,7 @@ export declare class NovaClient {
   readonly instanceUrl: URL;
   authPromise: Promise<string | null> | null;
   accessToken: string | null;
-  constructor(_: NovaClientConfig$1);
+  constructor(_: NovaClientConfig);
   renewAuthentication(): Promise<void>;
   makeWebsocketURL(_: string): string;
   openReconnectingWebsocket(_: string): AutoReconnectingWebsocket;
