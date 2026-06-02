@@ -1,7 +1,7 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: dynamic API class discovery
 import * as novaApiV2 from "@wandelbots/nova-api/v2"
 import { expect, test } from "vitest"
-import { NovaCellAPIClient } from "../../src/lib/v2/NovaCellAPIClient"
+import { NovaCellAPIClient } from "../../src/lib/deprecated/v2/NovaCellAPIClient"
 
 /**
  * This test ensures that every API class exported from @wandelbots/nova-api/v2

@@ -7,7 +7,7 @@ import { loginWithAuth0 } from "../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
 import { parseNovaInstanceUrl } from "../converters"
-import { NovaCellAPIClient } from "../deprecated/v2/NovaCellAPIClient"
+import { NovaAPIClient } from "./NovaAPIClient"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
 
 export type NovaClientConfig = {
@@ -16,6 +16,11 @@ export type NovaClientConfig = {
    * e.g. https://saeattii.instance.wandelbots.io
    */
   instanceUrl: string
+
+  /**
+   * Id of the cell to connect to
+   */
+  cellId: string
 
   /**
    * Access token for Bearer authentication.
@@ -30,7 +35,7 @@ export type NovaClientConfig = {
  * Client for connecting to a NOVA instance and controlling robots.
  */
 export class Nova {
-  readonly api: NovaCellAPIClient
+  readonly api: NovaAPIClient
   readonly config: NovaClientConfig
   readonly mock?: MockNovaInstance
   readonly instanceUrl: URL
@@ -111,7 +116,7 @@ export class Nova {
       )
     }
 
-    this.api = new NovaCellAPIClient(cellId, {
+    this.api = new NovaAPIClient(this.config.cellId, {
       ...config,
       basePath: urlJoin(this.instanceUrl.href, "/api/v2"),
       isJsonMime: (mime: string) => {

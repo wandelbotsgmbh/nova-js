@@ -43,7 +43,7 @@ type UnwrapAxiosResponseReturn<T> = T extends (...a: any) => any
     ) => Promise<Awaited<ReturnType<T>> extends { data: infer D } ? D : never>
   : never
 
-export type WithUnwrappedAxiosResponse<T> = {
+type WithUnwrappedAxiosResponse<T> = {
   [P in keyof T]: UnwrapAxiosResponseReturn<T[P]>
 }
 
