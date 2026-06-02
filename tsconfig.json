@@ -10,6 +10,7 @@
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "outDir": "dist",
+    "rootDir": "src",
     "declaration": true,
     // Enables "Go to Definition" when dist and src are distributed together
     "declarationMap": true,

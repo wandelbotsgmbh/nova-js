@@ -36,7 +36,6 @@ type ApiConstructors = {
  * e.g. "BUSInputsOutputs" -> "busInputsOutputs", "NOVACloud" -> "novaCloud",
  *      "Application" -> "application"
  */
-// prettier-ignore
 type CamelCase<S extends string> =
   S extends `${Uppercase<infer A>}${Uppercase<infer B>}${infer Rest}`
     ? Rest extends `${Lowercase<string>}${string}`
