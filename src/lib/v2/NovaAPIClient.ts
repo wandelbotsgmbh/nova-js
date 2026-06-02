@@ -6,7 +6,8 @@ import * as novaApiV2 from "@wandelbots/nova-api/v2"
 import type { AxiosInstance } from "axios"
 import axios from "axios"
 
-type UnwrapAxiosResponseReturn<T> = T extends (...a: unknown[]) => unknown[]
+// biome-ignore lint/suspicious/noExplicitAny: metamagic
+type UnwrapAxiosResponseReturn<T> = T extends (...a: any[]) => any
   ? (
       ...a: Parameters<T>
     ) => Promise<Awaited<ReturnType<T>> extends { data: infer D } ? D : never>
@@ -46,15 +47,13 @@ type CamelCase<S extends string> =
 /**
  * Maps API class names to property names by stripping "Api" and converting
  * the leading acronym to lowercase camelCase.
- *
- * Properties are auto-discovered from the upstream package at runtime,
- * so new API sections are available immediately without code changes.
  */
 type ApiProperties = {
   readonly [K in keyof ApiConstructors as K extends `${infer P}Api`
     ? CamelCase<P>
     : never]: ApiConstructors[K] extends new (
-    ...args: unknown[]
+    // biome-ignore lint/suspicious/noExplicitAny: needed for contravariant parameter matching
+    ...args: any[]
   ) => infer I
     ? WithUnwrappedAxiosResponse<I>
     : never
