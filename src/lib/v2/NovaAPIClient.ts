@@ -44,13 +44,18 @@ type CamelCase<S extends string> =
       : `${Lowercase<A>}${CamelCase<`${Uppercase<B>}${Rest}`>}`
     : Uncapitalize<S>
 
+/** Shorten e.g. "controllerInputsOutputs" -> "controllerIOs" */
+type AliasPropName<S extends string> = S extends `${infer Prefix}InputsOutputs`
+  ? `${Prefix}IOs`
+  : S
+
 /**
  * Maps API class names to property names by stripping "Api" and converting
  * the leading acronym to lowercase camelCase.
  */
 type ApiProperties = {
   readonly [K in keyof ApiConstructors as K extends `${infer P}Api`
-    ? CamelCase<P>
+    ? AliasPropName<CamelCase<P>>
     : never]: ApiConstructors[K] extends new (
     // biome-ignore lint/suspicious/noExplicitAny: needed for contravariant parameter matching
     ...args: any[]
@@ -138,8 +143,9 @@ export const NovaAPIClient = class NovaAPIClient {
         }
         // If multiple uppercase chars, keep the last one uppercase (it starts the next word)
         const boundary = i > 1 ? i - 1 : i
-        const propName =
+        let propName =
           stripped.slice(0, boundary).toLowerCase() + stripped.slice(boundary)
+        propName = propName.replace(/InputsOutputs$/, "IOs")
         // biome-ignore lint/suspicious/noExplicitAny: dynamically assigning discovered API properties
         ;(this as any)[propName] = wrapApi(value, opts)
       }
