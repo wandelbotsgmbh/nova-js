@@ -1,5 +1,5 @@
+import { NovaClient } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
-import { NovaClient } from "../../dist/lib/v2"
 
 test("websocket handling", async () => {
   const nova = new NovaClient({

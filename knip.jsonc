@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
   // Used by semantic-release in CI
-  "ignoreDependencies": ["conventional-changelog-conventionalcommits"]
+  "ignoreDependencies": ["conventional-changelog-conventionalcommits"],
+  "ignore": ["__snapshots__/**"]
 }
