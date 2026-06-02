@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
@@ -16,11 +15,6 @@ export type NovaClientConfig = {
    * e.g. https://saeattii.instance.wandelbots.io
    */
   instanceUrl: string
-
-  /**
-   * Id of the cell to connect to
-   */
-  cellId: string
 
   /**
    * Access token for Bearer authentication.
@@ -116,7 +110,7 @@ export class Nova {
       )
     }
 
-    this.api = new NovaAPIClient(this.config.cellId, {
+    this.api = new NovaAPIClient({
       ...config,
       basePath: urlJoin(this.instanceUrl.href, "/api/v2"),
       isJsonMime: (mime: string) => {
@@ -126,6 +120,7 @@ export class Nova {
         ...(this.mock
           ? ({
               adapter: (config) => {
+                // biome-ignore lint/style/noNonNullAssertion: guarded by ternary condition
                 return this.mock!.handleAPIRequest(config)
               },
             } satisfies AxiosRequestConfig)
@@ -165,13 +160,7 @@ export class Nova {
   }
 
   makeWebsocketURL(path: string): string {
-    const url = new URL(
-      urlJoin(
-        this.instanceUrl.href,
-        `/api/v2/cells/${this.config.cellId}`,
-        path,
-      ),
-    )
+    const url = new URL(urlJoin(this.instanceUrl.href, `/api/v2`, path))
     url.protocol = url.protocol.replace("http", "ws")
     url.protocol = url.protocol.replace("https", "wss")
 
