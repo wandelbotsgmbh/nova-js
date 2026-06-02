@@ -38,9 +38,6 @@ importers:
       three:
         specifier: ^0.183.2
         version: 0.183.2
-      url-join:
-        specifier: ^5.0.0
-        version: 5.0.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.4.15

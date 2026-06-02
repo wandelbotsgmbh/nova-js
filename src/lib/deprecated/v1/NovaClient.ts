@@ -6,11 +6,11 @@
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v1"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import urlJoin from "url-join"
 import { loginWithAuth0 } from "../../../LoginWithAuth0.js"
 import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.js"
 import { availableStorage } from "../../availableStorage.js"
 import { parseNovaInstanceUrl } from "../../converters.js"
+
 import { ConnectedMotionGroup } from "./ConnectedMotionGroup.js"
 import { JoggerConnection } from "./JoggerConnection.js"
 import { MotionStreamConnection } from "./MotionStreamConnection.js"
@@ -81,7 +81,7 @@ export class NovaClient {
 
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
-      baseURL: urlJoin(this.config.instanceUrl, "/api/v1"),
+      baseURL: new URL("/api/v1", this.config.instanceUrl).href,
       // TODO - backend needs to set proper CORS headers for this
       headers:
         typeof window !== "undefined" &&
@@ -143,7 +143,7 @@ export class NovaClient {
 
     this.api = new NovaCellAPIClient(cellId, {
       ...config,
-      basePath: urlJoin(this.instanceUrl.href, "/api/v1"),
+      basePath: new URL("/api/v1", this.instanceUrl).href,
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -192,11 +192,10 @@ export class NovaClient {
 
   makeWebsocketURL(path: string): string {
     const url = new URL(
-      urlJoin(
-        this.instanceUrl.href,
-        `/api/v1/cells/${this.config.cellId}`,
-        path,
-      ),
+      new URL(
+        `/api/v1/cells/${this.config.cellId}/${path.replace(/^\/+/, "")}`,
+        this.instanceUrl,
+      ).href,
     )
     url.protocol = url.protocol.replace("http", "ws")
     url.protocol = url.protocol.replace("https", "wss")
