@@ -60,8 +60,8 @@ test("NovaAPIClient uses camelCase property names", () => {
   })
 
   // Verify key properties resolve on the type
-  nova.api.controllerInputsOutputs satisfies object
-  nova.api.busInputsOutputs satisfies object
-  nova.api.virtualControllerInputsOutputs satisfies object
+  nova.api.controllerIOs satisfies object
+  nova.api.busIOs satisfies object
+  nova.api.virtualControllerIOs satisfies object
   nova.api.novaCloud satisfies object
 })

@@ -33,10 +33,10 @@ export declare class Nova {
 export declare class NovaAPIClient {
   readonly opts: NovaAPIClientOpts;
   readonly application: WithUnwrappedAxiosResponse$1<ApplicationApi>;
-  readonly busInputsOutputs: WithUnwrappedAxiosResponse$1<BUSInputsOutputsApi>;
+  readonly busIOs: WithUnwrappedAxiosResponse$1<BUSInputsOutputsApi>;
   readonly cell: WithUnwrappedAxiosResponse$1<CellApi>;
   readonly controller: WithUnwrappedAxiosResponse$1<ControllerApi>;
-  readonly controllerInputsOutputs: WithUnwrappedAxiosResponse$1<ControllerInputsOutputsApi>;
+  readonly controllerIOs: WithUnwrappedAxiosResponse$1<ControllerInputsOutputsApi>;
   readonly jogging: WithUnwrappedAxiosResponse$1<JoggingApi>;
   readonly kinematics: WithUnwrappedAxiosResponse$1<KinematicsApi>;
   readonly license: WithUnwrappedAxiosResponse$1<LicenseApi>;
@@ -56,7 +56,7 @@ export declare class NovaAPIClient {
   readonly version: WithUnwrappedAxiosResponse$1<VersionApi>;
   readonly virtualController: WithUnwrappedAxiosResponse$1<VirtualControllerApi>;
   readonly virtualControllerBehavior: WithUnwrappedAxiosResponse$1<VirtualControllerBehaviorApi>;
-  readonly virtualControllerInputsOutputs: WithUnwrappedAxiosResponse$1<VirtualControllerInputsOutputsApi>;
+  readonly virtualControllerIOs: WithUnwrappedAxiosResponse$1<VirtualControllerInputsOutputsApi>;
   constructor(_: NovaAPIClientOpts);
 }
 export declare class NovaCellAPIClient {
