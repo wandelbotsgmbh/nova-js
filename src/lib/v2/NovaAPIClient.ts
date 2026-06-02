@@ -40,23 +40,21 @@ type ApiConstructors = {
 type CamelCase<S extends string> =
   S extends `${Uppercase<infer A>}${Uppercase<infer B>}${infer Rest}`
     ? Rest extends `${Lowercase<string>}${string}`
-      ? `${Lowercase<A>}${CamelCase<`${Uppercase<B>}${Rest}`>}`
+      ? `${Lowercase<A>}${Uppercase<B>}${CamelCase<Rest>}`
       : `${Lowercase<A>}${CamelCase<`${Uppercase<B>}${Rest}`>}`
     : Uncapitalize<S>
-
-/** Shorten e.g. "controllerInputsOutputs" -> "controllerIOs" */
-type AliasPropName<S extends string> = S extends `${infer Prefix}InputsOutputs`
-  ? `${Prefix}IOs`
-  : S
 
 /**
  * Maps API class names to property names by stripping "Api" and converting
  * the leading acronym to lowercase camelCase.
+ * Names ending in "InputsOutputsApi" are aliased to "IOs" suffix.
  */
 type ApiProperties = {
-  readonly [K in keyof ApiConstructors as K extends `${infer P}Api`
-    ? AliasPropName<CamelCase<P>>
-    : never]: ApiConstructors[K] extends new (
+  readonly [K in keyof ApiConstructors as K extends `${infer P}InputsOutputsApi`
+    ? `${CamelCase<P>}IOs`
+    : K extends `${infer P}Api`
+      ? CamelCase<P>
+      : never]: ApiConstructors[K] extends new (
     // biome-ignore lint/suspicious/noExplicitAny: needed for contravariant parameter matching
     ...args: any[]
   ) => infer I

@@ -53,3 +53,30 @@ test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => 
     `NovaAPIClient is missing wrappers for: ${missingApis.join(", ")}`,
   ).toEqual([])
 })
+
+test("NovaAPIClient aliases InputsOutputs to IOs in property names", () => {
+  const client = new NovaAPIClient({
+    basePath: "https://mock.example.com",
+    isJsonMime: (mime: string) => mime === "application/json",
+  })
+
+  const keys = Object.keys(client)
+
+  // Should have the short aliases
+  expect(keys).toContain("controllerIOs")
+  expect(keys).toContain("busIOs")
+  expect(keys).toContain("virtualControllerIOs")
+  expect(keys).toContain("novaCloud")
+
+  // Should NOT have the long form
+  expect(keys).not.toContain("controllerInputsOutputs")
+  expect(keys).not.toContain("busInputsOutputs")
+  expect(keys).not.toContain("virtualControllerInputsOutputs")
+  expect(keys).not.toContain("NovaCloud")
+
+  // Verify the types also resolve these properties
+  client.controllerIOs satisfies object
+  client.busIOs satisfies object
+  client.virtualControllerIOs satisfies object
+  client.novaCloud satisfies object
+})
