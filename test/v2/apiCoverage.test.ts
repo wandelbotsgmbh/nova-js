@@ -27,6 +27,7 @@ test("NovaCellAPIClient covers all API classes from @wandelbots/nova-api/v2", ()
 
   const client = new NovaCellAPIClient("test-cell", {
     basePath: "https://mock.example.com",
+    isJsonMime: (mime: string) => mime === "application/json",
   })
 
   // Collect which API classes are used by the client by checking all property values

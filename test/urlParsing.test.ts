@@ -1,5 +1,9 @@
+import {
+  parseNovaInstanceUrl,
+  parseUrl,
+  tryParseUrl,
+} from "@wandelbots/nova-js"
 import { expect, test } from "vitest"
-import { parseNovaInstanceUrl, parseUrl, tryParseUrl } from "../dist"
 
 test("general URL parsing", () => {
   expect(() => parseUrl("example.com")).toThrowError()
