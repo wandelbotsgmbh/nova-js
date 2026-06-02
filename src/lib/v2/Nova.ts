@@ -9,7 +9,7 @@ import { parseNovaInstanceUrl } from "../converters"
 import { NovaAPIClient } from "./NovaAPIClient"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
 
-export type NovaClientConfig = {
+export type NovaConfig = {
   /**
    * Url of the deployed NOVA instance to connect to
    * e.g. https://saeattii.instance.wandelbots.io
@@ -30,13 +30,13 @@ export type NovaClientConfig = {
  */
 export class Nova {
   readonly api: NovaAPIClient
-  readonly config: NovaClientConfig
+  readonly config: NovaConfig
   readonly mock?: MockNovaInstance
   readonly instanceUrl: URL
   authPromise: Promise<string | null> | null = null
   accessToken: string | null = null
 
-  constructor(config: NovaClientConfig) {
+  constructor(config: NovaConfig) {
     this.config = config
     this.accessToken =
       config.accessToken ||
@@ -120,8 +120,10 @@ export class Nova {
         ...(this.mock
           ? ({
               adapter: (config) => {
-                // biome-ignore lint/style/noNonNullAssertion: guarded by ternary condition
-                return this.mock!.handleAPIRequest(config)
+                if (!this.mock) {
+                  throw new Error("Mock adapter used without a mock instance")
+                }
+                return this.mock.handleAPIRequest(config)
               },
             } satisfies AxiosRequestConfig)
           : {}),
