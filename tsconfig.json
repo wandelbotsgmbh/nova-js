@@ -16,6 +16,6 @@
     // https://github.com/microsoft/TypeScript/issues/45995
     "useDefineForClassFields": false
   },
-  "include": ["src"],
+  "include": ["src", "test", "e2e"],
   "exclude": ["node_modules"]
 }

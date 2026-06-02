@@ -1,5 +1,5 @@
+import { NovaClient } from "@wandelbots/nova-js/v1"
 import { expect, test } from "vitest"
-import { NovaClient } from "../../../dist/lib/deprecated/v1"
 
 test("jogging", async () => {
   const nova = new NovaClient({

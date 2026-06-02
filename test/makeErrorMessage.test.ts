@@ -1,6 +1,6 @@
+import { makeErrorMessage } from "@wandelbots/nova-js"
 import axios, { AxiosError, AxiosHeaders } from "axios"
 import { expect, test } from "vitest"
-import { makeErrorMessage } from "../dist"
 
 test("making useful error messages", async () => {
   // Error objects take the message
