@@ -54,28 +54,27 @@ test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => 
   ).toEqual([])
 })
 
-test("NovaAPIClient aliases InputsOutputs to IOs in property names", () => {
+test("NovaAPIClient uses camelCase property names", () => {
   const nova = new Nova({
     instanceUrl: "https://mock.example.com",
   })
 
   const keys = Object.keys(nova.api)
 
-  // Should have the short aliases
-  expect(keys).toContain("controllerIOs")
-  expect(keys).toContain("busIOs")
-  expect(keys).toContain("virtualControllerIOs")
+  // Should have camelCase names (acronyms lowercased)
+  expect(keys).toContain("controllerInputsOutputs")
+  expect(keys).toContain("busInputsOutputs")
+  expect(keys).toContain("virtualControllerInputsOutputs")
   expect(keys).toContain("novaCloud")
 
-  // Should NOT have the long form
-  expect(keys).not.toContain("controllerInputsOutputs")
-  expect(keys).not.toContain("busInputsOutputs")
-  expect(keys).not.toContain("virtualControllerInputsOutputs")
-  expect(keys).not.toContain("NovaCloud")
+  // Should NOT have the raw PascalCase form
+  expect(keys).not.toContain("ControllerInputsOutputs")
+  expect(keys).not.toContain("BUSInputsOutputs")
+  expect(keys).not.toContain("NOVACloud")
 
   // Verify the types also resolve these properties
-  nova.api.controllerIOs satisfies object
-  nova.api.busIOs satisfies object
-  nova.api.virtualControllerIOs satisfies object
+  nova.api.controllerInputsOutputs satisfies object
+  nova.api.busInputsOutputs satisfies object
+  nova.api.virtualControllerInputsOutputs satisfies object
   nova.api.novaCloud satisfies object
 })
