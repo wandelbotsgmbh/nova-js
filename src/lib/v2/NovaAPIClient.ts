@@ -2,7 +2,33 @@ import type {
   BaseAPI,
   Configuration as BaseConfiguration,
 } from "@wandelbots/nova-api/v2"
-import * as novaApiV2 from "@wandelbots/nova-api/v2"
+import {
+  ApplicationApi,
+  BUSInputsOutputsApi,
+  CellApi,
+  ControllerApi,
+  ControllerInputsOutputsApi,
+  JoggingApi,
+  KinematicsApi,
+  LicenseApi,
+  MotionGroupApi,
+  MotionGroupModelsApi,
+  NOVACloudApi,
+  ProgramApi,
+  RobotConfigurationsApi,
+  SessionApi,
+  StoreCollisionComponentsApi,
+  StoreCollisionSetupsApi,
+  StoreObjectApi,
+  SystemApi,
+  TrajectoryCachingApi,
+  TrajectoryExecutionApi,
+  TrajectoryPlanningApi,
+  VersionApi,
+  VirtualControllerApi,
+  VirtualControllerBehaviorApi,
+  VirtualControllerInputsOutputsApi,
+} from "@wandelbots/nova-api/v2"
 import type { AxiosInstance } from "axios"
 import axios from "axios"
 
@@ -17,68 +43,9 @@ type WithUnwrappedAxiosResponse<T> = {
   [P in keyof T]: UnwrapAxiosResponseReturn<T[P]>
 }
 
-/**
- * Filters nova-api/v2 exports to just the API class constructors,
- * excluding helper factories and param creators.
- */
-type ApiConstructors = {
-  [K in keyof typeof novaApiV2 as K extends `${string}Api`
-    ? K extends
-        | `${string}Factory${string}`
-        | `${string}Fp${string}`
-        | `${string}ParamCreator${string}`
-      ? never
-      : K
-    : never]: (typeof novaApiV2)[K]
-}
-
-/**
- * Lowercases leading uppercase characters to produce a camelCase property name.
- * e.g. "BUSInputsOutputs" -> "busInputsOutputs", "NOVACloud" -> "novaCloud",
- *      "Application" -> "application"
- */
-type CamelCase<S extends string> =
-  S extends `${Uppercase<infer A>}${Uppercase<infer B>}${infer Rest}`
-    ? Rest extends `${Lowercase<string>}${string}`
-      ? `${Lowercase<A>}${Uppercase<B>}${CamelCase<Rest>}`
-      : `${Lowercase<A>}${CamelCase<`${Uppercase<B>}${Rest}`>}`
-    : Uncapitalize<S>
-
-/**
- * Maps API class names to property names by stripping "Api" and converting
- * the leading acronym to lowercase camelCase.
- */
-type ApiProperties = {
-  readonly [K in keyof ApiConstructors as K extends `${infer P}Api`
-    ? CamelCase<P>
-    : never]: ApiConstructors[K] extends new (
-    // biome-ignore lint/suspicious/noExplicitAny: needed for contravariant parameter matching
-    ...args: any[]
-  ) => infer I
-    ? WithUnwrappedAxiosResponse<I>
-    : never
-}
-
 type NovaAPIClientOpts = BaseConfiguration & {
   axiosInstance?: AxiosInstance
   mock?: boolean
-}
-
-function isApiClass(
-  name: string,
-  value: unknown,
-): value is new (
-  config: BaseConfiguration,
-  basePath: string,
-  axios: AxiosInstance,
-) => BaseAPI {
-  return (
-    name.endsWith("Api") &&
-    typeof value === "function" &&
-    !name.includes("Factory") &&
-    !name.includes("Fp") &&
-    !name.includes("ParamCreator")
-  )
 }
 
 function wrapApi<T extends BaseAPI>(
@@ -115,43 +82,64 @@ function wrapApi<T extends BaseAPI>(
 
 /**
  * API client providing type-safe access to all the endpoints of a NOVA
- * instance. API sections are auto-discovered from @wandelbots/nova-api/v2
- * at runtime, so new sections added upstream are exposed automatically.
+ * instance.
  */
-export const NovaAPIClient = class NovaAPIClient {
+export class NovaAPIClient {
   readonly opts: NovaAPIClientOpts
+
+  readonly application: WithUnwrappedAxiosResponse<ApplicationApi>
+  readonly busIOs: WithUnwrappedAxiosResponse<BUSInputsOutputsApi>
+  readonly cell: WithUnwrappedAxiosResponse<CellApi>
+  readonly controller: WithUnwrappedAxiosResponse<ControllerApi>
+  readonly controllerIOs: WithUnwrappedAxiosResponse<ControllerInputsOutputsApi>
+  readonly jogging: WithUnwrappedAxiosResponse<JoggingApi>
+  readonly kinematics: WithUnwrappedAxiosResponse<KinematicsApi>
+  readonly license: WithUnwrappedAxiosResponse<LicenseApi>
+  readonly motionGroup: WithUnwrappedAxiosResponse<MotionGroupApi>
+  readonly motionGroupModels: WithUnwrappedAxiosResponse<MotionGroupModelsApi>
+  readonly novaCloud: WithUnwrappedAxiosResponse<NOVACloudApi>
+  readonly program: WithUnwrappedAxiosResponse<ProgramApi>
+  readonly robotConfigurations: WithUnwrappedAxiosResponse<RobotConfigurationsApi>
+  readonly session: WithUnwrappedAxiosResponse<SessionApi>
+  readonly storeCollisionComponents: WithUnwrappedAxiosResponse<StoreCollisionComponentsApi>
+  readonly storeCollisionSetups: WithUnwrappedAxiosResponse<StoreCollisionSetupsApi>
+  readonly storeObject: WithUnwrappedAxiosResponse<StoreObjectApi>
+  readonly system: WithUnwrappedAxiosResponse<SystemApi>
+  readonly trajectoryCaching: WithUnwrappedAxiosResponse<TrajectoryCachingApi>
+  readonly trajectoryExecution: WithUnwrappedAxiosResponse<TrajectoryExecutionApi>
+  readonly trajectoryPlanning: WithUnwrappedAxiosResponse<TrajectoryPlanningApi>
+  readonly version: WithUnwrappedAxiosResponse<VersionApi>
+  readonly virtualController: WithUnwrappedAxiosResponse<VirtualControllerApi>
+  readonly virtualControllerBehavior: WithUnwrappedAxiosResponse<VirtualControllerBehaviorApi>
+  readonly virtualControllerIOs: WithUnwrappedAxiosResponse<VirtualControllerInputsOutputsApi>
 
   constructor(opts: NovaAPIClientOpts) {
     this.opts = opts
 
-    for (const [name, value] of Object.entries(novaApiV2)) {
-      if (isApiClass(name, value)) {
-        const stripped = name.slice(0, -3)
-        // Lowercase leading acronym run: "BUSInputsOutputs" -> "busInputsOutputs"
-        let i = 0
-        while (
-          i < stripped.length &&
-          stripped[i] === stripped[i].toUpperCase() &&
-          stripped[i] !== stripped[i].toLowerCase()
-        ) {
-          i++
-        }
-        // If multiple uppercase chars, keep the last one uppercase (it starts the next word)
-        const boundary = i > 1 ? i - 1 : i
-        const propName =
-          stripped.slice(0, boundary).toLowerCase() + stripped.slice(boundary)
-        // biome-ignore lint/suspicious/noExplicitAny: dynamically assigning discovered API properties
-        ;(this as any)[propName] = wrapApi(value, opts)
-      }
-    }
-  }
-} as {
-  new (
-    opts: NovaAPIClientOpts,
-  ): ApiProperties & {
-    readonly cellId: string
-    readonly opts: NovaAPIClientOpts
+    this.application = wrapApi(ApplicationApi, opts)
+    this.busIOs = wrapApi(BUSInputsOutputsApi, opts)
+    this.cell = wrapApi(CellApi, opts)
+    this.controller = wrapApi(ControllerApi, opts)
+    this.controllerIOs = wrapApi(ControllerInputsOutputsApi, opts)
+    this.jogging = wrapApi(JoggingApi, opts)
+    this.kinematics = wrapApi(KinematicsApi, opts)
+    this.license = wrapApi(LicenseApi, opts)
+    this.motionGroup = wrapApi(MotionGroupApi, opts)
+    this.motionGroupModels = wrapApi(MotionGroupModelsApi, opts)
+    this.novaCloud = wrapApi(NOVACloudApi, opts)
+    this.program = wrapApi(ProgramApi, opts)
+    this.robotConfigurations = wrapApi(RobotConfigurationsApi, opts)
+    this.session = wrapApi(SessionApi, opts)
+    this.storeCollisionComponents = wrapApi(StoreCollisionComponentsApi, opts)
+    this.storeCollisionSetups = wrapApi(StoreCollisionSetupsApi, opts)
+    this.storeObject = wrapApi(StoreObjectApi, opts)
+    this.system = wrapApi(SystemApi, opts)
+    this.trajectoryCaching = wrapApi(TrajectoryCachingApi, opts)
+    this.trajectoryExecution = wrapApi(TrajectoryExecutionApi, opts)
+    this.trajectoryPlanning = wrapApi(TrajectoryPlanningApi, opts)
+    this.version = wrapApi(VersionApi, opts)
+    this.virtualController = wrapApi(VirtualControllerApi, opts)
+    this.virtualControllerBehavior = wrapApi(VirtualControllerBehaviorApi, opts)
+    this.virtualControllerIOs = wrapApi(VirtualControllerInputsOutputsApi, opts)
   }
 }
-
-export type NovaAPIClient = InstanceType<typeof NovaAPIClient>

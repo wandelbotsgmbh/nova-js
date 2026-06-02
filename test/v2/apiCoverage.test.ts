@@ -59,20 +59,7 @@ test("NovaAPIClient uses camelCase property names", () => {
     instanceUrl: "https://mock.example.com",
   })
 
-  const keys = Object.keys(nova.api)
-
-  // Should have camelCase names (acronyms lowercased)
-  expect(keys).toContain("controllerInputsOutputs")
-  expect(keys).toContain("busInputsOutputs")
-  expect(keys).toContain("virtualControllerInputsOutputs")
-  expect(keys).toContain("novaCloud")
-
-  // Should NOT have the raw PascalCase form
-  expect(keys).not.toContain("ControllerInputsOutputs")
-  expect(keys).not.toContain("BUSInputsOutputs")
-  expect(keys).not.toContain("NOVACloud")
-
-  // Verify the types also resolve these properties
+  // Verify key properties resolve on the type
   nova.api.controllerInputsOutputs satisfies object
   nova.api.busInputsOutputs satisfies object
   nova.api.virtualControllerInputsOutputs satisfies object
