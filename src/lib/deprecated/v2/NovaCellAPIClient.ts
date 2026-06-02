@@ -18,6 +18,7 @@ import {
   NOVACloudApi,
   ProgramApi,
   RobotConfigurationsApi,
+  SessionApi,
   StoreCollisionComponentsApi,
   StoreCollisionSetupsApi,
   StoreObjectApi,
@@ -186,4 +187,5 @@ export class NovaCellAPIClient {
     RobotConfigurationsApi,
   )
   readonly version = this.withUnwrappedResponsesOnly(VersionApi)
+  readonly session = this.withUnwrappedResponsesOnly(SessionApi)
 }
