@@ -45,7 +45,6 @@ export type NovaClientConfig = {
 
   /**
    * Access token for Bearer authentication.
-   * @deprecated use accessToken instead
    */
   accessToken?: string
 } & Omit<BaseConfiguration, "isJsonMime" | "basePath">
