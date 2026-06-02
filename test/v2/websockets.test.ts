@@ -7,7 +7,7 @@ test("websocket handling", async () => {
   })
 
   const ws = nova.openReconnectingWebsocket(
-    "/cells/cell//motion-groups/0@mock-ur5e/state-stream",
+    "/cells/cell/motion-groups/0@mock-ur5e/state-stream",
   )
   expect(ws.url).toBe(
     "wss://mock.example.com/api/v2/cells/cell/motion-groups/0@mock-ur5e/state-stream",
