@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { NovaClient } from "../../dist/lib/v1"
+import { NovaClient } from "../../../dist/lib/deprecated/v1"
 
 test("websocket handling", async () => {
   const nova = new NovaClient({
