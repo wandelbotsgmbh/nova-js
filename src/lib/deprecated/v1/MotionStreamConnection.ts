@@ -7,8 +7,8 @@ import type {
 } from "@wandelbots/nova-api/v1"
 import { makeAutoObservable, runInAction } from "mobx"
 import { Vector3 } from "three"
-import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
-import { tryParseJson } from "../converters"
+import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
+import { tryParseJson } from "../../converters"
 import { jointValuesEqual, tcpPoseEqual } from "./motionStateUpdate"
 import type { NovaClient } from "./NovaClient"
 

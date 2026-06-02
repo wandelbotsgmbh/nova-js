@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { poseToWandelscriptString } from "../../dist/lib/v1"
+import { poseToWandelscriptString } from "../../../dist/lib/deprecated/v1"
 
 test("pose string has right precision", async () => {
   expect(

@@ -2,8 +2,8 @@
 import type { CollectionValue } from "@wandelbots/nova-api/v1"
 import { AxiosError } from "axios"
 import { makeAutoObservable, runInAction } from "mobx"
-import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
-import { tryParseJson } from "../converters"
+import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
+import { tryParseJson } from "../../converters"
 import type { MotionStreamConnection } from "./MotionStreamConnection"
 import type { NovaClient } from "./NovaClient"
 

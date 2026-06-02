@@ -1,7 +1,7 @@
 import type { Command, Joints, TcpPose } from "@wandelbots/nova-api/v1"
 import { Vector3 } from "three/src/math/Vector3.js"
-import type { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
-import { isSameCoordinateSystem, tryParseJson } from "../converters"
+import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
+import { isSameCoordinateSystem, tryParseJson } from "../../converters"
 import type { MotionStreamConnection } from "./MotionStreamConnection"
 import type { NovaClient } from "./NovaClient"
 

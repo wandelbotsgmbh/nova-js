@@ -1,5 +1,5 @@
 import ReconnectingWebSocket, { type ErrorEvent } from "reconnecting-websocket"
-import type * as v1 from "./v1/mock/MockNovaInstance"
+import type * as v1 from "./deprecated/v1/mock/MockNovaInstance"
 import type * as v2 from "./v2/mock/MockNovaInstance"
 
 export class AutoReconnectingWebsocket extends ReconnectingWebSocket {

@@ -11,8 +11,8 @@
       "require": "./dist/index.cjs"
     },
     "./v1": {
-      "import": "./dist/lib/v1/index.mjs",
-      "require": "./dist/lib/v1/index.cjs"
+      "import": "./dist/lib/deprecated/v1/index.mjs",
+      "require": "./dist/lib/deprecated/v1/index.cjs"
     },
     "./v2": {
       "import": "./dist/lib/v2/index.mjs",
@@ -31,7 +31,7 @@
     "lint": "biome check --error-on-warnings .",
     "format": "biome format . --write",
     "knip": "knip",
-    "build": "tsdown src/index.ts src/lib/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
+    "build": "tsdown src/index.ts src/lib/deprecated/v1/index.ts src/lib/v2/index.ts --format esm,cjs --clean --sourcemap",
     "test": "pnpm run build && vitest run",
     "e2e": "vitest run --config vitest.e2e.config.ts",
     "checks": "pnpm format && concurrently --group --timings --names audit,lint,tsc,knip,test \"pnpm audit\" \"pnpm lint\" \"pnpm tsc\" \"pnpm knip\" \"pnpm test\""
