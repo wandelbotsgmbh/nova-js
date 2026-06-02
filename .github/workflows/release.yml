@@ -146,7 +146,7 @@ jobs:
               `pnpm add @wandelbots/nova-js@${version}`,
               `\`\`\``,
               ``,
-              `> **Note:** If your project uses pnpm's \`minimumReleaseAge\` (enabled by default since pnpm v11), this freshly published snapshot will be blocked. Add the following to your \`pnpm-workspace.yaml\` to allow it:`,
+              `> **Note:** If your project uses pnpm's \`minimumReleaseAge\` (enabled by default since pnpm v11), add the following to your \`pnpm-workspace.yaml\` to allow using this snapshot:`,
               `> \`\`\`yaml`,
               `> minimumReleaseAgeExclude:`,
               `>   - "@wandelbots/nova-js"`,
