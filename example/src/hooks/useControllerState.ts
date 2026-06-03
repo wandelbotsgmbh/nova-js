@@ -1,3 +1,4 @@
+import { env } from "@/runtimeEnv.ts"
 import { tryParseJson } from "@wandelbots/nova-js"
 import type { RobotControllerState } from "@wandelbots/nova-js/v2"
 import { useEffect, useState } from "react"
@@ -25,7 +26,7 @@ export function useControllerState(controller: string) {
     // If you are doing animations which require higher update rates, you may
     // want to structure this a bit differently.
     const socket = nova.openReconnectingWebsocket(
-      `/controllers/${controller}/state-stream?response_rate=200`,
+      `/cells/${env.CELL_ID || "cell"}/controllers/${controller}/state-stream?response_rate=200`,
     )
 
     socket.addEventListener("message", (event) => {
