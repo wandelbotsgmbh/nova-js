@@ -15,15 +15,17 @@ If you develop a React application we also provide a set of [React components](h
 
 ## Basic usage
 
-The core of this package is the `NovaClient`, which represents a connection to a configured robot cell on a given NOVA instance:
+The core of this package is the `Nova` client, which represents a connection to a given NOVA instance:
 
 ```ts
-import { NovaClient } from "@wandelbots/nova-js/v2"
+import { Nova } from "@wandelbots/nova-js/v2"
 
-const nova = new NovaClient({
+const nova = new Nova({
   instanceUrl: "https://example.instance.wandelbots.io",
-  cellId: "cell",
+
   // Access token is given in the developer portal UI when you create an instance
+  // This can be omitted when the frontend is hosted by the instance itself
+  // (i.e. when running as a NOVA app)
   accessToken: "...",
 })
 ```
@@ -35,7 +37,7 @@ You can make calls to the REST API via `nova.api`, which contains a bunch of nam
 For example, to list the controllers configured in your cell:
 
 ```ts
-const controllerIds = await nova.api.controller.listRobotControllers()
+const controllerIds = await nova.api.controller.listRobotControllers("cell")
 // -> e.g. ["ur5e", ...]
 ```
 
@@ -43,12 +45,11 @@ Documentation for the various API endpoints is available on your Nova instance a
 
 ## Opening websockets
 
-`NovaClient` has various convenience features for websocket handling in general. Use `openReconnectingWebsocket` to get a persistent socket for a given Nova streaming endpoint that will handle unexpected closes with exponential backoff:
-
+`Nova` has various convenience features for websocket handling in general. Use `openReconnectingWebsocket` to get a persistent socket for a given Nova streaming endpoint that will handle unexpected closes with exponential backoff:
 ```ts
-const programStateSocket = nova.openReconnectingWebsocket(`/programs/state`)
+const joggingWebsocket = nova.openReconnectingWebsocket(`/cells/cell/controllers/ur5e/execution/jogging`)
 
-this.programStateSocket.addEventListener("message", (ev) => {
+joggingWebsocket.addEventListener("message", (ev) => {
   console.log(ev.data)
 })
 ```
@@ -56,10 +57,8 @@ this.programStateSocket.addEventListener("message", (ev) => {
 Websockets on a given NOVA client are deduplicated by path, so if you call `openReconnectingWebsocket` twice with the same path you'll get the same object. The exception is if you called `dispose`, which you may do to permanently clean up a reconnecting websocket and free its resources:
 
 ```ts
-programStateSocket.dispose()
+joggingWebsocket.dispose()
 ```
-
-The reconnecting websocket interface is fairly low-level and you won't get type safety on the messages. So when available, you'll likely want to use one of the following endpoint-specific abstractions instead which are built on top!
 
 ## Contributing
 

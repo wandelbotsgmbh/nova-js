@@ -1,14 +1,14 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: dynamic API class discovery
 import * as novaApiV2 from "@wandelbots/nova-api/v2"
-import { Nova, NovaAPIClient } from "@wandelbots/nova-js/v2"
+import { NovaCellAPIClient } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
 
 /**
  * This test ensures that every API class exported from @wandelbots/nova-api/v2
- * is wrapped by NovaAPIClient. If a new API is added to the upstream
+ * is wrapped by NovaCellAPIClient. If a new API is added to the upstream
  * package without being exposed here, this test will fail.
  */
-test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => {
+test("NovaCellAPIClient covers all API classes from @wandelbots/nova-api/v2", () => {
   const allApiClassNames = Object.entries(novaApiV2)
     .filter(
       ([name, value]) =>
@@ -25,7 +25,7 @@ test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => 
   // Sanity check that we actually found some API classes
   expect(allApiClassNames.length).toBeGreaterThan(10)
 
-  const client = new NovaAPIClient({
+  const client = new NovaCellAPIClient("test-cell", {
     basePath: "https://mock.example.com",
     isJsonMime: (mime: string) => mime === "application/json",
   })
@@ -35,6 +35,8 @@ test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => 
   for (const key of Object.keys(client)) {
     const value = (client as any)[key]
     if (value && typeof value === "object") {
+      // The wrapped API instances have their constructor name mangled,
+      // but we can check against the original constructors
       for (const apiClassName of allApiClassNames) {
         const ApiClass = (novaApiV2 as any)[apiClassName]
         if (value instanceof ApiClass) {
@@ -50,18 +52,6 @@ test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => 
 
   expect(
     missingApis,
-    `NovaAPIClient is missing wrappers for: ${missingApis.join(", ")}`,
+    `NovaCellAPIClient is missing wrappers for: ${missingApis.join(", ")}`,
   ).toEqual([])
-})
-
-test("NovaAPIClient uses camelCase property names", () => {
-  const nova = new Nova({
-    instanceUrl: "https://mock.example.com",
-  })
-
-  // Verify key properties resolve on the type
-  nova.api.controllerIOs satisfies object
-  nova.api.busIOs satisfies object
-  nova.api.virtualControllerIOs satisfies object
-  nova.api.novaCloud satisfies object
 })

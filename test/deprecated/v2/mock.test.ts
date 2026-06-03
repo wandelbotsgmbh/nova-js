@@ -1,8 +1,8 @@
-import { Nova } from "@wandelbots/nova-js/v2"
+import { NovaClient } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
 
 test("getMotionGroupKinematicModel", async () => {
-  const nova = new Nova({
+  const nova = new NovaClient({
     instanceUrl: "https://mock.example.com",
   })
 
@@ -12,9 +12,11 @@ test("getMotionGroupKinematicModel", async () => {
 })
 
 test("mock correctly reports missing functionality", async () => {
-  const nova = new Nova({
+  const nova = new NovaClient({
     instanceUrl: "https://mock.example.com",
   })
+
+  // Something we don't have a mock for yet, to see what error we get
 
   await expect(
     nova.api.motionGroupModels.getMotionGroupCollisionModel("0@mock-ur5e"),
@@ -24,12 +26,12 @@ test("mock correctly reports missing functionality", async () => {
 })
 
 test("mock correctly handles query parameters", async () => {
-  const nova = new Nova({
+  const nova = new NovaClient({
     instanceUrl: "https://mock.example.com",
   })
 
+  // this endpoint uses a query parameter
   const data = await nova.api.controller.listCoordinateSystems(
-    "cell",
     "0@mock-ur5e",
     "ROTATION_VECTOR",
   )

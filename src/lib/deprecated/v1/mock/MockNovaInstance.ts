@@ -12,6 +12,7 @@ import type { AutoReconnectingWebsocket } from "../../../AutoReconnectingWebsock
 
 /**
  * Ultra-simplified mock Nova server for testing stuff
+ * @deprecated
  */
 export class MockNovaInstance {
   readonly connections: AutoReconnectingWebsocket[] = []

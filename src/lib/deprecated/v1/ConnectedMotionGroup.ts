@@ -19,12 +19,14 @@ import type { NovaClient } from "./NovaClient"
 
 const MOTION_DELTA_THRESHOLD = 0.0001
 
+/** @deprecated */
 export type MotionGroupOption = {
   selectionId: string
 } & MotionGroupPhysical
 
 /**
  * Store representing the current state of a connected motion group.
+ * @deprecated
  */
 export class ConnectedMotionGroup {
   static async connect(

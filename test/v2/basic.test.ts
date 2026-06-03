@@ -1,12 +1,10 @@
-import { NovaClient } from "@wandelbots/nova-js/v2"
-import { expect, test } from "vitest"
+import { Nova } from "@wandelbots/nova-js/v2"
+import { test } from "vitest"
 
 test("things compile and initialize", async () => {
-  const nova = new NovaClient({
+  const nova = new Nova({
     instanceUrl: "https://mock.example.com",
   })
 
-  expect(nova.config.cellId).toBe("cell")
-
-  await nova.api.controller.listRobotControllers()
+  await nova.api.controller.listRobotControllers("cell")
 })

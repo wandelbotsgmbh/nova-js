@@ -74,7 +74,6 @@
     "mobx": "^6.15.0",
     "path-to-regexp": "^8.4.0",
     "reconnecting-websocket": "^4.4.0",
-    "three": "^0.183.2",
-    "url-join": "^5.0.0"
+    "three": "^0.183.2"
   }
 }

@@ -2,14 +2,15 @@
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import urlJoin from "url-join"
-import { loginWithAuth0 } from "../../LoginWithAuth0"
-import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
-import { availableStorage } from "../availableStorage"
-import { parseNovaInstanceUrl } from "../converters"
-import { MockNovaInstance } from "./mock/MockNovaInstance"
+import { loginWithAuth0 } from "../../../LoginWithAuth0"
+import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
+import { availableStorage } from "../../availableStorage"
+import { parseNovaInstanceUrl } from "../../converters"
+
+import { MockNovaInstance } from "../../v2/mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
+/** @deprecated Use `NovaClientConfig` from `Nova` instead. */
 export type NovaClientConfig = {
   /**
    * Url of the deployed Nova instance to connect to
@@ -44,8 +45,8 @@ export type NovaClientConfig = {
 type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
 
 /**
- *
  * Client for connecting to a Nova instance and controlling robots.
+ * @deprecated Use `Nova` from `@wandelbots/nova-js/v2` instead.
  */
 export class NovaClient {
   readonly api: NovaCellAPIClient
@@ -73,7 +74,7 @@ export class NovaClient {
 
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
-      baseURL: urlJoin(this.instanceUrl.href, "/api/v2"),
+      baseURL: new URL("/api/v2", this.instanceUrl).href,
       // TODO - backend needs to set proper CORS headers for this
       headers:
         typeof window !== "undefined" &&
@@ -135,7 +136,7 @@ export class NovaClient {
 
     this.api = new NovaCellAPIClient(cellId, {
       ...config,
-      basePath: urlJoin(this.instanceUrl.href, "/api/v2"),
+      basePath: new URL("/api/v2", this.instanceUrl).href,
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -183,11 +184,10 @@ export class NovaClient {
 
   makeWebsocketURL(path: string): string {
     const url = new URL(
-      urlJoin(
-        this.instanceUrl.href,
-        `/api/v2/cells/${this.config.cellId}`,
-        path,
-      ),
+      new URL(
+        `/api/v2/cells/${this.config.cellId}/${path.replace(/^\/+/, "")}`,
+        this.instanceUrl,
+      ).href,
     )
     url.protocol = url.protocol.replace("http", "ws")
     url.protocol = url.protocol.replace("https", "wss")

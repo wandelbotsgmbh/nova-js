@@ -1,74 +1,42 @@
-/**
- * @fileoverview
- * @deprecated The nova v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
- */
-
-import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v1"
+import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import { loginWithAuth0 } from "../../../LoginWithAuth0.js"
-import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.js"
-import { availableStorage } from "../../availableStorage.js"
-import { parseNovaInstanceUrl } from "../../converters.js"
+import { loginWithAuth0 } from "../../LoginWithAuth0"
+import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
+import { availableStorage } from "../availableStorage"
+import { parseNovaInstanceUrl } from "../converters"
+import { NovaAPIClient } from "./NovaAPIClient"
+import { MockNovaInstance } from "./mock/MockNovaInstance"
 
-import { ConnectedMotionGroup } from "./ConnectedMotionGroup.js"
-import { JoggerConnection } from "./JoggerConnection.js"
-import { MotionStreamConnection } from "./MotionStreamConnection.js"
-import { NovaCellAPIClient } from "./NovaCellAPIClient.js"
-import { MockNovaInstance } from "./mock/MockNovaInstance.js"
-
-/** @deprecated Use `NovaConfig` from `@wandelbots/nova-js/v2` instead. */
-export type NovaClientConfig = {
+export type NovaConfig = {
   /**
-   * Url of the deployed Nova instance to connect to
+   * Url of the deployed NOVA instance to connect to
    * e.g. https://saeattii.instance.wandelbots.io
    */
-  instanceUrl: string | "https://mock.example.com"
-
-  /**
-   * Identifier of the cell on the Nova instance to connect this client to.
-   * If omitted, the default identifier "cell" is used.
-   **/
-  cellId?: string
-
-  /**
-   * Username for basic auth to the Nova instance.
-   * @deprecated use accessToken instead
-   */
-  username?: string
-
-  /**
-   * Password for basic auth to the Nova instance.
-   * @deprecated use accessToken instead
-   */
-  password?: string
+  instanceUrl: string
 
   /**
    * Access token for Bearer authentication.
+   * If running on a NOVA instance, this can be automatically retrieved from
+   * the current session when omitted.
    */
   accessToken?: string
 } & Omit<BaseConfiguration, "isJsonMime" | "basePath">
 
-type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
-
 /**
- * Client for connecting to a Nova instance and controlling robots.
- * @deprecated The nova v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
+ *
+ * Client for connecting to a NOVA instance and controlling robots.
  */
-export class NovaClient {
-  readonly api: NovaCellAPIClient
-  readonly config: NovaClientConfigWithDefaults
+export class Nova {
+  readonly api: NovaAPIClient
+  readonly config: NovaConfig
   readonly mock?: MockNovaInstance
   readonly instanceUrl: URL
   authPromise: Promise<string | null> | null = null
   accessToken: string | null = null
 
-  constructor(config: NovaClientConfig) {
-    const cellId = config.cellId ?? "cell"
-    this.config = {
-      cellId,
-      ...config,
-    }
+  constructor(config: NovaConfig) {
+    this.config = config
     this.accessToken =
       config.accessToken ||
       availableStorage.getString("wbjs.access_token") ||
@@ -81,7 +49,7 @@ export class NovaClient {
 
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
-      baseURL: new URL("/api/v1", this.config.instanceUrl).href,
+      baseURL: new URL("/api/v2", this.instanceUrl).href,
       // TODO - backend needs to set proper CORS headers for this
       headers:
         typeof window !== "undefined" &&
@@ -141,9 +109,9 @@ export class NovaClient {
       )
     }
 
-    this.api = new NovaCellAPIClient(cellId, {
+    this.api = new NovaAPIClient({
       ...config,
-      basePath: new URL("/api/v1", this.instanceUrl).href,
+      basePath: new URL("/api/v2", this.instanceUrl).href,
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -151,8 +119,10 @@ export class NovaClient {
         ...(this.mock
           ? ({
               adapter: (config) => {
-                // biome-ignore lint/style/noNonNullAssertion: legacy code
-                return this.mock!.handleAPIRequest(config)
+                if (!this.mock) {
+                  throw new Error("Mock adapter used without a mock instance")
+                }
+                return this.mock.handleAPIRequest(config)
               },
             } satisfies AxiosRequestConfig)
           : {}),
@@ -191,12 +161,7 @@ export class NovaClient {
   }
 
   makeWebsocketURL(path: string): string {
-    const url = new URL(
-      new URL(
-        `/api/v1/cells/${this.config.cellId}/${path.replace(/^\/+/, "")}`,
-        this.instanceUrl,
-      ).href,
-    )
+    const url = new URL(`/api/v2/${path.replace(/^\/+/, "")}`, this.instanceUrl)
     url.protocol = url.protocol.replace("http", "ws")
     url.protocol = url.protocol.replace("https", "wss")
 
@@ -222,39 +187,5 @@ export class NovaClient {
     return new AutoReconnectingWebsocket(this.makeWebsocketURL(path), {
       mock: this.mock,
     })
-  }
-
-  /**
-   * Connect to the motion state websocket(s) for a given motion group
-   */
-  async connectMotionStream(motionGroupId: string) {
-    return await MotionStreamConnection.open(this, motionGroupId)
-  }
-
-  /**
-   * Connect to the jogging websocket(s) for a given motion group
-   */
-  async connectJogger(motionGroupId: string) {
-    return await JoggerConnection.open(this, motionGroupId)
-  }
-
-  async connectMotionGroups(
-    motionGroupIds: string[],
-  ): Promise<ConnectedMotionGroup[]> {
-    const { instances } = await this.api.controller.listControllers()
-
-    return Promise.all(
-      motionGroupIds.map((motionGroupId) =>
-        ConnectedMotionGroup.connect(this, motionGroupId, instances),
-      ),
-    )
-  }
-
-  async connectMotionGroup(
-    motionGroupId: string,
-  ): Promise<ConnectedMotionGroup> {
-    const motionGroups = await this.connectMotionGroups([motionGroupId])
-    // biome-ignore lint/style/noNonNullAssertion: legacy code
-    return motionGroups[0]!
   }
 }

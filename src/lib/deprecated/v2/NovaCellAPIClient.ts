@@ -44,10 +44,12 @@ type UnwrapAxiosResponseReturn<T> = T extends (...a: any) => any
     ) => Promise<Awaited<ReturnType<T>> extends { data: infer D } ? D : never>
   : never
 
+/** @deprecated Use `NovaAPIClient` instead. */
 export type WithCellId<T> = {
   [P in keyof T]: UnwrapAxiosResponseReturn<OmitFirstArg<T[P]>>
 }
 
+/** @deprecated Use `NovaAPIClient` instead. */
 export type WithUnwrappedAxiosResponse<T> = {
   [P in keyof T]: UnwrapAxiosResponseReturn<T[P]>
 }
@@ -55,6 +57,7 @@ export type WithUnwrappedAxiosResponse<T> = {
 /**
  * API client providing type-safe access to all the Nova API REST endpoints
  * associated with a specific cell id.
+ * @deprecated Use `NovaAPIClient` from `@wandelbots/nova-js/v2` instead.
  */
 export class NovaCellAPIClient {
   constructor(

@@ -7,12 +7,14 @@ import { tryParseJson } from "../../converters"
 import type { MotionStreamConnection } from "./MotionStreamConnection"
 import type { NovaClient } from "./NovaClient"
 
+/** @deprecated */
 export type ProgramRunnerLogEntry = {
   timestamp: number
   message: string
   level?: "warn" | "error"
 }
 
+/** @deprecated */
 export enum ProgramState {
   NotStarted = "not started",
   Running = "running",
@@ -21,6 +23,7 @@ export enum ProgramState {
   Completed = "completed",
 }
 
+/** @deprecated */
 export type CurrentProgram = {
   id?: string
   wandelscript?: string
@@ -40,6 +43,7 @@ type ProgramStateMessage = {
 /**
  * Interface for running Wandelscript programs on the Nova instance and
  * tracking their progress and output
+ * @deprecated
  */
 export class ProgramStateConnection {
   currentProgram: CurrentProgram = {}
