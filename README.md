@@ -45,8 +45,7 @@ Documentation for the various API endpoints is available on your Nova instance a
 
 ## Opening websockets
 
-`NovaClient` has various convenience features for websocket handling in general. Use `openReconnectingWebsocket` to get a persistent socket for a given Nova streaming endpoint that will handle unexpected closes with exponential backoff:
-
+`Nova` has various convenience features for websocket handling in general. Use `openReconnectingWebsocket` to get a persistent socket for a given Nova streaming endpoint that will handle unexpected closes with exponential backoff:
 ```ts
 const joggingWebsocket = nova.openReconnectingWebsocket(`/cells/cell/controllers/ur5e/execution/jogging`)
 
