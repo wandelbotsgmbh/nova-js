@@ -1,0 +1,36 @@
+{
+  "name": "nova-nextjs-template",
+  "version": "0.0.1",
+  "private": true,
+  "author": "Wandelbots GmbH",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check --error-on-warnings",
+    "format": "biome format --write .",
+    "tsc": "tsc --pretty --noEmit",
+    "knip": "knip"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "@mui/material-nextjs": "^7.3.6",
+    "@tanstack/react-query": "^5.90.12",
+    "@wandelbots/nova-js": "3.3.3",
+    "@wandelbots/wandelbots-js-react-components": "^3.3.2",
+    "next": "^16.0.10",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.9",
+    "@types/node": "^24",
+    "@types/react": "^19.2.7",
+    "knip": "^5.75.1",
+    "typescript": "5.9.3"
+  }
+}

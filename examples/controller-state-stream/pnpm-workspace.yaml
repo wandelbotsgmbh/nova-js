@@ -1,0 +1,3 @@
+# If you update this here, make sure to update the version in the Dockerfile
+# and the @types/node package as well
+useNodeVersion: 24.12.0
