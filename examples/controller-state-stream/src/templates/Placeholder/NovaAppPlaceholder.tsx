@@ -10,7 +10,6 @@ import {
   LoadingCover,
   NoMotionGroupModal,
 } from "@wandelbots/wandelbots-js-react-components/core";
-import Image from "next/image";
 import { useControllerState } from "@/hooks/useControllerState.ts";
 import { env } from "@/runtimeEnv.ts";
 import AnimatedBackground from "./AnimatedBackground.tsx";
@@ -49,7 +48,7 @@ export const NovaAppPlaceholder = ({ controller }: { controller: string }) => {
       <AnimatedBackground />
       <Box display="flex" flexDirection="column" height="100vh">
         <Box alignSelf="flex-start" ml={7} mt={5}>
-          <Image
+          <img
             src={wandelbots}
             alt="Wandelbots"
             width={465 / 3.5}
@@ -77,9 +76,7 @@ export const NovaAppPlaceholder = ({ controller }: { controller: string }) => {
               </Typography>
               <Typography variant="body2" color="white" fontFamily={"Monaco"}>
                 → Get started by editing{" "}
-                <span style={{ color: "#49D4FF" }}>
-                  src/app/NovaAppMain.tsx
-                </span>
+                <span style={{ color: "#49D4FF" }}>src/App.tsx</span>
               </Typography>
             </CardContent>
           </BlurredCard>

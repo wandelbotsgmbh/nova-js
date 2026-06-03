@@ -6,16 +6,11 @@ let nova: NovaClient | null = null;
 function getNovaApiGatewayUrl() {
   if (env.NODE_ENV !== "production" && env.NOVA_DEV_INSTANCE_URL) {
     // In local dev: access the API remotely via the dev instance URL
-    return env.NOVA_DEV_INSTANCE_URL || "";
+    return env.NOVA_DEV_INSTANCE_URL;
   }
 
-  if (typeof window === "undefined") {
-    // On prod backend: access the API via the cluster-relative URL
-    return process.env.NOVA_API || "";
-  } else {
-    // In prod frontend: access the API via the instance URL we are deployed on
-    return window.location.origin;
-  }
+  // In prod: access the API via the instance URL we are deployed on
+  return window.location.origin;
 }
 
 export const useNovaClient = () => {

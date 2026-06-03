@@ -1,10 +1,10 @@
-# Next.js NOVA app template 
+# Vite NOVA app template
 
-This template provides the skeleton of a [Next.js](https://nextjs.org/) robot application built to run on [Wandelbots NOVA](https://docs.wandelbots.io/). 
+This template provides the skeleton of a [Vite](https://vitejs.dev/) + React robot application built to run on [Wandelbots NOVA](https://docs.wandelbots.io/).
 
-You can generate a new project with the [NOVA CLI](https://portal.wandelbots.io/en/download) by running `nova app create myapp -g "nextjs_app"`.
+You can generate a new project with the [NOVA CLI](https://portal.wandelbots.io/en/download) by running `nova app create myapp -g "vite_app"`.
 
-⚡ Next.js with App Router support
+⚡ Vite + React (SPA)
 
 🔥 Type checking with TypeScript
 
@@ -12,7 +12,7 @@ You can generate a new project with the [NOVA CLI](https://portal.wandelbots.io/
 
 ## Development setup
 
-First install [pnpm](https://pnpm.io/), which is used to manage the node version as well as the packages. 
+First install [pnpm](https://pnpm.io/), which is used to manage the node version as well as the packages.
 
 ## Installing dependencies
 
@@ -22,7 +22,7 @@ pnpm install
 
 ## Local development with a NOVA instance
 
-You can run your app locally for development and connect it to a remote NOVA instance by providing the `NOVA_DEV_INSTANCE_URL`, `NOVA_DEV_ACCESS_TOKEN` and `CELL_ID` environment variables in `.env.local`. 
+You can run your app locally for development and connect it to a remote NOVA instance by providing the `NOVA_DEV_INSTANCE_URL`, `NOVA_DEV_ACCESS_TOKEN` and `CELL_ID` environment variables in `.env.local`.
 
 For example, if your instance is at `my.instance.wandelbots.io` and your cell is called `cell`:
 
@@ -34,7 +34,7 @@ CELL_ID=cell
 
 ## Running the dev server
 
-Once everything is set up, you can run the NextJS dev server:
+Once everything is set up, you can run the Vite dev server:
 
 ```bash
 pnpm run dev

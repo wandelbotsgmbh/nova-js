@@ -9,11 +9,8 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
-# production
+# build output
+/dist
 /build
 
 # misc
@@ -29,11 +26,5 @@ yarn-error.log*
 .env*.local
 kubeconfig.yml
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-
-# next
-next-env.d.ts
