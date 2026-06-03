@@ -65,8 +65,6 @@ export class Nova {
       if (!request.headers.Authorization) {
         if (this.accessToken) {
           request.headers.Authorization = `Bearer ${this.accessToken}`
-        } else if (this.config.username && this.config.password) {
-          request.headers.Authorization = `Basic ${btoa(`${config.username}:${config.password}`)}`
         }
       }
       return request
