@@ -1,7 +1,7 @@
-import { NovaClient } from "@wandelbots/nova-js/v2"
 import { env } from "@/runtimeEnv.ts"
+import { Nova } from "@wandelbots/nova-js/v2"
 
-let nova: NovaClient | null = null
+let nova: Nova | null = null
 
 function getNovaApiGatewayUrl() {
   if (env.NODE_ENV !== "production" && env.NOVA_DEV_INSTANCE_URL) {
@@ -15,9 +15,8 @@ function getNovaApiGatewayUrl() {
 
 export const useNovaClient = () => {
   if (!nova) {
-    nova = new NovaClient({
+    nova = new Nova({
       instanceUrl: getNovaApiGatewayUrl(),
-      cellId: env.CELL_ID || "cell",
       accessToken: env.NOVA_DEV_ACCESS_TOKEN || "",
       baseOptions: {
         // Time out after 30 seconds

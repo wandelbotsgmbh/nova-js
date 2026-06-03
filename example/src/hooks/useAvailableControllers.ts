@@ -1,3 +1,4 @@
+import { env } from "@/runtimeEnv.ts"
 import { useQuery } from "@tanstack/react-query"
 import { useNovaClient } from "./useNovaClient.ts"
 
@@ -11,7 +12,9 @@ export function useAvailableControllers() {
   const { data, error } = useQuery({
     queryKey: ["available-controllers"],
     queryFn: async () => {
-      const controllers = await nova.api.controller.listRobotControllers()
+      const controllers = await nova.api.controller.listRobotControllers(
+        env.CELL_ID || "cell",
+      )
       return controllers.toSorted((a, b) => a.localeCompare(b))
     },
   })
