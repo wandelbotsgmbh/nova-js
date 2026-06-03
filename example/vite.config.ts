@@ -38,9 +38,7 @@ export default defineConfig(({ mode }) => {
       // Expose selected runtime env vars at build time for local dev.
       // In production, these are injected from the server env at runtime
       // via a small script tag in index.html (see entrypoint.sh).
-      "import.meta.env.VITE_NOVA_DEV_INSTANCE_URL": JSON.stringify(
-        env.NOVA_DEV_INSTANCE_URL || "",
-      ),
+      "import.meta.env.VITE_NOVA": JSON.stringify(env.NOVA || ""),
       "import.meta.env.VITE_NOVA_DEV_ACCESS_TOKEN": JSON.stringify(
         env.NOVA_DEV_ACCESS_TOKEN || "",
       ),

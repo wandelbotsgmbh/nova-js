@@ -4,9 +4,9 @@ import { Nova } from "@wandelbots/nova-js/v2"
 let nova: Nova | null = null
 
 function getNovaApiGatewayUrl() {
-  if (env.NODE_ENV !== "production" && env.NOVA_DEV_INSTANCE_URL) {
+  if (env.NODE_ENV !== "production" && env.NOVA) {
     // In local dev: access the API remotely via the dev instance URL
-    return env.NOVA_DEV_INSTANCE_URL
+    return env.NOVA
   }
 
   // In prod: access the API via the instance URL we are deployed on

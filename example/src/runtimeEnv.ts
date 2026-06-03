@@ -12,7 +12,7 @@
 declare global {
   interface Window {
     __NOVA_ENV__?: {
-      NOVA_DEV_INSTANCE_URL?: string
+      NOVA?: string
       NOVA_DEV_ACCESS_TOKEN?: string
       CELL_ID?: string
     }
@@ -24,10 +24,7 @@ const runtime =
 
 export const env = {
   NODE_ENV: import.meta.env.MODE,
-  NOVA_DEV_INSTANCE_URL:
-    runtime?.NOVA_DEV_INSTANCE_URL ||
-    import.meta.env.VITE_NOVA_DEV_INSTANCE_URL ||
-    "",
+  NOVA: runtime?.NOVA || import.meta.env.VITE_NOVA || "",
   NOVA_DEV_ACCESS_TOKEN:
     runtime?.NOVA_DEV_ACCESS_TOKEN ||
     import.meta.env.VITE_NOVA_DEV_ACCESS_TOKEN ||

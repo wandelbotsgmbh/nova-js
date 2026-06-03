@@ -14,7 +14,7 @@ fi
 # Regenerated on every startup so env changes take effect on restart.
 cat > dist/config.js <<EOF
 window.__NOVA_ENV__ = {
-  NOVA_DEV_INSTANCE_URL: "${NOVA_DEV_INSTANCE_URL}",
+  NOVA: "${NOVA}",
   NOVA_DEV_ACCESS_TOKEN: "${NOVA_DEV_ACCESS_TOKEN}",
   CELL_ID: "${CELL_ID}"
 };

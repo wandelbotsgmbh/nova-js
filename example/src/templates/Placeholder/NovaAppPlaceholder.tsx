@@ -1,3 +1,5 @@
+import { useControllerState } from "@/hooks/useControllerState.ts"
+import { env } from "@/runtimeEnv.ts"
 import styled from "@emotion/styled"
 import Box from "@mui/material/Box"
 import Card from "@mui/material/Card"
@@ -10,8 +12,6 @@ import {
   LoadingCover,
   NoMotionGroupModal,
 } from "@wandelbots/wandelbots-js-react-components/core"
-import { useControllerState } from "@/hooks/useControllerState.ts"
-import { env } from "@/runtimeEnv.ts"
 import AnimatedBackground from "./AnimatedBackground.tsx"
 import wandelbots from "./wbnova.svg"
 
@@ -40,7 +40,7 @@ export const NovaAppPlaceholder = ({ controller }: { controller: string }) => {
   }
 
   if (!motionGroup) {
-    return <NoMotionGroupModal baseUrl={env.NOVA_DEV_INSTANCE_URL || ""} />
+    return <NoMotionGroupModal baseUrl={env.NOVA || ""} />
   }
 
   return (
@@ -152,11 +152,8 @@ export const NovaAppPlaceholder = ({ controller }: { controller: string }) => {
                       </Link>
                       <br />
                       <span>Move robot:</span>
-                      <Link
-                        color="#6558FF"
-                        href={env.NOVA_DEV_INSTANCE_URL || "/"}
-                      >
-                        {env.NOVA_DEV_INSTANCE_URL || window.location.origin}
+                      <Link color="#6558FF" href={env.NOVA || "/"}>
+                        {env.NOVA || window.location.origin}
                       </Link>
                     </Stack>
                   </Typography>
