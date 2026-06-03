@@ -1,4 +1,4 @@
-import "./animations.css";
+import "./animations.css"
 
 const AnimatedBackground = () => {
   return (
@@ -28,7 +28,7 @@ const AnimatedBackground = () => {
         <div className="g3"></div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AnimatedBackground;
+export default AnimatedBackground

@@ -1,26 +1,26 @@
-import styled from "@emotion/styled";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Divider from "@mui/material/Divider";
-import Link from "@mui/material/Link";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import styled from "@emotion/styled"
+import Box from "@mui/material/Box"
+import Card from "@mui/material/Card"
+import CardContent from "@mui/material/CardContent"
+import Divider from "@mui/material/Divider"
+import Link from "@mui/material/Link"
+import Stack from "@mui/material/Stack"
+import Typography from "@mui/material/Typography"
 import {
   LoadingCover,
   NoMotionGroupModal,
-} from "@wandelbots/wandelbots-js-react-components/core";
-import { useControllerState } from "@/hooks/useControllerState.ts";
-import { env } from "@/runtimeEnv.ts";
-import AnimatedBackground from "./AnimatedBackground.tsx";
-import wandelbots from "./wbnova.svg";
+} from "@wandelbots/wandelbots-js-react-components/core"
+import { useControllerState } from "@/hooks/useControllerState.ts"
+import { env } from "@/runtimeEnv.ts"
+import AnimatedBackground from "./AnimatedBackground.tsx"
+import wandelbots from "./wbnova.svg"
 
 const CustomCard = styled(Card)({
   background: "none",
   borderRadius: "15px",
   margin: "10px",
   width: "300px",
-});
+})
 
 const BlurredCard = styled(Card)({
   backgroundColor: "#ffffff11",
@@ -29,18 +29,18 @@ const BlurredCard = styled(Card)({
   padding: "8px 24px",
   border: "1px solid #ffffff22",
   backdropFilter: "blur(50px)",
-});
+})
 
 export const NovaAppPlaceholder = ({ controller }: { controller: string }) => {
-  const { controllerState, error } = useControllerState(controller);
-  const motionGroup = controllerState?.motion_groups?.[0];
+  const { controllerState, error } = useControllerState(controller)
+  const motionGroup = controllerState?.motion_groups?.[0]
 
   if (!controllerState) {
-    return <LoadingCover error={error} />;
+    return <LoadingCover error={error} />
   }
 
   if (!motionGroup) {
-    return <NoMotionGroupModal baseUrl={env.NOVA_DEV_INSTANCE_URL || ""} />;
+    return <NoMotionGroupModal baseUrl={env.NOVA_DEV_INSTANCE_URL || ""} />
   }
 
   return (
@@ -168,5 +168,5 @@ export const NovaAppPlaceholder = ({ controller }: { controller: string }) => {
         </Box>
       </Box>
     </>
-  );
-};
+  )
+}

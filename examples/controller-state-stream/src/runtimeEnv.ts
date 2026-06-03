@@ -12,15 +12,15 @@
 declare global {
   interface Window {
     __NOVA_ENV__?: {
-      NOVA_DEV_INSTANCE_URL?: string;
-      NOVA_DEV_ACCESS_TOKEN?: string;
-      CELL_ID?: string;
-    };
+      NOVA_DEV_INSTANCE_URL?: string
+      NOVA_DEV_ACCESS_TOKEN?: string
+      CELL_ID?: string
+    }
   }
 }
 
 const runtime =
-  (typeof window !== "undefined" && window.__NOVA_ENV__) || undefined;
+  (typeof window !== "undefined" && window.__NOVA_ENV__) || undefined
 
 export const env = {
   NODE_ENV: import.meta.env.MODE,
@@ -33,4 +33,4 @@ export const env = {
     import.meta.env.VITE_NOVA_DEV_ACCESS_TOKEN ||
     "",
   CELL_ID: runtime?.CELL_ID || import.meta.env.VITE_CELL_ID || "cell",
-};
+}
