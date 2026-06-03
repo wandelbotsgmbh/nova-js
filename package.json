@@ -26,8 +26,9 @@
     "src"
   ],
   "scripts": {
+    "dev": "pnpm build && concurrently --names build,app --prefix-colors blue,magenta \"tsdown --watch --no-clean\" \"pnpm --filter example dev\"",
     "dev:pack": "nodemon -w \".\" -e ts -i *.tgz -i dist -x \"pnpm run build && pnpm pack\"",
-    "tsc": "tsc --pretty --noEmit",
+    "tsc": "concurrently --group --names tsc,tsc:example --prefix-colors blue,magenta \"tsc --pretty --noEmit\" \"pnpm --filter example tsc\"",
     "lint": "biome check --error-on-warnings .",
     "format": "biome format . --write",
     "knip": "knip",

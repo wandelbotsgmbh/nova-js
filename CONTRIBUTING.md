@@ -17,7 +17,15 @@ pnpm install
 Then you can run the unit tests against a mocked NOVA API and socket connections:
 
 ```bash
-pnpm run test
+pnpm test
+```
+
+## Example app testing
+
+To test nova-js changes in the context of a small NOVA Vite application:
+
+```bash
+NOVA=SOME_IP_ADDRESS pnpm dev
 ```
 
 ## e2e tests
@@ -25,7 +33,7 @@ pnpm run test
 To run basic e2e tests against a live NOVA instance during development:
 
 ```bash
-NOVA=SOME_IP_ADDRESS pnpm run e2e 
+NOVA=SOME_IP_ADDRESS pnpm e2e 
 ```
 
 This is just for development right now, the tests are not integrated with CI yet. You will need to create a virtual robot (any robot) on the instance first for the jogging test to work.

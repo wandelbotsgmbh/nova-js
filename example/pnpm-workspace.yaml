@@ -1,0 +1,6 @@
+allowBuilds:
+  browser-tabs-lock: false
+  esbuild: true
+
+overrides:
+  nova-js: "workspace:*"

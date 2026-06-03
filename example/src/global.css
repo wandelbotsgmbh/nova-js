@@ -1,0 +1,16 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+body {
+  font-family: "Dongle", sans-serif;
+  background-color: #0f111e;
+  color: #ffffff;
+}
+
+img {
+  user-select: none;
+}

@@ -1,0 +1,38 @@
+{
+  "name": "example",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "author": "Wandelbots GmbH",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js",
+    "lint": "biome check --error-on-warnings",
+    "format": "biome format --write .",
+    "tsc": "tsc --pretty --noEmit",
+    "knip": "knip"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "@tanstack/react-query": "^5.90.12",
+    "@wandelbots/nova-js": "workspace:*",
+    "@wandelbots/wandelbots-js-react-components": "^3.3.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "knip": "^5.75.1",
+    "typescript": "5.9.3",
+    "vite": "^7.0.0"
+  }
+}
