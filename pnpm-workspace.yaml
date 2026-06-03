@@ -13,7 +13,7 @@ allowBuilds:
 
 packages:
   - "."
-  - "examples/*"
+  - "example"
 
 overrides:
   axios: ">=1.15.2"

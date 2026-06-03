@@ -92,7 +92,7 @@ importers:
         specifier: ^8.21.0
         version: 8.21.0
 
-  examples/controller-state-stream:
+  example:
     dependencies:
       '@emotion/react':
         specifier: ^11.14.0
@@ -111,7 +111,7 @@ importers:
         version: 5.100.14(react@19.2.7)
       '@wandelbots/nova-js':
         specifier: workspace:*
-        version: link:../..
+        version: link:..
       '@wandelbots/wandelbots-js-react-components':
         specifier: ^3.3.2
         version: 3.7.4(873e18c0f6c58ac886ff63ad68adcc3f)
