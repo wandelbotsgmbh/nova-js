@@ -165,14 +165,8 @@ export class Nova {
     url.protocol = url.protocol.replace("http", "ws")
     url.protocol = url.protocol.replace("https", "wss")
 
-    // If provided, add basic auth credentials to the URL
-    // NOTE - basic auth is deprecated on websockets and doesn't work in Safari
-    // use tokens instead
     if (this.accessToken) {
       url.searchParams.append("token", this.accessToken)
-    } else if (this.config.username && this.config.password) {
-      url.username = this.config.username
-      url.password = this.config.password
     }
 
     return url.toString()
