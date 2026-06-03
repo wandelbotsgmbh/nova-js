@@ -49,7 +49,7 @@ Documentation for the various API endpoints is available on your Nova instance a
 ```ts
 const joggingWebsocket = nova.openReconnectingWebsocket(`/cells/cell/controllers/ur5e/execution/jogging`)
 
-this.joggingWebsocket.addEventListener("message", (ev) => {
+joggingWebsocket.addEventListener("message", (ev) => {
   console.log(ev.data)
 })
 ```
