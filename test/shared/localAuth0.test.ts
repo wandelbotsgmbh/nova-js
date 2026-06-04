@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { getAuth0Config } from "../src/LoginWithAuth0"
+import { getAuth0Config } from "../../src/LoginWithAuth0"
 
 test("local auth0 login detection", () => {
   expect(() =>

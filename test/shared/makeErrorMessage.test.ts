@@ -1,5 +1,5 @@
 import { makeErrorMessage } from "@wandelbots/nova-js"
-import axios, { AxiosError, AxiosHeaders } from "axios"
+import { AxiosError, AxiosHeaders } from "axios"
 import { expect, test } from "vitest"
 
 test("making useful error messages", async () => {
@@ -15,14 +15,30 @@ test("making useful error messages", async () => {
 
   // Axios errors with a response should include the response code
   // and url
-  try {
-    await axios.get("http://example.com/doesnt-exist")
-    expect(true).toBe(false)
-  } catch (err) {
-    expect(makeErrorMessage(err)).toMatch(
-      /^404 Not Found from GET http:\/\/example.com\/doesnt-exist: /,
-    )
-  }
+  const responseError = new AxiosError(
+    "Request failed with status code 404",
+    "ERR_BAD_REQUEST",
+    {
+      url: "http://example.com/doesnt-exist",
+      method: "get",
+      headers: new AxiosHeaders(),
+    },
+    {},
+    {
+      status: 404,
+      statusText: "Not Found",
+      data: {},
+      headers: new AxiosHeaders(),
+      config: {
+        url: "http://example.com/doesnt-exist",
+        method: "get",
+        headers: new AxiosHeaders(),
+      },
+    },
+  )
+  expect(makeErrorMessage(responseError)).toMatch(
+    /^404 Not Found from GET http:\/\/example.com\/doesnt-exist: /,
+  )
 
   // Not sure how to reproduce CORS errors naturally in vitest environment
   // so let's create it manually
