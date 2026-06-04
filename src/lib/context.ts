@@ -2,7 +2,7 @@
 
 export const isBrowser = typeof window !== "undefined"
 
-export const isLocalDev =
+export const isLocalhostDev =
   isBrowser &&
   window.location.hostname === "localhost" &&
   process.env.NODE_ENV === "development"

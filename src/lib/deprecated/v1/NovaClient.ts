@@ -11,6 +11,7 @@ import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.js"
 import { availableStorage } from "../../availableStorage.js"
 import { parseNovaInstanceUrl } from "../../converters.js"
 
+import { isBrowser, isLocalhostDev } from "../../context.js"
 import { ConnectedMotionGroup } from "./ConnectedMotionGroup.js"
 import { JoggerConnection } from "./JoggerConnection.js"
 import { MotionStreamConnection } from "./MotionStreamConnection.js"
@@ -83,14 +84,12 @@ export class NovaClient {
     const axiosInstance = axios.create({
       baseURL: new URL("/api/v1", this.config.instanceUrl).href,
       // TODO - backend needs to set proper CORS headers for this
-      headers:
-        typeof window !== "undefined" &&
-        window.location.origin.includes("localhost")
-          ? {}
-          : {
-              // Identify the client to the backend for logging purposes
-              "X-Wandelbots-Client": "Wandelbots-Nova-JS-SDK",
-            },
+      headers: isLocalhostDev
+        ? {}
+        : {
+            // Identify the client to the backend for logging purposes
+            "X-Wandelbots-Client": "Wandelbots-Nova-JS-SDK",
+          },
     })
 
     axiosInstance.interceptors.request.use(async (request) => {
@@ -104,7 +103,7 @@ export class NovaClient {
       return request
     })
 
-    if (typeof window !== "undefined") {
+    if (isBrowser) {
       axiosInstance.interceptors.response.use(
         (r) => r,
         async (error) => {

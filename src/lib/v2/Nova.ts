@@ -4,6 +4,7 @@ import axios, { isAxiosError } from "axios"
 import { loginWithAuth0 } from "../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
 import { availableStorage } from "../availableStorage"
+import { isLocalhostDev } from "../context"
 import { parseNovaInstanceUrl } from "../converters"
 import { NovaAPIClient } from "./NovaAPIClient"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
@@ -51,14 +52,12 @@ export class Nova {
     const axiosInstance = axios.create({
       baseURL: new URL("/api/v2", this.instanceUrl).href,
       // TODO - backend needs to set proper CORS headers for this
-      headers:
-        typeof window !== "undefined" &&
-        window.location.origin.includes("localhost")
-          ? {}
-          : {
-              // Identify the client to the backend for logging purposes
-              "X-Wandelbots-Client": "Wandelbots-Nova-JS-SDK",
-            },
+      headers: isLocalhostDev
+        ? {}
+        : {
+            // Identify the client to the backend for logging purposes
+            "X-Wandelbots-Client": "Wandelbots-Nova-JS-SDK",
+          },
     })
 
     axiosInstance.interceptors.request.use(async (request) => {
