@@ -22,8 +22,8 @@ importers:
         specifier: ^0.183.1
         version: 0.183.1
       '@wandelbots/nova-api':
-        specifier: 26.4.0
-        version: 26.4.0
+        specifier: 26.4.1
+        version: 26.4.1
       axios:
         specifier: '>=1.15.2'
         version: 1.16.1
@@ -1661,8 +1661,8 @@ packages:
   '@vitest/utils@4.1.8':
     resolution: {integrity: sha512-uOJamYALNhfJ6iolExyQM40yIQwDqYnkKtQ5VCiSe17E33H0aQ/u+1GlRuz4LZBk6Mm3sg90G9hEbmEt37C1Zg==}
 
-  '@wandelbots/nova-api@26.4.0':
-    resolution: {integrity: sha512-8xEP0JdUTZTvJpXPi9egeJ4z7AqqSkTpTaJrP82mbzxDckGT0jPpnX2cF7jN53oB/ziqE3BcthPgJiOKGjFRKg==}
+  '@wandelbots/nova-api@26.4.1':
+    resolution: {integrity: sha512-/lkTpg5eZkJAec/O5iJXelxcDoxX+sKWoQcRdaaEdHhx14eOttLcGR9p+hD2ZkB9j+qxHygR4l+RCb5xJB1BlA==}
 
   '@wandelbots/wandelbots-js-react-components@3.7.4':
     resolution: {integrity: sha512-wD4xygHQuh3qMr3jlJB1wLxCUkL8dfYR6OP+QNbbQIlUqH1DiXgjYAOsL4+2oRgqWwSUcIK6UtAPq/0pNkQOTw==}
@@ -5162,7 +5162,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@wandelbots/nova-api@26.4.0':
+  '@wandelbots/nova-api@26.4.1':
     dependencies:
       axios: 1.16.1
     transitivePeerDependencies:
