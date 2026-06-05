@@ -3,20 +3,86 @@
  */
 // #region Classes
 export class Nova {
+  api
+  config
+  mock
+  instanceUrl
+  authPromise
+  accessToken
   constructor(_) {}
   async renewAuthentication() {}
   makeWebsocketURL(_) {}
   openReconnectingWebsocket(_) {}
 }
 export class NovaAPIClient {
+  opts
+  application
+  busIOs
+  cell
+  controller
+  controllerIOs
+  jogging
+  kinematics
+  license
+  motionGroup
+  motionGroupModels
+  novaCloud
+  program
+  robotConfigurations
+  session
+  storeCollisionComponents
+  storeCollisionSetups
+  storeObject
+  system
+  trajectoryCaching
+  trajectoryExecution
+  trajectoryPlanning
+  version
+  virtualController
+  virtualControllerBehavior
+  virtualControllerIOs
   constructor(_) {}
 }
 export class NovaCellAPIClient {
+  cellId
+  opts
   constructor(_, _) {}
   withCellId(_) {}
   withUnwrappedResponsesOnly(_) {}
+  system
+  cell
+  motionGroup
+  motionGroupModels
+  controller
+  controllerIOs
+  trajectoryPlanning
+  trajectoryExecution
+  trajectoryCaching
+  application
+  applicationGlobal
+  jogging
+  kinematics
+  busInputsOutputs
+  virtualController
+  virtualControllerBehavior
+  virtualControllerIOs
+  storeObject
+  storeCollisionComponents
+  storeCollisionSetups
+  program
+  license
+  novaCloud
+  robotConfigurations
+  version
+  session
 }
 export class NovaClient {
+  api
+  config
+  mock
+  instanceUrl
+  authPromise
+  accessToken
   constructor(_) {}
   async renewAuthentication() {}
   makeWebsocketURL(_) {}
