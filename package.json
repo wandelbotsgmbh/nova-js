@@ -35,7 +35,7 @@
     "build": "tsdown",
     "test": "pnpm run build && vitest run",
     "e2e": "vitest run --config vitest.e2e.config.ts",
-    "checks": "pnpm format && pnpm build && concurrently --group --timings --names audit,lint,tsc,knip,test \"pnpm audit\" \"pnpm lint\" \"pnpm tsc\" \"pnpm knip\" \"vitest run\""
+    "checks": "pnpm format && pnpm build && concurrently --group --timings --names audit,biome,tsc,knip,test \"pnpm audit\" \"pnpm biome\" \"pnpm tsc\" \"pnpm knip\" \"vitest run\""
   },
   "repository": {
     "type": "git",
