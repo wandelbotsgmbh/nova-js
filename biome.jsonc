@@ -34,5 +34,29 @@
   },
   "assist": {
     "enabled": false
-  }
+  },
+  "overrides": [
+    {
+      // Tests should exercise the published package entry points
+      // (e.g. @wandelbots/nova-js/v2), not reach into `src` directly.
+      "includes": ["test/**", "e2e/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/src", "**/src/**"],
+                    "message": "Tests must import from the package entry points (e.g. @wandelbots/nova-js/v2), not from src."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
