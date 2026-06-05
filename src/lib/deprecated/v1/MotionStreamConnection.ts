@@ -109,13 +109,25 @@ export class MotionStreamConnection {
   // using animation frames
   rapidlyChangingMotionState: MotionGroupStateResponse
 
+  readonly nova: NovaClient
+  readonly controller: ControllerInstance
+  readonly motionGroup: MotionGroupPhysical
+  readonly initialMotionState: MotionGroupStateResponse
+  readonly motionStateSocket: AutoReconnectingWebsocket
+
   constructor(
-    readonly nova: NovaClient,
-    readonly controller: ControllerInstance,
-    readonly motionGroup: MotionGroupPhysical,
-    readonly initialMotionState: MotionGroupStateResponse,
-    readonly motionStateSocket: AutoReconnectingWebsocket,
+    nova: NovaClient,
+    controller: ControllerInstance,
+    motionGroup: MotionGroupPhysical,
+    initialMotionState: MotionGroupStateResponse,
+    motionStateSocket: AutoReconnectingWebsocket,
   ) {
+    this.nova = nova
+    this.controller = controller
+    this.motionGroup = motionGroup
+    this.initialMotionState = initialMotionState
+    this.motionStateSocket = motionStateSocket
+
     this.rapidlyChangingMotionState = initialMotionState
 
     motionStateSocket.addEventListener("message", (event) => {

@@ -54,7 +54,10 @@ export class ProgramStateConnection {
 
   programStateSocket: AutoReconnectingWebsocket
 
-  constructor(readonly nova: NovaClient) {
+  readonly nova: NovaClient
+
+  constructor(nova: NovaClient) {
+    this.nova = nova
     makeAutoObservable(this, {}, { autoBind: true })
 
     this.programStateSocket = nova.openReconnectingWebsocket(`/programs/state`)

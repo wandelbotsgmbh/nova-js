@@ -26,6 +26,11 @@
         // Enforce file extensions on relative imports
         // for node direct TS compatibility and performance
         "useImportExtensions": "error"
+      },
+      "style": {
+        // Disallow TS constructor parameter properties, which
+        // node type stripping cannot handle (no runtime transform)
+        "noParameterProperties": "error"
       }
     }
   },

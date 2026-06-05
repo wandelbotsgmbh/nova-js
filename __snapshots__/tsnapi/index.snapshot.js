@@ -3,10 +3,10 @@
  */
 // #region Classes
 export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
-  opts
   receivedFirstMessage
   targetUrl
   disposed
+  opts
   constructor(_, _) {}
   changeUrl(_) {}
   sendJson(_) {}

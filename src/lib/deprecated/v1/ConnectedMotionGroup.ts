@@ -159,20 +159,46 @@ export class ConnectedMotionGroup {
   activationState: "inactive" | "activating" | "deactivating" | "active" =
     "inactive"
 
+  readonly nova: NovaClient
+  readonly controller: ControllerInstance
+  readonly motionGroup: MotionGroupPhysical
+  readonly initialMotionState: MotionGroupStateResponse
+  readonly motionStateSocket: AutoReconnectingWebsocket
+  readonly isVirtual: boolean
+  readonly tcps: RobotTcp[]
+  readonly motionGroupSpecification: MotionGroupSpecification
+  readonly safetySetup: SafetySetup
+  readonly mounting: Mounting | null
+  readonly initialControllerState: RobotControllerState
+  readonly controllerStateSocket: AutoReconnectingWebsocket
+
   constructor(
-    readonly nova: NovaClient,
-    readonly controller: ControllerInstance,
-    readonly motionGroup: MotionGroupPhysical,
-    readonly initialMotionState: MotionGroupStateResponse,
-    readonly motionStateSocket: AutoReconnectingWebsocket,
-    readonly isVirtual: boolean,
-    readonly tcps: RobotTcp[],
-    readonly motionGroupSpecification: MotionGroupSpecification,
-    readonly safetySetup: SafetySetup,
-    readonly mounting: Mounting | null,
-    readonly initialControllerState: RobotControllerState,
-    readonly controllerStateSocket: AutoReconnectingWebsocket,
+    nova: NovaClient,
+    controller: ControllerInstance,
+    motionGroup: MotionGroupPhysical,
+    initialMotionState: MotionGroupStateResponse,
+    motionStateSocket: AutoReconnectingWebsocket,
+    isVirtual: boolean,
+    tcps: RobotTcp[],
+    motionGroupSpecification: MotionGroupSpecification,
+    safetySetup: SafetySetup,
+    mounting: Mounting | null,
+    initialControllerState: RobotControllerState,
+    controllerStateSocket: AutoReconnectingWebsocket,
   ) {
+    this.nova = nova
+    this.controller = controller
+    this.motionGroup = motionGroup
+    this.initialMotionState = initialMotionState
+    this.motionStateSocket = motionStateSocket
+    this.isVirtual = isVirtual
+    this.tcps = tcps
+    this.motionGroupSpecification = motionGroupSpecification
+    this.safetySetup = safetySetup
+    this.mounting = mounting
+    this.initialControllerState = initialControllerState
+    this.controllerStateSocket = controllerStateSocket
+
     this.rapidlyChangingMotionState = initialMotionState
     this.controllerState = initialControllerState
 

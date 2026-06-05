@@ -3,12 +3,12 @@
  */
 // #region Classes
 export class ProgramStateConnection {
-  nova
   currentProgram
   logs
   executionState
   currentlyExecutingProgramRunnerId
   programStateSocket
+  nova
   constructor(_) {}
   async handleProgramStateMessage(_) {}
   gotoIdleState() {}

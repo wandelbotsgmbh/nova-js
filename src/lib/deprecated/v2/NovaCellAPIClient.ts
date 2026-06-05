@@ -87,13 +87,21 @@ export class NovaCellAPIClient {
   readonly version: WithUnwrappedAxiosResponse<VersionApi>
   readonly session: WithUnwrappedAxiosResponse<SessionApi>
 
+  readonly cellId: string
+  readonly opts: BaseConfiguration & {
+    axiosInstance?: AxiosInstance
+    mock?: boolean
+  }
+
   constructor(
-    readonly cellId: string,
-    readonly opts: BaseConfiguration & {
+    cellId: string,
+    opts: BaseConfiguration & {
       axiosInstance?: AxiosInstance
       mock?: boolean
     },
   ) {
+    this.cellId = cellId
+    this.opts = opts
     this.system = this.withUnwrappedResponsesOnly(SystemApi)
     this.cell = this.withUnwrappedResponsesOnly(CellApi)
     this.motionGroup = this.withCellId(MotionGroupApi)

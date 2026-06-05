@@ -60,11 +60,6 @@ export declare class NovaAPIClient {
   constructor(_: NovaAPIClientOpts);
 }
 export declare class NovaCellAPIClient {
-  readonly cellId: string;
-  readonly opts: Configuration & {
-    axiosInstance?: AxiosInstance;
-    mock?: boolean;
-  };
   readonly system: WithUnwrappedAxiosResponse<SystemApi>;
   readonly cell: WithUnwrappedAxiosResponse<CellApi>;
   readonly motionGroup: WithCellId<MotionGroupApi>;
@@ -91,6 +86,11 @@ export declare class NovaCellAPIClient {
   readonly robotConfigurations: WithUnwrappedAxiosResponse<RobotConfigurationsApi>;
   readonly version: WithUnwrappedAxiosResponse<VersionApi>;
   readonly session: WithUnwrappedAxiosResponse<SessionApi>;
+  readonly cellId: string;
+  readonly opts: Configuration & {
+    axiosInstance?: AxiosInstance;
+    mock?: boolean;
+  };
   constructor(_: string, _: Configuration & {
     axiosInstance?: AxiosInstance;
     mock?: boolean;
