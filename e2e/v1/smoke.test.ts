@@ -1,5 +1,5 @@
+import { NovaClient } from "@wandelbots/nova-js"
 import { expect, test } from "vitest"
-import { NovaClient } from "../../src/lib/deprecated/v1"
 import { env } from "../env"
 
 test("basic smoke test of API client", async () => {

@@ -6,8 +6,8 @@
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v1"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import { loginWithAuth0 } from "../../../LoginWithAuth0.js"
 import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.js"
+import { loginWithAuth0 } from "../../LoginWithAuth0.js"
 import { availableStorage } from "../../availableStorage.js"
 import { parseNovaInstanceUrl } from "../../converters.js"
 

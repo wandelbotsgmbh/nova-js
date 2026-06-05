@@ -1,8 +1,9 @@
+import { delay } from "@wandelbots/nova-js"
+import { NovaClient } from "@wandelbots/nova-js/v1"
 import { keyBy } from "lodash-es"
 import { expect, test, vi } from "vitest"
-import { NovaClient } from "../../src/lib/deprecated/v1"
+// biome-ignore lint/style/noRestrictedImports: old code
 import { jointValuesEqual } from "../../src/lib/deprecated/v1/motionStateUpdate"
-import { delay } from "../../src/lib/errorHandling"
 import { env } from "../env"
 
 // Note: Requires a robot on the instance to work
