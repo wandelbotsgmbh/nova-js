@@ -1,5 +1,5 @@
-import { delay, makeErrorMessage } from "../lib/errorHandling"
-import type { Nova } from "../lib/v2/Nova"
+import { delay, makeErrorMessage } from "../../../lib/errorHandling"
+import type { Nova } from "../../../lib/v2/Nova"
 
 export type WaitOptions = {
   /** Maximum time to wait before throwing, in milliseconds. */

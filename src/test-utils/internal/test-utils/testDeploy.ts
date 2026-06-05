@@ -1,6 +1,6 @@
 import fs from "node:fs/promises"
-import { makeErrorMessage } from "../lib/errorHandling"
-import { Nova } from "../lib/v2/Nova"
+import { makeErrorMessage } from "../../../lib/errorHandling"
+import { Nova } from "../../../lib/v2/Nova"
 import { patchLocalEnv } from "./patchLocalEnv"
 import type { InstanceProvider } from "./providers"
 import {
