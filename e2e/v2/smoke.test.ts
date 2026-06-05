@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { NovaClient } from "../../src/internal/v2"
+import { NovaClient } from "../../src/lib/v2"
 import { env } from "../env"
 
 test("basic smoke test of API client", async () => {
