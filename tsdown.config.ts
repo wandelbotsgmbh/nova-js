@@ -2,11 +2,7 @@
 import { defineConfig } from "tsdown"
 import ApiSnapshot from "tsnapi/rolldown"
 
-const entry = [
-  "src/index.ts",
-  "src/lib/deprecated/v1/index.ts",
-  "src/lib/v2/index.ts",
-]
+const entry = ["src/index.ts", "src/v1/index.ts", "src/v2/index.ts"]
 
 export default defineConfig([
   {

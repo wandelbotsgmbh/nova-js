@@ -11,12 +11,12 @@
       "require": "./dist/index.cjs"
     },
     "./v1": {
-      "import": "./dist/lib/deprecated/v1/index.mjs",
-      "require": "./dist/lib/deprecated/v1/index.cjs"
+      "import": "./dist/v1/index.mjs",
+      "require": "./dist/v1/index.cjs"
     },
     "./v2": {
-      "import": "./dist/lib/v2/index.mjs",
-      "require": "./dist/lib/v2/index.cjs"
+      "import": "./dist/v2/index.mjs",
+      "require": "./dist/v2/index.cjs"
     }
   },
   "main": "./dist/index.mjs",

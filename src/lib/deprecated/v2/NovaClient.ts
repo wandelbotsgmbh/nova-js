@@ -8,7 +8,7 @@ import { parseNovaInstanceUrl } from "../../converters"
 import { loginWithAuth0 } from "../../LoginWithAuth0"
 
 import { isLocalhostDev } from "../../context"
-import { MockNovaInstance } from "../../v2/mock/MockNovaInstance"
+import { MockNovaInstance } from "../../mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
 /** @deprecated Use `NovaClientConfig` from `Nova` instead. */
