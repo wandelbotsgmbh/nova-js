@@ -1,24 +1,17 @@
-/**
- * @fileoverview
- * @deprecated The nova v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
- */
-
-import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v1"
+/** biome-ignore-all lint/style/noNonNullAssertion: legacy code */
+import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import { loginWithAuth0 } from "../../../LoginWithAuth0.js"
-import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.js"
-import { availableStorage } from "../../availableStorage.js"
-import { parseNovaInstanceUrl } from "../../converters.js"
+import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
+import { availableStorage } from "../../availableStorage"
+import { parseNovaInstanceUrl } from "../../converters"
+import { loginWithAuth0 } from "../../LoginWithAuth0"
 
-import { isBrowser, isLocalhostDev } from "../../context.js"
-import { ConnectedMotionGroup } from "./ConnectedMotionGroup.js"
-import { JoggerConnection } from "./JoggerConnection.js"
-import { MotionStreamConnection } from "./MotionStreamConnection.js"
-import { NovaCellAPIClient } from "./NovaCellAPIClient.js"
-import { MockNovaInstance } from "./mock/MockNovaInstance.js"
+import { isLocalhostDev } from "../../context"
+import { MockNovaInstance } from "../../v2/mock/MockNovaInstance"
+import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
-/** @deprecated Use `NovaConfig` from `@wandelbots/nova-js/v2` instead. */
+/** @deprecated Use `NovaClientConfig` from `Nova` instead. */
 export type NovaClientConfig = {
   /**
    * Url of the deployed Nova instance to connect to
@@ -54,7 +47,7 @@ type NovaClientConfigWithDefaults = NovaClientConfig & { cellId: string }
 
 /**
  * Client for connecting to a Nova instance and controlling robots.
- * @deprecated The nova v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
+ * @deprecated Use `Nova` from `@wandelbots/nova-js/v2` instead.
  */
 export class NovaClient {
   readonly api: NovaCellAPIClient
@@ -82,7 +75,7 @@ export class NovaClient {
 
     // Set up Axios instance with interceptor for token fetching
     const axiosInstance = axios.create({
-      baseURL: new URL("/api/v1", this.config.instanceUrl).href,
+      baseURL: new URL("/api/v2", this.instanceUrl).href,
       // TODO - backend needs to set proper CORS headers for this
       headers: isLocalhostDev
         ? {}
@@ -103,7 +96,7 @@ export class NovaClient {
       return request
     })
 
-    if (isBrowser) {
+    if (typeof window !== "undefined") {
       axiosInstance.interceptors.response.use(
         (r) => r,
         async (error) => {
@@ -142,7 +135,7 @@ export class NovaClient {
 
     this.api = new NovaCellAPIClient(cellId, {
       ...config,
-      basePath: new URL("/api/v1", this.instanceUrl).href,
+      basePath: new URL("/api/v2", this.instanceUrl).href,
       isJsonMime: (mime: string) => {
         return mime === "application/json"
       },
@@ -150,7 +143,6 @@ export class NovaClient {
         ...(this.mock
           ? ({
               adapter: (config) => {
-                // biome-ignore lint/style/noNonNullAssertion: legacy code
                 return this.mock!.handleAPIRequest(config)
               },
             } satisfies AxiosRequestConfig)
@@ -192,7 +184,7 @@ export class NovaClient {
   makeWebsocketURL(path: string): string {
     const url = new URL(
       new URL(
-        `/api/v1/cells/${this.config.cellId}/${path.replace(/^\/+/, "")}`,
+        `/api/v2/cells/${this.config.cellId}/${path.replace(/^\/+/, "")}`,
         this.instanceUrl,
       ).href,
     )
@@ -221,39 +213,5 @@ export class NovaClient {
     return new AutoReconnectingWebsocket(this.makeWebsocketURL(path), {
       mock: this.mock,
     })
-  }
-
-  /**
-   * Connect to the motion state websocket(s) for a given motion group
-   */
-  async connectMotionStream(motionGroupId: string) {
-    return await MotionStreamConnection.open(this, motionGroupId)
-  }
-
-  /**
-   * Connect to the jogging websocket(s) for a given motion group
-   */
-  async connectJogger(motionGroupId: string) {
-    return await JoggerConnection.open(this, motionGroupId)
-  }
-
-  async connectMotionGroups(
-    motionGroupIds: string[],
-  ): Promise<ConnectedMotionGroup[]> {
-    const { instances } = await this.api.controller.listControllers()
-
-    return Promise.all(
-      motionGroupIds.map((motionGroupId) =>
-        ConnectedMotionGroup.connect(this, motionGroupId, instances),
-      ),
-    )
-  }
-
-  async connectMotionGroup(
-    motionGroupId: string,
-  ): Promise<ConnectedMotionGroup> {
-    const motionGroups = await this.connectMotionGroups([motionGroupId])
-    // biome-ignore lint/style/noNonNullAssertion: legacy code
-    return motionGroups[0]!
   }
 }

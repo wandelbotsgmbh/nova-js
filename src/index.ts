@@ -1,7 +1,14 @@
-export * from "./lib/AutoReconnectingWebsocket"
-export * from "./lib/availableStorage"
-export * from "./lib/converters"
-export * from "./lib/deprecated/v1/NovaClient" // top-level export will be removed in v4.0
-export * from "./lib/deprecated/v1/wandelscriptUtils"
-export * from "./lib/errorHandling"
-export * from "./LoginWithAuth0"
+/**
+ * @fileoverview
+ * @deprecated The NOVA v1 client is deprecated. Please use the v2 client from `@wandelbots/nova-js/v2` instead.
+ */
+
+export * from "@wandelbots/nova-api/v1"
+export * from "./ConnectedMotionGroup"
+export * from "./getLatestTrajectories"
+export * from "./JoggerConnection"
+export * from "./MotionStreamConnection"
+export * from "./NovaCellAPIClient"
+export * from "./NovaClient"
+export * from "./ProgramStateConnection"
+export * from "./wandelscriptUtils"

@@ -1,8 +1,8 @@
 import { keyBy } from "lodash-es"
 import { expect, test, vi } from "vitest"
-import { NovaClient } from "../../src/lib/deprecated/v1"
-import { jointValuesEqual } from "../../src/lib/deprecated/v1/motionStateUpdate"
-import { delay } from "../../src/lib/errorHandling"
+import { NovaClient } from "../../src/internal/deprecated/v1"
+import { jointValuesEqual } from "../../src/internal/deprecated/v1/motionStateUpdate"
+import { delay } from "../../src/internal/errorHandling"
 import { env } from "../env"
 
 // Note: Requires a robot on the instance to work
