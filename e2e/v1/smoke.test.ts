@@ -1,6 +1,6 @@
 import { NovaClient } from "@wandelbots/nova-js"
 import { expect, test } from "vitest"
-import { env } from "../env"
+import { env } from "../env.ts"
 
 test("basic smoke test of API client", async () => {
   const nova = new NovaClient({

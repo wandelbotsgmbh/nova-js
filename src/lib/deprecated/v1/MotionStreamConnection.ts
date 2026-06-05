@@ -7,10 +7,10 @@ import type {
 } from "@wandelbots/nova-api/v1"
 import { makeAutoObservable, runInAction } from "mobx"
 import { Vector3 } from "three"
-import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
-import { tryParseJson } from "../../converters"
-import { jointValuesEqual, tcpPoseEqual } from "./motionStateUpdate"
-import type { NovaClient } from "./NovaClient"
+import type { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.ts"
+import { tryParseJson } from "../../converters.ts"
+import { jointValuesEqual, tcpPoseEqual } from "./motionStateUpdate.ts"
+import type { NovaClient } from "./NovaClient.ts"
 
 const MOTION_DELTA_THRESHOLD = 0.0001
 

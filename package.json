@@ -29,13 +29,13 @@
     "dev": "pnpm build && concurrently --names build,app --prefix-colors blue,magenta \"tsdown --watch --no-clean\" \"pnpm --filter example dev\"",
     "dev:pack": "nodemon -w \".\" -e ts -i *.tgz -i dist -x \"pnpm run build && pnpm pack\"",
     "tsc": "concurrently --group --names tsc,tsc:example --prefix-colors blue,magenta \"tsc --pretty --noEmit\" \"pnpm --filter example tsc\"",
-    "lint": "biome check --error-on-warnings .",
+    "biome": "biome check --error-on-warnings .",
     "format": "biome format . --write",
     "knip": "knip",
     "build": "tsdown",
     "test": "pnpm run build && vitest run",
     "e2e": "vitest run --config vitest.e2e.config.ts",
-    "checks": "pnpm format && pnpm build && concurrently --group --timings --names audit,lint,tsc,knip,test \"pnpm audit\" \"pnpm lint\" \"pnpm tsc\" \"pnpm knip\" \"vitest run\""
+    "checks": "pnpm format && pnpm build && concurrently --group --timings --names audit,biome,tsc,knip,test \"pnpm audit\" \"pnpm biome\" \"pnpm tsc\" \"pnpm knip\" \"vitest run\""
   },
   "repository": {
     "type": "git",

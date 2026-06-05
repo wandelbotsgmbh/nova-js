@@ -13,7 +13,10 @@
     // Enables "Go to Definition" when dist and src are distributed together
     "declarationMap": true,
     // https://github.com/microsoft/TypeScript/issues/45995
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "noEmit": true,
+    // Allow importing TS files with extensions
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "test", "e2e"],
   "exclude": ["node_modules"]

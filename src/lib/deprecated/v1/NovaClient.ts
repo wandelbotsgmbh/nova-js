@@ -6,17 +6,17 @@
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v1"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.js"
-import { loginWithAuth0 } from "../../LoginWithAuth0.js"
-import { availableStorage } from "../../availableStorage.js"
-import { parseNovaInstanceUrl } from "../../converters.js"
+import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.ts"
+import { loginWithAuth0 } from "../../LoginWithAuth0.ts"
+import { availableStorage } from "../../availableStorage.ts"
+import { parseNovaInstanceUrl } from "../../converters.ts"
 
-import { isBrowser, isLocalhostDev } from "../../context.js"
-import { ConnectedMotionGroup } from "./ConnectedMotionGroup.js"
-import { JoggerConnection } from "./JoggerConnection.js"
-import { MotionStreamConnection } from "./MotionStreamConnection.js"
-import { NovaCellAPIClient } from "./NovaCellAPIClient.js"
-import { MockNovaInstance } from "./mock/MockNovaInstance.js"
+import { isBrowser, isLocalhostDev } from "../../context.ts"
+import { ConnectedMotionGroup } from "./ConnectedMotionGroup.ts"
+import { JoggerConnection } from "./JoggerConnection.ts"
+import { MotionStreamConnection } from "./MotionStreamConnection.ts"
+import { NovaCellAPIClient } from "./NovaCellAPIClient.ts"
+import { MockNovaInstance } from "./mock/MockNovaInstance.ts"
 
 /** @deprecated Use `NovaConfig` from `@wandelbots/nova-js/v2` instead. */
 export type NovaClientConfig = {
