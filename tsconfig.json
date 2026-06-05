@@ -5,28 +5,16 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "strict": true,
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
     "declaration": true,
-
     // Enables "Go to Definition" when dist and src are distributed together
     "declarationMap": true,
-
-    // Not helpful to check node_modules
-    "skipLibCheck": true,
-
-    // We only want to check stuff, not emit JS files
-    "noEmit": true,
-
-    // Strictness
-    "strict": true,
-    "verbatimModuleSyntax": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "noUncheckedIndexedAccess": true,
     // https://github.com/microsoft/TypeScript/issues/45995
-    "useDefineForClassFields": true,
-
+    "useDefineForClassFields": false,
+    "noEmit": true,
     // Allow importing TS files with extensions
     "allowImportingTsExtensions": true
   },
