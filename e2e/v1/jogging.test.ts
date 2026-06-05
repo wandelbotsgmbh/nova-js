@@ -46,9 +46,13 @@ test("jog a robot somewhat", async () => {
 
   const jogger = await nova.connectJogger(virtualMotionGroup.motion_group)
 
-  function getJoints() {
-    return jogger.motionStream.rapidlyChangingMotionState.state.joint_position
-      .joints
+  function getJoints(): [number, number] {
+    const [a, b] =
+      jogger.motionStream.rapidlyChangingMotionState.state.joint_position.joints
+    if (a === undefined || b === undefined) {
+      throw new Error("Expected at least two joint values")
+    }
+    return [a, b]
   }
 
   let joints = getJoints()
