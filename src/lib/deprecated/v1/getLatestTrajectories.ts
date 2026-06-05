@@ -1,5 +1,5 @@
 import type { GetTrajectoryResponse } from "@wandelbots/nova-api/v1"
-import type { NovaCellAPIClient } from "./NovaCellAPIClient"
+import type { NovaCellAPIClient } from "./NovaCellAPIClient.ts"
 
 let lastMotionIds: Set<string> = new Set()
 

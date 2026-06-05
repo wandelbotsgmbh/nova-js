@@ -1,5 +1,5 @@
 import { isAxiosError } from "axios"
-import { tryStringifyJson } from "./converters"
+import { tryStringifyJson } from "./converters.ts"
 
 export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))

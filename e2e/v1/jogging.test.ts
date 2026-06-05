@@ -3,8 +3,8 @@ import { NovaClient } from "@wandelbots/nova-js/v1"
 import { keyBy } from "lodash-es"
 import { expect, test, vi } from "vitest"
 // biome-ignore lint/style/noRestrictedImports: old code
-import { jointValuesEqual } from "../../src/lib/deprecated/v1/motionStateUpdate"
-import { env } from "../env"
+import { jointValuesEqual } from "../../src/lib/deprecated/v1/motionStateUpdate.ts"
+import { env } from "../env.ts"
 
 // Note: Requires a robot on the instance to work
 

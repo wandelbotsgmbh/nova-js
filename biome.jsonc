@@ -22,7 +22,10 @@
       "correctness": {
         // vscode already warns about these
         "noUnusedVariables": "off",
-        "noUnusedFunctionParameters": "off"
+        "noUnusedFunctionParameters": "off",
+        // Enforce file extensions on relative imports
+        // for node direct TS compatibility and performance
+        "useImportExtensions": "error"
       }
     }
   },
