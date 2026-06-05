@@ -26,12 +26,12 @@ export declare enum ProgramState {
 
 // #region Classes
 export declare class ProgramStateConnection {
-  readonly nova: NovaClient;
   currentProgram: CurrentProgram;
   logs: ProgramRunnerLogEntry[];
   executionState: "idle" | "starting" | "executing" | "stopping";
   currentlyExecutingProgramRunnerId: string | null;
   programStateSocket: AutoReconnectingWebsocket;
+  readonly nova: NovaClient;
   constructor(_: NovaClient);
   handleProgramStateMessage(_: ProgramStateMessage): Promise<void>;
   gotoIdleState(): void;

@@ -6,10 +6,14 @@ export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
   receivedFirstMessage?: MessageEvent
   targetUrl: string
   disposed = false
+  readonly opts: {
+    mock?: v1.MockNovaInstance | v2.MockNovaInstance
+    onDispose?: () => void
+  }
 
   constructor(
     targetUrl: string,
-    readonly opts: {
+    opts: {
       mock?: v1.MockNovaInstance | v2.MockNovaInstance
       onDispose?: () => void
     } = {},
@@ -28,6 +32,7 @@ export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
     })
 
     this.targetUrl = targetUrl
+    this.opts = opts
 
     this.addEventListener("open", () => {
       console.log(`Websocket to ${this.url} opened`)

@@ -17,13 +17,13 @@ export type URLParseOptions = {
 
 // #region Classes
 export declare class AutoReconnectingWebsocket extends ReconnectingWebSocket {
+  receivedFirstMessage?: MessageEvent;
+  targetUrl: string;
+  disposed: boolean;
   readonly opts: {
     mock?: MockNovaInstance$1 | MockNovaInstance;
     onDispose?: () => void;
   };
-  receivedFirstMessage?: MessageEvent;
-  targetUrl: string;
-  disposed: boolean;
   constructor(_: string, _?: {
     mock?: MockNovaInstance$1 | MockNovaInstance;
     onDispose?: () => void;

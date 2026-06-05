@@ -87,13 +87,21 @@ export class NovaCellAPIClient {
   readonly storeCollisionComponents: WithCellId<StoreCollisionComponentsApi>
   readonly storeCollisionScenes: WithCellId<StoreCollisionScenesApi>
 
+  readonly cellId: string
+  readonly opts: BaseConfiguration & {
+    axiosInstance?: AxiosInstance
+    mock?: boolean
+  }
+
   constructor(
-    readonly cellId: string,
-    readonly opts: BaseConfiguration & {
+    cellId: string,
+    opts: BaseConfiguration & {
       axiosInstance?: AxiosInstance
       mock?: boolean
     },
   ) {
+    this.cellId = cellId
+    this.opts = opts
     this.system = this.withUnwrappedResponsesOnly(SystemApi)
     this.cell = this.withUnwrappedResponsesOnly(CellApi)
     this.deviceConfig = this.withCellId(DeviceConfigurationApi)

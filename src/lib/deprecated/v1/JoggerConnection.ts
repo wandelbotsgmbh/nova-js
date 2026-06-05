@@ -36,10 +36,16 @@ export class JoggerConnection {
     return new JoggerConnection(motionStream, opts)
   }
 
+  readonly motionStream: MotionStreamConnection
+  readonly opts: JoggerConnectionOpts
+
   constructor(
-    readonly motionStream: MotionStreamConnection,
-    readonly opts: JoggerConnectionOpts = {},
-  ) {}
+    motionStream: MotionStreamConnection,
+    opts: JoggerConnectionOpts = {},
+  ) {
+    this.motionStream = motionStream
+    this.opts = opts
+  }
 
   get motionGroupId() {
     return this.motionStream.motionGroupId
