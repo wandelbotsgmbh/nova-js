@@ -60,13 +60,74 @@ export type WithUnwrappedAxiosResponse<T> = {
  * @deprecated Use `NovaAPIClient` from `@wandelbots/nova-js/v2` instead.
  */
 export class NovaCellAPIClient {
+  readonly system: WithUnwrappedAxiosResponse<SystemApi>
+  readonly cell: WithUnwrappedAxiosResponse<CellApi>
+  readonly motionGroup: WithCellId<MotionGroupApi>
+  readonly motionGroupModels: WithUnwrappedAxiosResponse<MotionGroupModelsApi>
+  readonly controller: WithCellId<ControllerApi>
+  readonly controllerIOs: WithCellId<ControllerInputsOutputsApi>
+  readonly trajectoryPlanning: WithCellId<TrajectoryPlanningApi>
+  readonly trajectoryExecution: WithCellId<TrajectoryExecutionApi>
+  readonly trajectoryCaching: WithCellId<TrajectoryCachingApi>
+  readonly application: WithCellId<ApplicationApi>
+  readonly applicationGlobal: WithUnwrappedAxiosResponse<ApplicationApi>
+  readonly jogging: WithCellId<JoggingApi>
+  readonly kinematics: WithCellId<KinematicsApi>
+  readonly busInputsOutputs: WithCellId<BUSInputsOutputsApi>
+  readonly virtualController: WithCellId<VirtualControllerApi>
+  readonly virtualControllerBehavior: WithCellId<VirtualControllerBehaviorApi>
+  readonly virtualControllerIOs: WithCellId<VirtualControllerInputsOutputsApi>
+  readonly storeObject: WithCellId<StoreObjectApi>
+  readonly storeCollisionComponents: WithCellId<StoreCollisionComponentsApi>
+  readonly storeCollisionSetups: WithCellId<StoreCollisionSetupsApi>
+  readonly program: WithCellId<ProgramApi>
+  readonly license: WithUnwrappedAxiosResponse<LicenseApi>
+  readonly novaCloud: WithUnwrappedAxiosResponse<NOVACloudApi>
+  readonly robotConfigurations: WithUnwrappedAxiosResponse<RobotConfigurationsApi>
+  readonly version: WithUnwrappedAxiosResponse<VersionApi>
+  readonly session: WithUnwrappedAxiosResponse<SessionApi>
+
   constructor(
     readonly cellId: string,
     readonly opts: BaseConfiguration & {
       axiosInstance?: AxiosInstance
       mock?: boolean
     },
-  ) {}
+  ) {
+    this.system = this.withUnwrappedResponsesOnly(SystemApi)
+    this.cell = this.withUnwrappedResponsesOnly(CellApi)
+    this.motionGroup = this.withCellId(MotionGroupApi)
+    this.motionGroupModels =
+      this.withUnwrappedResponsesOnly(MotionGroupModelsApi)
+    this.controller = this.withCellId(ControllerApi)
+    this.controllerIOs = this.withCellId(ControllerInputsOutputsApi)
+    this.trajectoryPlanning = this.withCellId(TrajectoryPlanningApi)
+    this.trajectoryExecution = this.withCellId(TrajectoryExecutionApi)
+    this.trajectoryCaching = this.withCellId(TrajectoryCachingApi)
+    this.application = this.withCellId(ApplicationApi)
+    this.applicationGlobal = this.withUnwrappedResponsesOnly(ApplicationApi)
+    this.jogging = this.withCellId(JoggingApi)
+    this.kinematics = this.withCellId(KinematicsApi)
+    this.busInputsOutputs = this.withCellId(BUSInputsOutputsApi)
+    this.virtualController = this.withCellId(VirtualControllerApi)
+    this.virtualControllerBehavior = this.withCellId(
+      VirtualControllerBehaviorApi,
+    )
+    this.virtualControllerIOs = this.withCellId(
+      VirtualControllerInputsOutputsApi,
+    )
+    this.storeObject = this.withCellId(StoreObjectApi)
+    this.storeCollisionComponents = this.withCellId(StoreCollisionComponentsApi)
+    this.storeCollisionSetups = this.withCellId(StoreCollisionSetupsApi)
+    this.program = this.withCellId(ProgramApi)
+    this.license = this.withUnwrappedResponsesOnly(LicenseApi)
+    this.novaCloud = this.withUnwrappedResponsesOnly(NOVACloudApi)
+    this.robotConfigurations = this.withUnwrappedResponsesOnly(
+      RobotConfigurationsApi,
+    )
+    this.version = this.withUnwrappedResponsesOnly(VersionApi)
+    this.session = this.withUnwrappedResponsesOnly(SessionApi)
+  }
 
   /**
    * Some TypeScript sorcery which alters the API class methods so you don't
@@ -143,52 +204,4 @@ export class NovaCellAPIClient {
 
     return apiClient as WithUnwrappedAxiosResponse<T>
   }
-
-  readonly system = this.withUnwrappedResponsesOnly(SystemApi)
-  readonly cell = this.withUnwrappedResponsesOnly(CellApi)
-
-  readonly motionGroup = this.withCellId(MotionGroupApi)
-  readonly motionGroupModels =
-    this.withUnwrappedResponsesOnly(MotionGroupModelsApi)
-
-  readonly controller = this.withCellId(ControllerApi)
-
-  readonly controllerIOs = this.withCellId(ControllerInputsOutputsApi)
-
-  readonly trajectoryPlanning = this.withCellId(TrajectoryPlanningApi)
-  readonly trajectoryExecution = this.withCellId(TrajectoryExecutionApi)
-  readonly trajectoryCaching = this.withCellId(TrajectoryCachingApi)
-
-  readonly application = this.withCellId(ApplicationApi)
-  readonly applicationGlobal = this.withUnwrappedResponsesOnly(ApplicationApi)
-
-  readonly jogging = this.withCellId(JoggingApi)
-
-  readonly kinematics = this.withCellId(KinematicsApi)
-
-  readonly busInputsOutputs = this.withCellId(BUSInputsOutputsApi)
-
-  readonly virtualController = this.withCellId(VirtualControllerApi)
-  readonly virtualControllerBehavior = this.withCellId(
-    VirtualControllerBehaviorApi,
-  )
-  readonly virtualControllerIOs = this.withCellId(
-    VirtualControllerInputsOutputsApi,
-  )
-
-  readonly storeObject = this.withCellId(StoreObjectApi)
-  readonly storeCollisionComponents = this.withCellId(
-    StoreCollisionComponentsApi,
-  )
-  readonly storeCollisionSetups = this.withCellId(StoreCollisionSetupsApi)
-
-  readonly program = this.withCellId(ProgramApi)
-
-  readonly license = this.withUnwrappedResponsesOnly(LicenseApi)
-  readonly novaCloud = this.withUnwrappedResponsesOnly(NOVACloudApi)
-  readonly robotConfigurations = this.withUnwrappedResponsesOnly(
-    RobotConfigurationsApi,
-  )
-  readonly version = this.withUnwrappedResponsesOnly(VersionApi)
-  readonly session = this.withUnwrappedResponsesOnly(SessionApi)
 }

@@ -46,9 +46,6 @@ export class NovaAPIClient {
 export class NovaCellAPIClient {
   cellId
   opts
-  constructor(_, _) {}
-  withCellId(_) {}
-  withUnwrappedResponsesOnly(_) {}
   system
   cell
   motionGroup
@@ -75,6 +72,9 @@ export class NovaCellAPIClient {
   robotConfigurations
   version
   session
+  constructor(_, _) {}
+  withCellId(_) {}
+  withUnwrappedResponsesOnly(_) {}
 }
 export class NovaClient {
   api
