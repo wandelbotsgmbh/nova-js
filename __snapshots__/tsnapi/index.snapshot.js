@@ -3,6 +3,10 @@
  */
 // #region Classes
 export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
+  opts
+  receivedFirstMessage
+  targetUrl
+  disposed
   constructor(_, _) {}
   changeUrl(_) {}
   sendJson(_) {}
@@ -13,6 +17,12 @@ export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
   async nextMessage() {}
 }
 export class NovaClient {
+  api
+  config
+  mock
+  instanceUrl
+  authPromise
+  accessToken
   constructor(_) {}
   async renewAuthentication() {}
   makeWebsocketURL(_) {}

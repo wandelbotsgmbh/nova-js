@@ -5,15 +5,32 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "strict": true,
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
-    "declaration": true,
+
+    // Strictness
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "noUncheckedIndexedAccess": true,
+
     // Enables "Go to Definition" when dist and src are distributed together
+    "declaration": true,
     "declarationMap": true,
+
+    // Not helpful to check node_modules
+    "skipLibCheck": true,
+
+    // We only want to check stuff, rolldown does the build
+    "noEmit": true,
+
     // https://github.com/microsoft/TypeScript/issues/45995
-    "useDefineForClassFields": false
+    "useDefineForClassFields": true,
+
+    // Allow importing TS files with extensions for
+    // better explicitness and performance
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "test", "e2e"],
   "exclude": ["node_modules"]

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 // biome-ignore lint/style/noRestrictedImports: internal unit testing
-import { getAuth0Config } from "../../../src/lib/LoginWithAuth0"
+import { getAuth0Config } from "../../../src/lib/LoginWithAuth0.ts"
 
 test("local auth0 login detection", () => {
   expect(() =>
