@@ -1,13 +1,13 @@
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import { loginWithAuth0 } from "../../LoginWithAuth0"
-import { AutoReconnectingWebsocket } from "../AutoReconnectingWebsocket"
-import { availableStorage } from "../availableStorage"
-import { isLocalhostDev } from "../context"
-import { parseNovaInstanceUrl } from "../converters"
-import { NovaAPIClient } from "./NovaAPIClient"
+import { AutoReconnectingWebsocket } from "./AutoReconnectingWebsocket"
+import { availableStorage } from "./availableStorage"
+import { isLocalhostDev } from "./context"
+import { parseNovaInstanceUrl } from "./converters"
+import { loginWithAuth0 } from "./LoginWithAuth0"
 import { MockNovaInstance } from "./mock/MockNovaInstance"
+import { NovaAPIClient } from "./NovaAPIClient"
 
 export type NovaConfig = {
   /**
@@ -90,6 +90,27 @@ export class Nova {
                 }
               } catch (err) {
                 return Promise.reject(err)
+              }
+            } else if (
+              error.response?.status === 403 &&
+              !error.config?.url?.split(/[?#]/)[0].endsWith("/session")
+            ) {
+              // If we hit a 403, the user is authenticated but may lack access
+              // to the instance entirely. Check the session to find out.
+              try {
+                const session = await this.api.session.getSession()
+                if (
+                  session.session_id !== "default" &&
+                  session.capabilities.length === 0
+                ) {
+                  // An authenticated user with no capabilities has no access;
+                  // send them to the instance url, which renders the access
+                  // denied screen.
+                  window.location.href = this.instanceUrl.href
+                }
+              } catch {
+                // Couldn't determine access; fall through to bubble the
+                // original 403 error below.
               }
             } else if (error.response?.status === 503) {
               // Check if the server as a whole is down

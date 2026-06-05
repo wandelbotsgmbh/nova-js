@@ -11,16 +11,16 @@
       "require": "./dist/index.cjs"
     },
     "./v1": {
-      "import": "./dist/lib/deprecated/v1/index.mjs",
-      "require": "./dist/lib/deprecated/v1/index.cjs"
+      "import": "./dist/v1/index.mjs",
+      "require": "./dist/v1/index.cjs"
     },
     "./v2": {
-      "import": "./dist/lib/v2/index.mjs",
-      "require": "./dist/lib/v2/index.cjs"
+      "import": "./dist/v2/index.mjs",
+      "require": "./dist/v2/index.cjs"
     },
     "./test-utils": {
-      "import": "./dist/test-utils/index.mjs",
-      "require": "./dist/test-utils/index.cjs"
+      "import": "./dist/test-utils.mjs",
+      "require": "./dist/test-utils.cjs"
     }
   },
   "main": "./dist/index.mjs",
@@ -75,7 +75,7 @@
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.17.0",
     "@types/three": "^0.183.1",
-    "@wandelbots/nova-api": "26.4.0",
+    "@wandelbots/nova-api": "26.4.1",
     "axios": "^1.15.2",
     "mobx": "^6.15.0",
     "path-to-regexp": "^8.4.0",

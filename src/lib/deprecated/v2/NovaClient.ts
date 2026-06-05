@@ -2,13 +2,13 @@
 import type { Configuration as BaseConfiguration } from "@wandelbots/nova-api/v2"
 import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
-import { loginWithAuth0 } from "../../../LoginWithAuth0"
 import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket"
 import { availableStorage } from "../../availableStorage"
 import { parseNovaInstanceUrl } from "../../converters"
+import { loginWithAuth0 } from "../../LoginWithAuth0"
 
 import { isLocalhostDev } from "../../context"
-import { MockNovaInstance } from "../../v2/mock/MockNovaInstance"
+import { MockNovaInstance } from "../../mock/MockNovaInstance"
 import { NovaCellAPIClient } from "./NovaCellAPIClient"
 
 /** @deprecated Use `NovaClientConfig` from `Nova` instead. */
