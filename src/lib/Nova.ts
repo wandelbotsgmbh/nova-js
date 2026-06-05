@@ -93,7 +93,7 @@ export class Nova {
               }
             } else if (
               error.response?.status === 403 &&
-              !error.config?.url?.split(/[?#]/)[0].endsWith("/session")
+              !error.config?.url?.split(/[?#]/)[0]?.endsWith("/session")
             ) {
               // If we hit a 403, the user is authenticated but may lack access
               // to the instance entirely. Check the session to find out.

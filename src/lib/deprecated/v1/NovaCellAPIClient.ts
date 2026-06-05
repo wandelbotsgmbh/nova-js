@@ -60,13 +60,67 @@ export type WithUnwrappedAxiosResponse<T> = {
  * @deprecated Use `NovaAPIClient` from `@wandelbots/nova-js/v2` instead.
  */
 export class NovaCellAPIClient {
+  readonly system: WithUnwrappedAxiosResponse<SystemApi>
+  readonly cell: WithUnwrappedAxiosResponse<CellApi>
+  readonly deviceConfig: WithCellId<DeviceConfigurationApi>
+  readonly motionGroup: WithCellId<MotionGroupApi>
+  readonly motionGroupInfos: WithCellId<MotionGroupInfosApi>
+  readonly controller: WithCellId<ControllerApi>
+  readonly program: WithCellId<ProgramApi>
+  readonly programValues: WithCellId<ProgramValuesApi>
+  readonly controllerIOs: WithCellId<ControllerIOsApi>
+  readonly motionGroupKinematic: WithCellId<MotionGroupKinematicApi>
+  readonly motion: WithCellId<MotionApi>
+  readonly coordinateSystems: WithCellId<CoordinateSystemsApi>
+  readonly application: WithCellId<ApplicationApi>
+  readonly applicationGlobal: WithUnwrappedAxiosResponse<ApplicationApi>
+  readonly motionGroupJogging: WithCellId<MotionGroupJoggingApi>
+  readonly virtualRobot: WithCellId<VirtualRobotApi>
+  readonly virtualRobotSetup: WithCellId<VirtualRobotSetupApi>
+  readonly virtualRobotMode: WithCellId<VirtualRobotModeApi>
+  readonly virtualRobotBehavior: WithCellId<VirtualRobotBehaviorApi>
+  readonly libraryProgramMetadata: WithCellId<LibraryProgramMetadataApi>
+  readonly libraryProgram: WithCellId<LibraryProgramApi>
+  readonly libraryRecipeMetadata: WithCellId<LibraryRecipeMetadataApi>
+  readonly libraryRecipe: WithCellId<LibraryRecipeApi>
+  readonly storeObject: WithCellId<StoreObjectApi>
+  readonly storeCollisionComponents: WithCellId<StoreCollisionComponentsApi>
+  readonly storeCollisionScenes: WithCellId<StoreCollisionScenesApi>
+
   constructor(
     readonly cellId: string,
     readonly opts: BaseConfiguration & {
       axiosInstance?: AxiosInstance
       mock?: boolean
     },
-  ) {}
+  ) {
+    this.system = this.withUnwrappedResponsesOnly(SystemApi)
+    this.cell = this.withUnwrappedResponsesOnly(CellApi)
+    this.deviceConfig = this.withCellId(DeviceConfigurationApi)
+    this.motionGroup = this.withCellId(MotionGroupApi)
+    this.motionGroupInfos = this.withCellId(MotionGroupInfosApi)
+    this.controller = this.withCellId(ControllerApi)
+    this.program = this.withCellId(ProgramApi)
+    this.programValues = this.withCellId(ProgramValuesApi)
+    this.controllerIOs = this.withCellId(ControllerIOsApi)
+    this.motionGroupKinematic = this.withCellId(MotionGroupKinematicApi)
+    this.motion = this.withCellId(MotionApi)
+    this.coordinateSystems = this.withCellId(CoordinateSystemsApi)
+    this.application = this.withCellId(ApplicationApi)
+    this.applicationGlobal = this.withUnwrappedResponsesOnly(ApplicationApi)
+    this.motionGroupJogging = this.withCellId(MotionGroupJoggingApi)
+    this.virtualRobot = this.withCellId(VirtualRobotApi)
+    this.virtualRobotSetup = this.withCellId(VirtualRobotSetupApi)
+    this.virtualRobotMode = this.withCellId(VirtualRobotModeApi)
+    this.virtualRobotBehavior = this.withCellId(VirtualRobotBehaviorApi)
+    this.libraryProgramMetadata = this.withCellId(LibraryProgramMetadataApi)
+    this.libraryProgram = this.withCellId(LibraryProgramApi)
+    this.libraryRecipeMetadata = this.withCellId(LibraryRecipeMetadataApi)
+    this.libraryRecipe = this.withCellId(LibraryRecipeApi)
+    this.storeObject = this.withCellId(StoreObjectApi)
+    this.storeCollisionComponents = this.withCellId(StoreCollisionComponentsApi)
+    this.storeCollisionScenes = this.withCellId(StoreCollisionScenesApi)
+  }
 
   /**
    * Some TypeScript sorcery which alters the API class methods so you don't
@@ -143,45 +197,4 @@ export class NovaCellAPIClient {
 
     return apiClient as WithUnwrappedAxiosResponse<T>
   }
-
-  readonly system = this.withUnwrappedResponsesOnly(SystemApi)
-  readonly cell = this.withUnwrappedResponsesOnly(CellApi)
-
-  readonly deviceConfig = this.withCellId(DeviceConfigurationApi)
-
-  readonly motionGroup = this.withCellId(MotionGroupApi)
-  readonly motionGroupInfos = this.withCellId(MotionGroupInfosApi)
-
-  readonly controller = this.withCellId(ControllerApi)
-
-  readonly program = this.withCellId(ProgramApi)
-  readonly programValues = this.withCellId(ProgramValuesApi)
-
-  readonly controllerIOs = this.withCellId(ControllerIOsApi)
-
-  readonly motionGroupKinematic = this.withCellId(MotionGroupKinematicApi)
-  readonly motion = this.withCellId(MotionApi)
-
-  readonly coordinateSystems = this.withCellId(CoordinateSystemsApi)
-
-  readonly application = this.withCellId(ApplicationApi)
-  readonly applicationGlobal = this.withUnwrappedResponsesOnly(ApplicationApi)
-
-  readonly motionGroupJogging = this.withCellId(MotionGroupJoggingApi)
-
-  readonly virtualRobot = this.withCellId(VirtualRobotApi)
-  readonly virtualRobotSetup = this.withCellId(VirtualRobotSetupApi)
-  readonly virtualRobotMode = this.withCellId(VirtualRobotModeApi)
-  readonly virtualRobotBehavior = this.withCellId(VirtualRobotBehaviorApi)
-
-  readonly libraryProgramMetadata = this.withCellId(LibraryProgramMetadataApi)
-  readonly libraryProgram = this.withCellId(LibraryProgramApi)
-  readonly libraryRecipeMetadata = this.withCellId(LibraryRecipeMetadataApi)
-  readonly libraryRecipe = this.withCellId(LibraryRecipeApi)
-
-  readonly storeObject = this.withCellId(StoreObjectApi)
-  readonly storeCollisionComponents = this.withCellId(
-    StoreCollisionComponentsApi,
-  )
-  readonly storeCollisionScenes = this.withCellId(StoreCollisionScenesApi)
 }
