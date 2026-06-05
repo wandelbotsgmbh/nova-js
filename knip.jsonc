@@ -8,7 +8,8 @@
       "entry": [
         "src/index.ts",
         "src/lib/deprecated/v1/index.ts",
-        "src/lib/v2/index.ts"
+        "src/lib/v2/index.ts",
+        "src/test-utils/index.ts"
       ]
     }
   }
