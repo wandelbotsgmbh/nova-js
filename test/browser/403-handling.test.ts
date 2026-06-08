@@ -70,6 +70,26 @@ function stubBrowserWindow(origin = "https://example.com") {
   return location
 }
 
+/**
+ * Asserts that the given request promise does not settle within a short
+ * window. When we redirect to the access denied screen we deliberately leave
+ * the request pending so the caller doesn't flash an error state before the
+ * navigation takes effect.
+ */
+async function expectPendingWhileRedirecting(request: Promise<unknown>) {
+  const pending = Symbol("pending")
+  const outcome = await Promise.race([
+    request.then(
+      () => "resolved" as const,
+      () => "rejected" as const,
+    ),
+    new Promise<typeof pending>((resolve) =>
+      setTimeout(() => resolve(pending), 50),
+    ),
+  ])
+  expect(outcome).toBe(pending)
+}
+
 test("redirects to the access denied screen on a 403 when the session has no capabilities", async () => {
   const location = stubBrowserWindow()
 
@@ -89,9 +109,11 @@ test("redirects to the access denied screen on a 403 when the session has no cap
     },
   })
 
-  await expect(
+  // The error must not bubble, otherwise the caller flashes an error state
+  // before the redirect takes effect
+  await expectPendingWhileRedirecting(
     nova.api.controller.listRobotControllers("cell"),
-  ).rejects.toThrow()
+  )
 
   // The user is authenticated but lacks access -> send them to the NOVA
   // instance homescreen, where the access denied screen is rendered
@@ -112,9 +134,11 @@ test("redirects to the access denied screen on a 403 when the session endpoint i
     },
   })
 
-  await expect(
+  // The error must not bubble, otherwise the caller flashes an error state
+  // before the redirect takes effect
+  await expectPendingWhileRedirecting(
     nova.api.controller.listRobotControllers("cell"),
-  ).rejects.toThrow()
+  )
 
   expect(location.href).toBe("https://example.com/")
 })
