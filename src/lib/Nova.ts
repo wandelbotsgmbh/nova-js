@@ -108,9 +108,19 @@ export class Nova {
                   // denied screen.
                   window.location.href = this.instanceUrl.href
                 }
-              } catch {
-                // Couldn't determine access; fall through to bubble the
-                // original 403 error below.
+              } catch (sessionError) {
+                // The session endpoint itself returns a 403 when the user is
+                // not assigned to a cell at all, which is equivalent to an
+                // authenticated user with non-default empty capabilities ->
+                // send them to the access denied screen.
+                if (
+                  isAxiosError(sessionError) &&
+                  sessionError.response?.status === 403
+                ) {
+                  window.location.href = this.instanceUrl.href
+                }
+                // Otherwise couldn't determine access; fall through to bubble
+                // the original 403 error below.
               }
             } else if (error.response?.status === 503) {
               // Check if the server as a whole is down

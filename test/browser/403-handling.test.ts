@@ -12,14 +12,16 @@ afterEach(() => {
  * Adapter that fails every request with a 403, simulating a Nova instance
  * rejecting the request because the authenticated user lacks the required
  * capability. The `session` endpoint is special-cased to return the provided
- * session response so the access check can be performed.
+ * session response so the access check can be performed. Pass `"403"` as the
+ * session response to make the `session` endpoint itself fail with a 403,
+ * simulating a user who is not assigned to any cell.
  */
 function make403Adapter(
   sessionResponse: unknown,
 ): AxiosRequestConfig["adapter"] {
   return async (config) => {
     const url = `${config.baseURL ?? ""}${config.url ?? ""}`
-    if (url.endsWith("/session")) {
+    if (url.endsWith("/session") && sessionResponse !== "403") {
       return {
         status: 200,
         statusText: "OK",
@@ -93,6 +95,27 @@ test("redirects to the access denied screen on a 403 when the session has no cap
 
   // The user is authenticated but lacks access -> send them to the NOVA
   // instance homescreen, where the access denied screen is rendered
+  expect(location.href).toBe("https://example.com/")
+})
+
+test("redirects to the access denied screen on a 403 when the session endpoint itself returns a 403", async () => {
+  const location = stubBrowserWindow()
+
+  const nova = new Nova({
+    instanceUrl: "https://example.com",
+    accessToken: "authenticated-but-unassigned-token",
+    baseOptions: {
+      // The session endpoint now returns a 403 when the user is not assigned
+      // to any cell at all, which we treat as equivalent to non-default empty
+      // capabilities.
+      adapter: make403Adapter("403"),
+    },
+  })
+
+  await expect(
+    nova.api.controller.listRobotControllers("cell"),
+  ).rejects.toThrow()
+
   expect(location.href).toBe("https://example.com/")
 })
 
