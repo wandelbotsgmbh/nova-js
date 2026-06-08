@@ -97,37 +97,47 @@ export class Nova {
             ) {
               // If we hit a 403, the user is authenticated but may lack access
               // to the instance entirely. Check the session to find out.
+              let redirectToAccessDenied = false
               try {
                 const session = await this.api.session.getSession()
                 if (
                   session.session_id !== "default" &&
                   session.capabilities.length === 0
                 ) {
-                  // An authenticated user with no capabilities has no access;
-                  // send them to the instance url, which renders the access
-                  // denied screen.
-                  window.location.href = this.instanceUrl.href
+                  // An authenticated user with no capabilities has no access.
+                  redirectToAccessDenied = true
                 }
               } catch (sessionError) {
                 // The session endpoint itself returns a 403 when the user is
-                // not assigned to a cell at all, which is equivalent to an
-                // authenticated user with non-default empty capabilities ->
-                // send them to the access denied screen.
+                // not assigned to an instance at all, which we treat as equivalent to
+                // an authenticated user with empty capabilities.
                 if (
                   isAxiosError(sessionError) &&
                   sessionError.response?.status === 403
                 ) {
-                  window.location.href = this.instanceUrl.href
+                  redirectToAccessDenied = true
                 }
                 // Otherwise couldn't determine access; fall through to bubble
                 // the original 403 error below.
+              }
+
+              if (redirectToAccessDenied) {
+                // Send them to the instance url, which renders the access
+                // denied screen. Return a promise that never settles so the
+                // caller doesn't flash an error state before the navigation
+                // takes effect.
+                window.location.href = this.instanceUrl.href
+                return new Promise(() => {})
               }
             } else if (error.response?.status === 503) {
               // Check if the server as a whole is down
               const res = await fetch(window.location.href)
               if (res.status === 503) {
-                // Go to 503 page
+                // Go to 503 page. Return a promise that never settles so the
+                // caller doesn't flash an error state before the reload takes
+                // effect.
                 window.location.reload()
+                return new Promise(() => {})
               }
             }
           }

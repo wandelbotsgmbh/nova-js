@@ -45,6 +45,25 @@ function stubBrowserWindow(reload: () => void) {
   })
 }
 
+/**
+ * Asserts that the given request promise does not settle within a short
+ * window. When we reload the page we deliberately leave the request pending so
+ * the caller doesn't flash an error state before the reload takes effect.
+ */
+async function expectPendingWhileReloading(request: Promise<unknown>) {
+  const pending = Symbol("pending")
+  const outcome = await Promise.race([
+    request.then(
+      () => "resolved" as const,
+      () => "rejected" as const,
+    ),
+    new Promise<typeof pending>((resolve) =>
+      setTimeout(() => resolve(pending), 50),
+    ),
+  ])
+  expect(outcome).toBe(pending)
+}
+
 test("reloads the page when a 503 indicates the whole instance is down", async () => {
   const reload = vi.fn()
   stubBrowserWindow(reload)
@@ -59,9 +78,11 @@ test("reloads the page when a 503 indicates the whole instance is down", async (
     baseOptions: { adapter: make503Adapter() },
   })
 
-  await expect(
+  // The error must not bubble, otherwise the caller flashes an error state
+  // before the reload takes effect
+  await expectPendingWhileReloading(
     nova.api.controller.listRobotControllers("cell"),
-  ).rejects.toThrow()
+  )
 
   expect(fetch).toHaveBeenCalledWith("https://example.com/app")
   expect(reload).toHaveBeenCalledOnce()
