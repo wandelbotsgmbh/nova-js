@@ -137,7 +137,7 @@ export class Nova {
                 // Go to 503 page. Return a promise that never settles so the
                 // caller doesn't flash an error state before the reload takes
                 // effect.
-                return guardedPageReload()
+                return guardedPageReload("503_server_unavailable")
               }
             }
           }

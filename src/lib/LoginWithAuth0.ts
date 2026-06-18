@@ -49,7 +49,7 @@ export const loginWithAuth0 = async (
     // When deployed on the instance itself, our auth is handled by cookies
     // and no access token is needed-- just need to reload the page and it'll
     // login again / set cookie as needed
-    return guardedPageReload()
+    return guardedPageReload("cloud_instance_auth")
   }
 
   // If we're on localhost or another domain, we need to do the full oauth flow

@@ -131,7 +131,7 @@ export class NovaClient {
               const res = await fetch(window.location.href)
               if (res.status === 503) {
                 // Go to 503 page
-                return guardedPageReload()
+                return guardedPageReload("503_server_unavailable")
               }
             }
           }

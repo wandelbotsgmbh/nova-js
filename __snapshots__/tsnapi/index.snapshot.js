@@ -37,7 +37,7 @@ export class NovaClient {
 // #region Functions
 export function degreesToRadians(_) {}
 export function delay(_) {}
-export function guardedPageReload() {}
+export function guardedPageReload(_) {}
 export function isSameCoordinateSystem(_, _) {}
 export function makeErrorMessage(_) {}
 export function makeShortErrorMessage(_) {}
