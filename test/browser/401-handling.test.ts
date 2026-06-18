@@ -30,7 +30,12 @@ function make401Adapter(): AxiosRequestConfig["adapter"] {
   }
 }
 
-function stubBrowserWindow(reload: () => void, origin = "https://example.com") {
+function stubBrowserWindow(
+  reload: () => void,
+  origin = "https://example.com",
+  sessionStorageData: Record<string, string> = {},
+) {
+  const sessionStorageStore: Record<string, string> = { ...sessionStorageData }
   vi.stubGlobal("window", {
     location: {
       href: `${origin}/app`,
@@ -45,6 +50,15 @@ function stubBrowserWindow(reload: () => void, origin = "https://example.com") {
       getItem: () => null,
       setItem: () => {},
       removeItem: () => {},
+    },
+    sessionStorage: {
+      getItem: (key: string) => sessionStorageStore[key] ?? null,
+      setItem: (key: string, value: string) => {
+        sessionStorageStore[key] = value
+      },
+      removeItem: (key: string) => {
+        delete sessionStorageStore[key]
+      },
     },
   })
 }
@@ -66,4 +80,24 @@ test("reloads the page to re-authenticate on a 401 when deployed on the instance
   ).rejects.toThrow()
 
   expect(reload).toHaveBeenCalledOnce()
+})
+
+test("throws on a 401 when a reload was already attempted recently (redirect loop guard)", async () => {
+  const reload = vi.fn()
+  // Simulate a recent reload by pre-populating the sessionStorage timestamp
+  stubBrowserWindow(reload, "https://example.com", {
+    nova_reload_at: String(Date.now()),
+  })
+
+  const nova = new Nova({
+    instanceUrl: "https://example.com",
+    accessToken: "expired-token",
+    baseOptions: { adapter: make401Adapter() },
+  })
+
+  await expect(
+    nova.api.controller.listRobotControllers("cell"),
+  ).rejects.toThrow("Page reload loop detected")
+
+  expect(reload).not.toHaveBeenCalled()
 })

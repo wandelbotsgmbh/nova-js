@@ -10,6 +10,7 @@ import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.ts"
 import { loginWithAuth0 } from "../../LoginWithAuth0.ts"
 import { availableStorage } from "../../availableStorage.ts"
 import { parseNovaInstanceUrl } from "../../converters.ts"
+import { guardedPageReload } from "../../errorHandling.ts"
 
 import { isBrowser, isLocalhostDev } from "../../context.ts"
 import { ConnectedMotionGroup } from "./ConnectedMotionGroup.ts"
@@ -130,7 +131,7 @@ export class NovaClient {
               const res = await fetch(window.location.href)
               if (res.status === 503) {
                 // Go to 503 page
-                window.location.reload()
+                return guardedPageReload()
               }
             }
           }

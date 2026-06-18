@@ -5,6 +5,7 @@ import { AutoReconnectingWebsocket } from "./AutoReconnectingWebsocket.ts"
 import { availableStorage } from "./availableStorage.ts"
 import { isLocalhostDev } from "./context.ts"
 import { parseNovaInstanceUrl } from "./converters.ts"
+import { guardedPageReload } from "./errorHandling.ts"
 import { loginWithAuth0 } from "./LoginWithAuth0.ts"
 import { MockNovaInstance } from "./mock/MockNovaInstance.ts"
 import { NovaAPIClient } from "./NovaAPIClient.ts"
@@ -136,8 +137,7 @@ export class Nova {
                 // Go to 503 page. Return a promise that never settles so the
                 // caller doesn't flash an error state before the reload takes
                 // effect.
-                window.location.reload()
-                return new Promise(() => {})
+                return guardedPageReload()
               }
             }
           }
