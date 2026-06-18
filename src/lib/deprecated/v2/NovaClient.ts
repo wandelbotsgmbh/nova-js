@@ -5,6 +5,7 @@ import axios, { isAxiosError } from "axios"
 import { AutoReconnectingWebsocket } from "../../AutoReconnectingWebsocket.ts"
 import { availableStorage } from "../../availableStorage.ts"
 import { parseNovaInstanceUrl } from "../../converters.ts"
+import { guardedPageReload } from "../../errorHandling.ts"
 import { loginWithAuth0 } from "../../LoginWithAuth0.ts"
 
 import { isLocalhostDev } from "../../context.ts"
@@ -123,7 +124,7 @@ export class NovaClient {
               const res = await fetch(window.location.href)
               if (res.status === 503) {
                 // Go to 503 page
-                window.location.reload()
+                return guardedPageReload("503_server_unavailable")
               }
             }
           }

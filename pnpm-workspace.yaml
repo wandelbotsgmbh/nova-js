@@ -17,6 +17,7 @@ packages:
 
 overrides:
   axios: ">=1.15.2"
+  form-data: ">=4.0.6"
   follow-redirects: ">=1.15.12"
   postcss: ">=8.5.10"
   brace-expansion: ">=5.0.6"

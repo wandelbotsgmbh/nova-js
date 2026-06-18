@@ -42,6 +42,11 @@ function stubBrowserWindow(reload: () => void) {
       setItem: () => {},
       removeItem: () => {},
     },
+    sessionStorage: {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+    },
   })
 }
 

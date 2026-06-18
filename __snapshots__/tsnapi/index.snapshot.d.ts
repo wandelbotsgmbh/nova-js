@@ -57,6 +57,7 @@ export declare class NovaClient {
 // #region Functions
 export declare function degreesToRadians(_: number): number;
 export declare function delay(_: number): Promise<unknown>;
+export declare function guardedPageReload(_: string): Promise<never>;
 export declare function isSameCoordinateSystem(_: string | undefined, _: string | undefined): boolean;
 export declare function makeErrorMessage(_: unknown): string;
 export declare function makeShortErrorMessage(_: unknown): string;

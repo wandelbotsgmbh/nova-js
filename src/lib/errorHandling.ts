@@ -41,3 +41,25 @@ export function makeErrorMessage(err: unknown): string {
 
   return `${err}`
 }
+
+/**
+ * Reloads the page with protection against loops.
+ * Allows at most one reload per 10 seconds; otherwise throws
+ * an error.
+ */
+export function guardedPageReload(key: string): Promise<never> {
+  const RELOAD_KEY = `novajs_reload_guard:${key}`
+  const RELOAD_COOLDOWN_MS = 10_000
+  const lastReloadAt = Number(window.sessionStorage.getItem(RELOAD_KEY) ?? "0")
+
+  if (Date.now() - lastReloadAt < RELOAD_COOLDOWN_MS) {
+    throw new Error(
+      `Unhandled error caused a reload (${key}), but a reload was already attempted recently. Aborting to prevent reload loop.`,
+    )
+  }
+
+  window.sessionStorage.setItem(RELOAD_KEY, String(Date.now()))
+  window.location.reload()
+
+  return new Promise(() => {}) // never settles, the page should be reloading
+}

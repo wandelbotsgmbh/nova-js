@@ -1,3 +1,5 @@
+import { guardedPageReload } from "./errorHandling.ts"
+
 /**
  * Mapping of stages to Auth0 configurations.
  * The client ids are public identifiers for a specific auth0 application
@@ -47,10 +49,7 @@ export const loginWithAuth0 = async (
     // When deployed on the instance itself, our auth is handled by cookies
     // and no access token is needed-- just need to reload the page and it'll
     // login again / set cookie as needed
-    window.location.reload()
-    throw new Error(
-      "Failed to reload page to get auth details, please refresh manually",
-    )
+    return guardedPageReload("cloud_instance_auth")
   }
 
   // If we're on localhost or another domain, we need to do the full oauth flow

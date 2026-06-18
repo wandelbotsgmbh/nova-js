@@ -29,10 +29,10 @@ export default defineConfig(({ mode }) => {
       dedupe: ["@wandelbots/nova-js"],
     },
     server: {
-      port: 3000,
+      port: 3572,
     },
     preview: {
-      port: 3000,
+      port: 3572,
     },
     define: {
       // Expose selected runtime env vars at build time for local dev.
