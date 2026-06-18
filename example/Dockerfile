@@ -23,6 +23,6 @@ COPY --from=builder /app/scripts/entrypoint.sh ./entrypoint.sh
 # Used in entrypoint base path injection for startup speed (~500x faster)
 RUN apk add ripgrep
 
-EXPOSE 3000
+EXPOSE 3572
 
 ENTRYPOINT ["/bin/sh", "./entrypoint.sh"]
