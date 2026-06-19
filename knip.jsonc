@@ -5,7 +5,12 @@
   "ignore": ["__snapshots__/**"],
   "workspaces": {
     ".": {
-      "entry": ["src/index.ts", "src/v1/index.ts", "src/v2/index.ts"]
+      "entry": [
+        "src/index.ts",
+        "src/v1/index.ts",
+        "src/v2/index.ts",
+        "src/test-utils.ts"
+      ]
     }
   }
 }

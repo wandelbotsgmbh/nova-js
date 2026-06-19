@@ -17,6 +17,10 @@
     "./v2": {
       "import": "./dist/v2/index.mjs",
       "require": "./dist/v2/index.cjs"
+    },
+    "./test-utils": {
+      "import": "./dist/test-utils.mjs",
+      "require": "./dist/test-utils.cjs"
     }
   },
   "main": "./dist/index.mjs",
@@ -32,7 +36,7 @@
     "biome": "biome check --error-on-warnings .",
     "format": "biome format . --write",
     "knip": "knip",
-    "build": "tsdown",
+    "build": "rm -rf dist && tsdown",
     "test": "pnpm run build && vitest run",
     "e2e": "vitest run --config vitest.e2e.config.ts",
     "checks": "pnpm format && pnpm build && concurrently --group --timings --names audit,biome,tsc,knip,test \"pnpm audit --audit-level high\" \"pnpm biome\" \"pnpm tsc\" \"pnpm knip\" \"vitest run\""
