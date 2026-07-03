@@ -137,7 +137,7 @@ export type NovaNatsClientConfig = ConnectionOptions;
 // #region Classes
 export declare class NovaNatsClient {
   readonly config: NovaNatsClientConfig;
-  connection: NatsConnection | null;
+  private connectionPromise;
   constructor(_: NovaNatsClientConfig);
   connect(): Promise<NatsConnection>;
   close(): Promise<void>;

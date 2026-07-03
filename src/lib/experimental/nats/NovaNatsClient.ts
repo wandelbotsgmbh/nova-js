@@ -24,24 +24,39 @@ export type NovaNatsClientConfig = ConnectionOptions
  */
 export class NovaNatsClient {
   readonly config: NovaNatsClientConfig
-  connection: NatsConnection | null = null
+  private connectionPromise: Promise<NatsConnection> | null = null
 
   constructor(config: NovaNatsClientConfig) {
     this.config = config
   }
 
-  /** Connects to NATS if not already connected, and returns the connection. */
-  async connect(): Promise<NatsConnection> {
-    if (!this.connection) {
-      this.connection = await wsconnect(this.config)
+  /**
+   * Connects to NATS if not already connected or connecting, and returns the
+   * connection. Safe to call concurrently: all callers share the same
+   * in-flight connection attempt instead of each starting their own.
+   */
+  connect(): Promise<NatsConnection> {
+    if (!this.connectionPromise) {
+      this.connectionPromise = wsconnect(this.config).catch((err: unknown) => {
+        // Allow a subsequent connect() call to retry after a failed attempt.
+        this.connectionPromise = null
+        throw err
+      })
     }
-    return this.connection
+    return this.connectionPromise
   }
 
-  /** Closes the underlying NATS connection, if open. */
+  /** Closes the underlying NATS connection, if open or connecting. */
   async close(): Promise<void> {
-    await this.connection?.close()
-    this.connection = null
+    const connectionPromise = this.connectionPromise
+    this.connectionPromise = null
+    if (!connectionPromise) return
+    try {
+      const nc = await connectionPromise
+      await nc.close()
+    } catch {
+      // Connection never succeeded; nothing to close.
+    }
   }
 
   /**

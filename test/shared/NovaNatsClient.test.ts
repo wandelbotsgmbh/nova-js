@@ -50,6 +50,34 @@ describe("NovaNatsClient", () => {
     expect(nc1).toBe(nc2)
   })
 
+  test("connect() calls wsconnect only once when called concurrently before it resolves", async () => {
+    let resolveConnect!: (nc: typeof mockConnection) => void
+    wsconnect.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveConnect = resolve
+        }),
+    )
+
+    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    const p1 = client.connect()
+    const p2 = client.connect()
+
+    resolveConnect(mockConnection)
+    const [nc1, nc2] = await Promise.all([p1, p2])
+
+    expect(wsconnect).toHaveBeenCalledTimes(1)
+    expect(nc1).toBe(nc2)
+  })
+
+  test("close() allows a subsequent connect() to reconnect", async () => {
+    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    await client.connect()
+    await client.close()
+    await client.connect()
+    expect(wsconnect).toHaveBeenCalledTimes(2)
+  })
+
   test("subscribe() builds the subject and invokes handler with decoded JSON payloads", async () => {
     const client = new NovaNatsClient({ servers: "wss://example.com" })
     const handler = vi.fn()

@@ -4,9 +4,9 @@
 // #region Classes
 export class NovaNatsClient {
   config
-  connection
+  connectionPromise
   constructor(_) {}
-  async connect() {}
+  connect() {}
   async close() {}
   async subscribe(_, _, _) {}
   async request(_, _, _, _) {}
