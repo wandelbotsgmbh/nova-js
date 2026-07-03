@@ -30,8 +30,8 @@ test("receives a NATS message when the cell configuration changes via REST", asy
     // message that update publishes.
     const unsubscribe = await natsClient.subscribe(
       "nova.v2.cells.{cell}",
-      { cell: "cell" },
-      (payload) => resolveReceived(payload),
+      { cell: "*" },
+      (payload) => resolveReceived(payload)
     )
 
     const cell = await nova.api.cell.getCell("cell")
