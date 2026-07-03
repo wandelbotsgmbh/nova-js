@@ -11,12 +11,15 @@ function isValidSubjectChar(char: string): boolean {
     (code >= 65 && code <= 90) || // A-Z
     (code >= 97 && code <= 122) || // a-z
     char === "-" ||
-    char === "_" ||
-    char === "*"
+    char === "_"
   )
 }
 
 function isValidSubjectValue(value: string): boolean {
+  // A bare "*" is the NATS single-token wildcard, allowed on its own (e.g.
+  // subscribing to all cells with `{ cell: "*" }") but not as part of a
+  // larger value, since it wouldn't act as a wildcard there anyway.
+  if (value === "*") return true
   if (value.length === 0) return false
   for (const char of value) {
     if (!isValidSubjectChar(char)) return false

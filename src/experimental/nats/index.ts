@@ -15,5 +15,9 @@ export type {
   NatsSubscribePayloads,
   NatsSubscribeSubject,
 } from "../../lib/experimental/nats/generated/operations.ts"
+// Message payload types for every schema in src/asyncapi.yaml, e.g. `Cell`,
+// `App`, `ProgramStatus` (see NatsSubscribePayloads/NatsRequestPayloads for
+// which type applies to which subject).
+export type * from "../../lib/experimental/nats/generated/types.ts"
 export { NovaNatsClient } from "../../lib/experimental/nats/NovaNatsClient.ts"
 export type { NovaNatsClientConfig } from "../../lib/experimental/nats/NovaNatsClient.ts"
