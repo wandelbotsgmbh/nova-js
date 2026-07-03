@@ -83,6 +83,29 @@ describe("NovaNatsClient", () => {
     expect(wsconnect).toHaveBeenCalledTimes(2)
   })
 
+  test("uses the Nova instance's accessToken as the NATS token when available", async () => {
+    const authedNova = new Nova({
+      instanceUrl: "https://example.com",
+      accessToken: "the-token",
+    })
+    const client = new NovaNatsClient(authedNova)
+    expect(client.config.token).toBe("the-token")
+  })
+
+  test("omits the NATS token when the Nova instance has none", () => {
+    const client = new NovaNatsClient(nova)
+    expect(client.config.token).toBeUndefined()
+  })
+
+  test("an explicit token in config overrides the Nova instance's accessToken", () => {
+    const authedNova = new Nova({
+      instanceUrl: "https://example.com",
+      accessToken: "the-token",
+    })
+    const client = new NovaNatsClient(authedNova, { token: "override-token" })
+    expect(client.config.token).toBe("override-token")
+  })
+
   test("subscribe() builds the subject and invokes handler with decoded JSON payloads", async () => {
     const client = new NovaNatsClient(nova)
     const handler = vi.fn()

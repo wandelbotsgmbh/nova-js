@@ -6,9 +6,6 @@ import { Nova } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
 import { env } from "../env.ts"
 
-// Note: assumes the e2e test instance's NATS WebSocket gateway (like its REST
-// API) does not require authentication. If that's not the case, pass a
-// `token` (see NovaNatsClientConfig) alongside `servers`.
 test("receives a NATS message when the cell configuration changes via REST", async () => {
   const nova = new Nova({ instanceUrl: env.NOVA })
   const nats = new NovaNatsClient(nova)

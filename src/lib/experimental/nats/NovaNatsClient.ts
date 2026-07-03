@@ -43,6 +43,10 @@ export class NovaNatsClient {
   constructor(nova: Nova, config: NovaNatsClientConfig = {}) {
     this.config = {
       servers: buildNatsServerUrl(nova.instanceUrl.href),
+      // Reuse the Nova instance's access token for NATS auth, if it has one
+      // (e.g. from login or a passed-in config.accessToken). Explicit auth
+      // options in `config` (token/user/pass/authenticator) still win.
+      ...(nova.accessToken ? { token: nova.accessToken } : {}),
       ...config,
     }
   }
