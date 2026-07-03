@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 // biome-ignore lint/style/noRestrictedImports: internal unit testing
-import { buildSubject } from "../../src/lib/experimental/nats/buildSubject.ts"
+import { buildSubject } from "../../../src/lib/experimental/nats/buildSubject.ts"
 
 describe("buildSubject", () => {
   test("substitutes a single param into a channel template", () => {

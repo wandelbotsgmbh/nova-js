@@ -147,3 +147,7 @@ export declare class NovaNatsClient {
   }): Promise<NatsReplyPayloads[K]>;
 }
 // #endregion
+
+// #region Functions
+export declare function buildNatsServerUrl(_: string): string;
+// #endregion

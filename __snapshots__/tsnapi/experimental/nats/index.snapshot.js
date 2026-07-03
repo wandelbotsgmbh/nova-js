@@ -12,3 +12,7 @@ export class NovaNatsClient {
   async request(_, _, _, _) {}
 }
 // #endregion
+
+// #region Functions
+export function buildNatsServerUrl(_) {}
+// #endregion

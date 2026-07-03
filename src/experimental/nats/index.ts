@@ -4,6 +4,7 @@
  *
  * This API is experimental and may change without a major version bump.
  */
+export { buildNatsServerUrl } from "../../lib/experimental/nats/buildNatsServerUrl.ts"
 export type {
   NatsOperationParams,
   NatsReplyPayloads,
