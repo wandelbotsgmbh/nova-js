@@ -9,6 +9,7 @@ describe("require(esm) fallback", () => {
     ["@wandelbots/nova-js", "."],
     ["@wandelbots/nova-js/v1", "./v1"],
     ["@wandelbots/nova-js/v2", "./v2"],
+    ["@wandelbots/nova-js/experimental/nats", "./experimental/nats"],
   ] as const
 
   for (const [specifier] of entries) {
