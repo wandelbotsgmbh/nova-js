@@ -43,7 +43,7 @@ type RawSpec = {
     string,
     {
       address: string | null
-      parameters?: Record<string, unknown>
+      parameters?: Record<string, { description?: string }>
       messages?: Record<string, { payload?: { $ref?: string } }>
     }
   >
@@ -51,10 +51,32 @@ type RawSpec = {
     string,
     {
       action: "send" | "receive"
+      title?: string
+      description?: string
       channel: { $ref: string }
       reply?: { channel: { $ref: string } }
     }
   >
+}
+
+/**
+ * Renders a JSDoc comment block (starting with `/**`, ending with ` *\/`) from
+ * one or more text fragments, e.g. an operation's `title`/`description`. Empty
+ * fragments are skipped. Returns `[]` if every fragment is empty/undefined.
+ */
+function formatJsDoc(...fragments: (string | undefined)[]): string[] {
+  const content = fragments
+    .filter((fragment): fragment is string => Boolean(fragment?.trim()))
+    .map((fragment) => fragment.trim())
+    .join("\n\n")
+  if (!content) return []
+  // Defensively escape any literal comment-terminators in spec text.
+  const escaped = content.replaceAll("*/", "*\\/")
+  return [
+    "/**",
+    ...escaped.split("\n").map((line) => (line ? ` * ${line}` : " *")),
+    " */",
+  ]
 }
 
 function channelNameFromRef(ref: string): string {
@@ -163,9 +185,12 @@ function generateOperations(
     name: string
     subject: string
     paramNames: string[]
+    paramDescriptions: Record<string, string | undefined>
     payloadTypeName: string
     kind: "subscribe" | "request"
     replyPayloadTypeName?: string
+    title?: string
+    description?: string
   }
 
   const operations: OperationInfo[] = Object.entries(spec.operations).map(
@@ -190,6 +215,11 @@ function generateOperations(
       const paramNames = Object.keys(channel.parameters ?? {}).filter(
         (p) => p !== INSTANCE_PARAM_NAME,
       )
+      const paramDescriptions: Record<string, string | undefined> = {}
+      for (const paramName of paramNames) {
+        paramDescriptions[paramName] =
+          channel.parameters?.[paramName]?.description
+      }
       const payloadSchemaName = firstMessagePayloadSchemaName(channel)
       const payloadTypeName = schemaExportName(payloadSchemaName)
 
@@ -198,8 +228,11 @@ function generateOperations(
           name,
           subject,
           paramNames,
+          paramDescriptions,
           payloadTypeName,
           kind: "subscribe",
+          title: op.title,
+          description: op.description,
         }
       }
 
@@ -223,9 +256,12 @@ function generateOperations(
         name,
         subject,
         paramNames,
+        paramDescriptions,
         payloadTypeName,
         kind: "request",
         replyPayloadTypeName: schemaExportName(replyPayloadSchemaName),
+        title: op.title,
+        description: op.description,
       }
     },
   )
@@ -249,6 +285,32 @@ function generateOperations(
   const paramsKey = (paramName: string) =>
     /^[A-Za-z_$][\w$]*$/.test(paramName) ? paramName : JSON.stringify(paramName)
 
+  // JSDoc for a subject entry: the operation's spec `title`/`description`,
+  // plus its asyncapi operationId for traceability back to the spec.
+  const operationDoc = (op: OperationInfo): string[] =>
+    formatJsDoc(op.title, op.description, `@operationId ${op.name}`).map(
+      (line) => `  ${line}`,
+    )
+
+  // Renders the `NatsOperationParams` value for an operation: an inline
+  // `Record<never, never>` when it has no subject params, otherwise a
+  // multi-line object type with a JSDoc comment per param (from the
+  // channel's `parameters.<name>.description`).
+  const renderParamsType = (op: OperationInfo): string[] => {
+    if (op.paramNames.length === 0) {
+      return [`  ${JSON.stringify(op.subject)}: Record<never, never>`]
+    }
+    const lines: string[] = [`  ${JSON.stringify(op.subject)}: {`]
+    for (const paramName of op.paramNames) {
+      for (const docLine of formatJsDoc(op.paramDescriptions[paramName])) {
+        lines.push(`    ${docLine}`)
+      }
+      lines.push(`    ${paramsKey(paramName)}: string`)
+    }
+    lines.push(`  }`)
+    return lines
+  }
+
   const lines: string[] = []
   lines.push(GENERATED_BANNER)
   lines.push(`import type {`)
@@ -262,11 +324,8 @@ function generateOperations(
   )
   lines.push(`export interface NatsOperationParams {`)
   for (const op of operations) {
-    const paramsType = op.paramNames.length
-      ? `{ ${op.paramNames.map((p) => `${paramsKey(p)}: string`).join("; ")} }`
-      : "Record<never, never>"
-    lines.push(`  /** ${op.name} */`)
-    lines.push(`  ${JSON.stringify(op.subject)}: ${paramsType}`)
+    lines.push(...operationDoc(op))
+    lines.push(...renderParamsType(op))
   }
   lines.push(`}\n`)
 
@@ -275,7 +334,7 @@ function generateOperations(
   )
   lines.push(`export interface NatsSubscribePayloads {`)
   for (const op of subscribeOps) {
-    lines.push(`  /** ${op.name} */`)
+    lines.push(...operationDoc(op))
     lines.push(`  ${JSON.stringify(op.subject)}: ${op.payloadTypeName}`)
   }
   lines.push(`}\n`)
@@ -286,7 +345,7 @@ function generateOperations(
   )
   lines.push(`export interface NatsRequestPayloads {`)
   for (const op of requestOps) {
-    lines.push(`  /** ${op.name} */`)
+    lines.push(...operationDoc(op))
     lines.push(`  ${JSON.stringify(op.subject)}: ${op.payloadTypeName}`)
   }
   lines.push(`}\n`)
@@ -294,7 +353,7 @@ function generateOperations(
   lines.push(`/** Reply payload types for request/reply subjects. */`)
   lines.push(`export interface NatsReplyPayloads {`)
   for (const op of requestOps) {
-    lines.push(`  /** ${op.name} */`)
+    lines.push(...operationDoc(op))
     lines.push(`  ${JSON.stringify(op.subject)}: ${op.replyPayloadTypeName}`)
   }
   lines.push(`}\n`)
@@ -305,7 +364,7 @@ function generateOperations(
   )
   lines.push(`export interface NatsPublishPayloads {`)
   for (const op of operations) {
-    lines.push(`  /** ${op.name} */`)
+    lines.push(...operationDoc(op))
     lines.push(`  ${JSON.stringify(op.subject)}: ${op.payloadTypeName}`)
   }
   lines.push(`}\n`)

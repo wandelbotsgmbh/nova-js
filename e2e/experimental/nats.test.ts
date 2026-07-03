@@ -29,7 +29,6 @@ test("receives a NATS message when the cell configuration changes via REST", asy
       (payload) => resolveReceived(payload),
     )
 
-
     const cell = await nova.api.cell.getCell("cell")
     const expectedDescription = `e2e nats test ${Date.now()}`
     await nova.api.cell.updateCell("cell", {
