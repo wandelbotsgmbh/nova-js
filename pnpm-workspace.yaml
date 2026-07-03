@@ -9,6 +9,9 @@ shellEmulator: true
 allowBuilds:
   esbuild: true
   browser-tabs-lock: false
+  # Telemetry-only postinstall (phones home on every install), pulled in
+  # transitively via @asyncapi/parser -> @stoplight/spectral-*. No need to run it.
+  "@scarf/scarf": false
 
 packages:
   - "."
