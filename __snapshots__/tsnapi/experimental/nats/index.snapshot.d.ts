@@ -91,6 +91,35 @@ export interface NatsOperationParams {
     controller: string;
   };
 }
+export interface NatsPublishPayloads {
+  "nova.v2.cells.{cell}": Cell;
+  "nova.v2.cells.{cell}.apps.{app}": App;
+  "nova.v2.cells.{cell}.programs": ProgramStatus;
+  "nova.v2.cells.{cell}.controllers.{controller}": RobotController;
+  "nova.v2.cells.{cell}.status": ServiceStatusList;
+  "nova.v2.cells.{cell}.cycle": CellCycleEvent;
+  "nova.v2.system.status": ServiceStatusList;
+  "nova.v2.cells.{cell}.collision.setups.{setup}": CollisionSetup;
+  "nova.v2.cells.{cell}.bus-ios.status": BusIOsState;
+  "nova.v2.cells.{cell}.bus-ios.ios": ListIOValuesResponse;
+  "nova.v2.cells.{cell}.bus-ios.ios.set": ListIOValuesResponse;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.select": SelectIOs;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios": StreamIOValuesResponse;
+  "nova.v2.cells.{cell}.controllers.{controller}.state": RobotControllerState;
+  "nova.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description": MotionGroupDescription;
+  "nova.v2.events.system.update.started": SystemUpdateStartedEvent;
+  "nova.v2.events.system.update.completed": SystemUpdateCompletedEvent;
+  "nova.v2.events.system.network.status.changed": NetworkStatusChangedEvent;
+  "nova.v2.events.cells.{cell}.created": CellCreatedEvent;
+  "nova.v2.events.cells.{cell}.updated": CellUpdatedEvent;
+  "nova.v2.events.cells.{cell}.deleted": CellDeletedEvent;
+  "nova.v2.events.cells.{cell}.apps.{app}.created": AppCreatedEvent;
+  "nova.v2.events.cells.{cell}.apps.{app}.updated": AppUpdatedEvent;
+  "nova.v2.events.cells.{cell}.apps.{app}.deleted": AppDeletedEvent;
+  "nova.v2.events.cells.{cell}.controllers.{controller}.created": RobotControllerCreatedEvent;
+  "nova.v2.events.cells.{cell}.controllers.{controller}.updated": RobotControllerUpdatedEvent;
+  "nova.v2.events.cells.{cell}.controllers.{controller}.deleted": RobotControllerDeletedEvent;
+}
 export interface NatsReplyPayloads {
   "nova.v2.cells.{cell}.bus-ios.ios.set": NatsErrorPayload;
   "nova.v2.cells.{cell}.controllers.{controller}.ios.select": NatsErrorPayload;
@@ -129,6 +158,7 @@ export interface NatsSubscribePayloads {
 // #endregion
 
 // #region Types
+export type NatsPublishSubject = keyof NatsPublishPayloads;
 export type NatsRequestSubject = keyof NatsRequestPayloads;
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
 export type NovaNatsClientConfig = ConnectionOptions;
@@ -145,7 +175,7 @@ export declare class NovaNatsClient {
   request<K extends NatsRequestSubject>(_: K, _: NatsOperationParams[K], _: NatsRequestPayloads[K], _?: {
     timeout?: number;
   }): Promise<NatsReplyPayloads[K]>;
-  publish<K extends NatsRequestSubject>(_: K, _: NatsOperationParams[K], _: NatsRequestPayloads[K]): Promise<void>;
+  publish<K extends NatsPublishSubject>(_: K, _: NatsOperationParams[K], _: NatsPublishPayloads[K]): Promise<void>;
 }
 // #endregion
 

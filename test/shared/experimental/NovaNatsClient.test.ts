@@ -141,6 +141,22 @@ describe("NovaNatsClient", () => {
     )
   })
 
+  test("publish() supports subjects the server publishes (not just request subjects)", async () => {
+    const client = new NovaNatsClient(nova)
+    const publishPayload = { name: "cell", description: "test" }
+
+    await client.publish(
+      "nova.v2.cells.{cell}",
+      { cell: "cell" },
+      publishPayload,
+    )
+
+    expect(mockConnection.publish).toHaveBeenCalledWith(
+      "nova.v2.cells.cell",
+      JSON.stringify(publishPayload),
+    )
+  })
+
   test("close() closes the underlying connection", async () => {
     const client = new NovaNatsClient(nova)
     await client.connect()

@@ -201,3 +201,63 @@ export interface NatsReplyPayloads {
 }
 
 export type NatsRequestSubject = keyof NatsRequestPayloads
+
+/** Payload types for every subject defined in the spec, publishable via NovaNatsClient#publish. */
+export interface NatsPublishPayloads {
+  /** publishCell */
+  "nova.v2.cells.{cell}": Cell
+  /** publishApp */
+  "nova.v2.cells.{cell}.apps.{app}": App
+  /** publishProgramStatus */
+  "nova.v2.cells.{cell}.programs": ProgramStatus
+  /** publishRobotController */
+  "nova.v2.cells.{cell}.controllers.{controller}": RobotController
+  /** publishCellStatus */
+  "nova.v2.cells.{cell}.status": ServiceStatusList
+  /** publishCellCycle */
+  "nova.v2.cells.{cell}.cycle": CellCycleEvent
+  /** publishSystemStatus */
+  "nova.v2.system.status": ServiceStatusList
+  /** publishCollisionSetup */
+  "nova.v2.cells.{cell}.collision.setups.{setup}": CollisionSetup
+  /** publishBUSIOStatus */
+  "nova.v2.cells.{cell}.bus-ios.status": BusIOsState
+  /** publishBUSIOsIOs */
+  "nova.v2.cells.{cell}.bus-ios.ios": ListIOValuesResponse
+  /** setBUSIOsIOs */
+  "nova.v2.cells.{cell}.bus-ios.ios.set": ListIOValuesResponse
+  /** selectRobotControllerIOs */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.select": SelectIOs
+  /** publishRobotControllerIOs */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios": StreamIOValuesResponse
+  /** publishRobotControllersState */
+  "nova.v2.cells.{cell}.controllers.{controller}.state": RobotControllerState
+  /** publishMotionGroupDescription */
+  "nova.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description": MotionGroupDescription
+  /** eventSystemUpdateStarted */
+  "nova.v2.events.system.update.started": SystemUpdateStartedEvent
+  /** eventSystemUpdateCompleted */
+  "nova.v2.events.system.update.completed": SystemUpdateCompletedEvent
+  /** eventSystemNetworkStatusChanged */
+  "nova.v2.events.system.network.status.changed": NetworkStatusChangedEvent
+  /** eventCellCreated */
+  "nova.v2.events.cells.{cell}.created": CellCreatedEvent
+  /** eventCellUpdated */
+  "nova.v2.events.cells.{cell}.updated": CellUpdatedEvent
+  /** eventCellDeleted */
+  "nova.v2.events.cells.{cell}.deleted": CellDeletedEvent
+  /** eventAppCreated */
+  "nova.v2.events.cells.{cell}.apps.{app}.created": AppCreatedEvent
+  /** eventAppUpdated */
+  "nova.v2.events.cells.{cell}.apps.{app}.updated": AppUpdatedEvent
+  /** eventAppDeleted */
+  "nova.v2.events.cells.{cell}.apps.{app}.deleted": AppDeletedEvent
+  /** eventRobotControllerCreated */
+  "nova.v2.events.cells.{cell}.controllers.{controller}.created": RobotControllerCreatedEvent
+  /** eventRobotControllerUpdated */
+  "nova.v2.events.cells.{cell}.controllers.{controller}.updated": RobotControllerUpdatedEvent
+  /** eventRobotControllerDeleted */
+  "nova.v2.events.cells.{cell}.controllers.{controller}.deleted": RobotControllerDeletedEvent
+}
+
+export type NatsPublishSubject = keyof NatsPublishPayloads

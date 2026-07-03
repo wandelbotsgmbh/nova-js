@@ -9,6 +9,8 @@ import { buildNatsServerUrl } from "./buildNatsServerUrl.ts"
 import { buildSubject } from "./buildSubject.ts"
 import type {
   NatsOperationParams,
+  NatsPublishPayloads,
+  NatsPublishSubject,
   NatsReplyPayloads,
   NatsRequestPayloads,
   NatsRequestSubject,
@@ -134,17 +136,17 @@ export class NovaNatsClient {
   }
 
   /**
-   * Publishes a JSON payload to a NATS subject the server receives, without
-   * waiting for a reply.
+   * Publishes a JSON payload to any NATS subject defined in the spec,
+   * without waiting for a reply.
    *
    * `subject` is the subject template as it appears on the wire, e.g.
    * `"nova.v2.cells.{cell}.bus-ios.ios.set"`, with `{param}` placeholders
    * filled in from `params`.
    */
-  async publish<K extends NatsRequestSubject>(
+  async publish<K extends NatsPublishSubject>(
     subject: K,
     params: NatsOperationParams[K],
-    payload: NatsRequestPayloads[K],
+    payload: NatsPublishPayloads[K],
   ): Promise<void> {
     const nc = await this.connect()
     const resolvedSubject = buildSubject(subject, params)

@@ -7,6 +7,8 @@
 export { buildNatsServerUrl } from "../../lib/experimental/nats/buildNatsServerUrl.ts"
 export type {
   NatsOperationParams,
+  NatsPublishPayloads,
+  NatsPublishSubject,
   NatsReplyPayloads,
   NatsRequestPayloads,
   NatsRequestSubject,

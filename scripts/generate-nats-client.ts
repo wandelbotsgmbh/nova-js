@@ -300,6 +300,17 @@ function generateOperations(
   lines.push(`}\n`)
   lines.push(`export type NatsRequestSubject = keyof NatsRequestPayloads\n`)
 
+  lines.push(
+    `/** Payload types for every subject defined in the spec, publishable via NovaNatsClient#publish. */`,
+  )
+  lines.push(`export interface NatsPublishPayloads {`)
+  for (const op of operations) {
+    lines.push(`  /** ${op.name} */`)
+    lines.push(`  ${JSON.stringify(op.subject)}: ${op.payloadTypeName}`)
+  }
+  lines.push(`}\n`)
+  lines.push(`export type NatsPublishSubject = keyof NatsPublishPayloads\n`)
+
   return lines.join("\n")
 }
 
