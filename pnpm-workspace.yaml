@@ -9,7 +9,6 @@ shellEmulator: true
 allowBuilds:
   esbuild: true
   browser-tabs-lock: false
-  '@scarf/scarf': false
 
 packages:
   - "."
