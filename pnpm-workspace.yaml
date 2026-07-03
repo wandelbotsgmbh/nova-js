@@ -3,7 +3,6 @@ useNodeVersion: 24.11.1
 
 minimumReleaseAgeExclude:
   - "@wandelbots/nova-api"
-
 # Support pnpm scripts on non-POSIX systems (e.g. Windows)
 shellEmulator: true
 
