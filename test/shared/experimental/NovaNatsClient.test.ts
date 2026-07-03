@@ -105,6 +105,55 @@ describe("NovaNatsClient", () => {
     )
   })
 
+  test("subscribe() isolates a handler error to one message and keeps processing later ones", async () => {
+    const messages = [
+      { json: () => ({ name: "cell-1" }) },
+      { json: () => ({ name: "cell-2" }) },
+    ]
+    let index = 0
+    mockConnection.subscribe.mockReturnValueOnce({
+      [Symbol.asyncIterator]: () => ({
+        next: async () => {
+          if (index >= messages.length) {
+            return { value: undefined, done: true }
+          }
+          return { value: messages[index++], done: false }
+        },
+      }),
+      unsubscribe: vi.fn(),
+    })
+
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {})
+    const handler = vi.fn((payload: { name: string }) => {
+      if (payload.name === "cell-1") throw new Error("boom")
+    })
+
+    const client = new NovaNatsClient(nova)
+    await client.subscribe("nova.v2.cells.{cell}", { cell: "cell" }, handler)
+    // let the async iteration loop process both messages
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(handler).toHaveBeenCalledTimes(2)
+    expect(handler).toHaveBeenNthCalledWith(
+      1,
+      { name: "cell-1" },
+      expect.anything(),
+    )
+    expect(handler).toHaveBeenNthCalledWith(
+      2,
+      { name: "cell-2" },
+      expect.anything(),
+    )
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Error handling NATS message"),
+      expect.any(Error),
+    )
+
+    consoleErrorSpy.mockRestore()
+  })
+
   test("request() builds the subject, sends the JSON payload, and returns the decoded reply", async () => {
     const client = new NovaNatsClient(nova)
     const requestPayload = [

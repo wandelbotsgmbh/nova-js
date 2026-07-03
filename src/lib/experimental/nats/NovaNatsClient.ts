@@ -23,7 +23,7 @@ export type NovaNatsClientConfig = ConnectionOptions
 type NatsMessageHandler<K extends NatsSubscribeSubject> = (
   payload: NatsSubscribePayloads[K],
   msg: Msg,
-) => void
+) => void | Promise<void>
 
 type SubscribeArgs<K extends NatsSubscribeSubject> =
   keyof NatsOperationParams[K] extends never
@@ -84,6 +84,10 @@ export class NovaNatsClient {
    * `"nova.v2.cells.{cell}"`, with `{param}` placeholders filled in from
    * `params`.
    *
+   * Errors decoding a message or thrown/rejected by `handler` are caught and
+   * logged per-message, so one bad message doesn't stop later messages on
+   * the same subscription from being handled.
+   *
    * Returns a function that unsubscribes when called.
    */
   async subscribe<K extends NatsSubscribeSubject>(
@@ -101,11 +105,20 @@ export class NovaNatsClient {
 
     ;(async () => {
       for await (const msg of sub) {
-        handler(msg.json<NatsSubscribePayloads[K]>(), msg)
+        // Handled per-message: a bad payload or a throwing/rejecting handler
+        // should not stop the subscription from processing later messages.
+        try {
+          await handler(msg.json<NatsSubscribePayloads[K]>(), msg)
+        } catch (err) {
+          console.error(
+            `Error handling NATS message on subject "${resolvedSubject}"`,
+            err,
+          )
+        }
       }
     })().catch((err: unknown) => {
       console.error(
-        `Error handling NATS subscription for "${resolvedSubject}"`,
+        `NATS subscription iterator failed for "${resolvedSubject}"`,
         err,
       )
     })
