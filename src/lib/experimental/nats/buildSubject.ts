@@ -11,7 +11,8 @@ function isValidSubjectChar(char: string): boolean {
     (code >= 65 && code <= 90) || // A-Z
     (code >= 97 && code <= 122) || // a-z
     char === "-" ||
-    char === "_"
+    char === "_" ||
+    char === "*"
   )
 }
 
