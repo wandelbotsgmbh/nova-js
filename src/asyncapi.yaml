@@ -1,0 +1,3593 @@
+info:
+  title: Wandelbots NOVA Async API
+  version: '2.0'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  description: |
+    Interact with robots in an easy and intuitive way.
+  contact:
+    name: Copyright (c) 2025 Wandelbots GmbH
+    url: https://www.wandelbots.com
+components:
+  schemas:
+    CellName:
+      type: string
+      description: |
+        A unique name for the cell used as an identifier for addressing the cell in all API calls.
+        It must be a valid k8s label name as defined by [RFC 1123](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-label-names).
+      pattern: ^[a-z][a-z0-9-]{0,30}[a-z0-9]$
+      default: cell
+    CellDescription:
+      type: string
+      maxLength: 200
+      description: |
+        A description of the cell.
+    AbbController:
+      title: AbbController
+      description: |
+        The configuration of a physical ABB robot controller has to contain IP address.
+        Additionally an EGM server configuration has to be specified in order to control the robot.
+        Deploying the server is a functionality of this API.
+      type: object
+      required:
+        - kind
+        - controller_ip
+        - controller_port
+        - egm_server
+      properties:
+        kind:
+          type: string
+          enum:
+            - AbbController
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+        controller_ip:
+          type: string
+        controller_port:
+          description: |
+            Default values: 80, 443. If custom value is set, field is required.
+          type: integer
+          default: 80
+        egm_server:
+          description: The EGM server runs inside of the cell, thus its IP must be in the same network as the 'controller_ip'
+          type: object
+          required:
+            - ip
+            - port
+          properties:
+            ip:
+              type: string
+            port:
+              type: integer
+              default: 32112
+    ControllerNetworkInterface:
+      title: ControllerNetworkInterface
+      description: |
+        Optional dedicated network interface for a physical robot controller.
+
+        When set, the controller is given its own network interface on the selected
+        physical network port (`pf`) with the given `address`, so it can reach the
+        robot network directly.
+      type: object
+      required:
+        - address
+        - pf
+      properties:
+        address:
+          description: |
+            IPv4 address in CIDR notation to assign to the controller's network
+            interface, for example `192.168.1.10/24`. The value must be a valid IPv4
+            address followed by a prefix length between 0 and 32.
+          type: string
+          pattern: ^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}/([0-9]|[12][0-9]|3[0-2])$
+          example: 192.168.1.10/24
+        pf:
+          description: |
+            Name of the node's physical network port that connects to the robot
+            network, for example `enp10s0f0`. The controller's interface is provided
+            from this port.
+          type: string
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._-]{0,14}$
+          example: enp10s0f0
+    FanucController:
+      title: FanucController
+      description: The configuration of a physical FANUC robot controller has to contain IP address of the controller.
+      type: object
+      required:
+        - kind
+        - controller_ip
+      properties:
+        kind:
+          type: string
+          enum:
+            - FanucController
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+        controller_ip:
+          type: string
+        network_interface:
+          $ref: '#/components/schemas/ControllerNetworkInterface'
+    KukaController:
+      title: KukaController
+      description: |
+        The configuration of a physical KUKA robot controller has to contain an IP address.
+        Additionally an RSI server configuration has to be specified in order to control the robot.
+        Deploying the server is a functionality of this API.
+      type: object
+      required:
+        - kind
+        - controller_ip
+        - controller_port
+        - rsi_server
+      properties:
+        kind:
+          type: string
+          enum:
+            - KukaController
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+        controller_ip:
+          type: string
+        controller_port:
+          type: integer
+          default: 54600
+        rsi_server:
+          description: The RSI server runs inside of the cell.
+          type: object
+          required:
+            - ip
+            - port
+          properties:
+            ip:
+              type: string
+              default: 0.0.0.0
+            port:
+              type: integer
+              default: 30152
+        slow_cycle_rate:
+          type: boolean
+          default: false
+          description: |
+            If true, uses slower cycle time of 12ms instead of 4ms.
+    UniversalrobotsController:
+      title: UniversalrobotsController
+      description: The configuration of a physical Universal Robots controller has to contain IP address of the controller.
+      type: object
+      required:
+        - kind
+        - controller_ip
+      properties:
+        kind:
+          type: string
+          enum:
+            - UniversalrobotsController
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+        controller_ip:
+          type: string
+    Manufacturer:
+      type: string
+      enum:
+        - abb
+        - fanuc
+        - kuka
+        - staubli
+        - universalrobots
+        - yaskawa
+    MotionGroupModel:
+      title: MotionGroupModel
+      type: string
+      description: |
+        Identifies a single motion group model.
+        See [getMotionGroupModels](#/operations/getMotionGroupModels) for supported types.
+    MotionGroupFromType:
+      title: Motion Group from Model
+      type: object
+      required:
+        - motion_group_model
+        - motion_group
+      properties:
+        motion_group:
+          type: string
+          description: Unique identifier for the motion group to be added.
+        motion_group_model:
+          $ref: '#/components/schemas/MotionGroupModel'
+        initial_joint_position:
+          type: string
+          description: |
+            Initial joint position of the added motion group.
+            Provides the joint position as a JSON array of float values in radians. The array length
+            must match the robot's degrees of freedom, e.g., `"[0, 0, 0, 0, 0, 0]"` for a 6-DOF robot.
+            If the provided array length does not match the robot's DOF, the array will be adjusted; if it is longer, extra values will be truncated;
+            if it is shorter, missing values will be filled with zeros.
+    MotionGroupFromJson:
+      title: Motion Group from JSON
+      type: object
+      required:
+        - json_data
+        - extracted_motion_group_id
+        - motion_group
+      properties:
+        motion_group:
+          type: string
+          description: Unique identifier for the motion group to be added.
+        json_data:
+          type: string
+          description: |
+            JSON configuration of the virtual robot controller, can be obtained from the physical controller's configuration
+            via [getVirtualControllerConfiguration](#/operations/getVirtualControllerConfiguration).
+        extracted_motion_group_id:
+          type: string
+          description: |
+            The identifier of the motion group that needs to be extracted from the provided JSON configuration.
+        initial_joint_position:
+          type: string
+          description: |
+            Initial joint position of the added motion group.
+            Provides the joint position as a JSON array of float values in radians. The array length
+            must match the robot's degrees of freedom, e.g., `"[0, 0, 0, 0, 0, 0]"` for a 6-DOF robot.
+            If the provided array length does not match the robot's DOF, the array will be adjusted: if it is longer, extra values will be truncated;
+            if it is shorter, missing values will be filled with zeros.
+    AddVirtualControllerMotionGroupRequest:
+      title: AddVirtualControllerMotionGroupRequest
+      description: |
+        Request body wrapper for `addVirtualControllerMotionGroup`.
+        Allow either referencing a predefined motion group model or
+        uploading a JSON configuration that the backend converts into a
+        motion group description.
+      oneOf:
+        - $ref: '#/components/schemas/MotionGroupFromType'
+        - $ref: '#/components/schemas/MotionGroupFromJson'
+    VirtualController:
+      title: VirtualController
+      description: |
+        The configuration of a virtual robot controller has to contain the manufacturer string,
+        an optional joint position string array, and either a preset `type` **or** the complete JSON configuration.
+      type: object
+      required:
+        - kind
+        - manufacturer
+      properties:
+        kind:
+          type: string
+          enum:
+            - VirtualController
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+        manufacturer:
+          $ref: '#/components/schemas/Manufacturer'
+        type:
+          type: string
+          description: |
+            Preset type of the virtual robot controller.
+            See [getRobotConfigurations](#/operations/getRobotConfigurations) for supported types.
+        json:
+          type: string
+          description: |
+            Complete JSON configuration of the virtual robot controller.
+            Can be obtained from the physical controller's configuration via [getVirtualControllerConfiguration](#/operations/getVirtualControllerConfiguration).
+            If provided, the `type` field should not be used.
+        initial_joint_position:
+          type: string
+          description: |
+            Initial joint position of the first motion group from the virtual robot controller.
+            Provides the joint position as a JSON array of float values in radians. The array length
+            must match the robot's degrees of freedom, e.g., `"[0, 0, 0, 0, 0, 0]"` for a 6-DOF robot.
+            If the provided array length does not match the robot's DOF, the array will be adjusted: if it is longer, extra values will be truncated;
+            if it is shorter, missing values will be filled with zeros.
+        motion_groups:
+          type: array
+          maxItems: 10
+          description: |
+            Adds a motion group configuration for the virtual robot controller.
+
+            > **NOTE**
+            >
+            > Set only one of the two options, **motion_group_model**, or **json_data**
+
+            - **motion_group_model**: Identifies a single motion group. See [getMotionGroupModels](#/operations/getMotionGroupModels) for supported types
+            - **json_data**: JSON configuration of the virtual robot controller, can be obtained from the physical controller's configuration
+                via [getVirtualControllerConfiguration](#/operations/getVirtualControllerConfiguration)
+            - **extracted_motion_group_id**: Motion group identifier to extract from the provided JSON configuration,  required when using json_data
+            - **motion_group**: Unique identifier for the motion group
+            - **initial_joint_position**: Specifies the initial joint position for the added motion group
+          items:
+            $ref: '#/components/schemas/AddVirtualControllerMotionGroupRequest'
+    YaskawaController:
+      title: YaskawaController
+      description: The configuration of a physical Yaskawa robot controller has to contain IP address of the controller.
+      type: object
+      required:
+        - kind
+        - controller_ip
+      properties:
+        kind:
+          type: string
+          enum:
+            - YaskawaController
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+        controller_ip:
+          type: string
+    RobotController:
+      type: object
+      description: The configuration of a physical or virtual robot controller.
+      required:
+        - name
+        - configuration
+      properties:
+        name:
+          description: |
+            Unique name of controller within the cell.
+            It must be a valid k8s label name as defined by [RFC 1035](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#rfc-1035-label-names).
+          type: string
+          pattern: ^[a-z][a-z0-9-]{0,61}[a-z0-9]$
+        configuration:
+          oneOf:
+            - $ref: '#/components/schemas/AbbController'
+            - $ref: '#/components/schemas/FanucController'
+            - $ref: '#/components/schemas/KukaController'
+            - $ref: '#/components/schemas/UniversalrobotsController'
+            - $ref: '#/components/schemas/VirtualController'
+            - $ref: '#/components/schemas/YaskawaController'
+          discriminator: kind
+          x-go-type-name: ControllerConfig
+    ImageCredentials:
+      type: object
+      description: |
+        User provided credentials for creating a secret to pull an image from a registry.
+      required:
+        - registry
+        - user
+        - password
+      properties:
+        registry:
+          type: string
+        user:
+          type: string
+        password:
+          type: string
+    ContainerImage:
+      type: object
+      description: |
+        A user provided, custom container image and the required credentials to pull it from a registry.
+      required:
+        - image
+      properties:
+        image:
+          description: The location of a container image in the form of `<registry>/<image>:<tag>`.
+          type: string
+          minLength: 1
+        credentials:
+          $ref: '#/components/schemas/ImageCredentials'
+        secrets:
+          type: array
+          description: Known secrets for authentication with the container registry.
+          items:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+    ContainerEnvironment:
+      type: array
+      description: |
+        A list of environment variables with name and their value.
+        These can be used to configure the containerized application, and turn features on or off.
+      items:
+        type: object
+        required:
+          - name
+          - value
+        properties:
+          name:
+            type: string
+          value:
+            type: string
+    Capacity:
+      type: string
+      description: The amount of requested storage capacity.
+      pattern: ^[0-9]+(\\.[0-9]+)?(Ki|Mi|Gi|Ti|Pi|Ei|B)?$
+      example: 100Mi
+    ContainerStorage:
+      type: object
+      description: |
+        The path and capacity of a volume that retains data across application restarts.
+        The maximal requestable capacity is 300Mi.
+        If you need more capacity consider using [storeObject](#/operations/storeObject).
+      required:
+        - mount_path
+        - capacity
+      properties:
+        mount_path:
+          type: string
+          format: path
+          example: /data
+        capacity:
+          $ref: '#/components/schemas/Capacity'
+          description: |
+            The amount of local storage available for the application.
+
+            **NOTE:** The capacity can NEVER be reduced!
+    ContainerResources:
+      type: object
+      description: Additional resources that the application requires.
+      properties:
+        intel_gpu:
+          type: integer
+          description: Number of GPUs the application requires.
+          minimum: 0
+          maximum: 1
+        memory_limit:
+          type: string
+          description: The maximum memory allocated to this application.
+          example: 1000Mi
+    App:
+      type: object
+      description: |
+        An App is defined by a webserver, packed inside a container, serving a web-application.
+      required:
+        - name
+        - app_icon
+        - container_image
+      properties:
+        name:
+          description: |
+            The name of the provided application.
+            The name must be unique within the cell and is used as an identifier for addressing the application in all API calls
+            , e.g., when updating the application.
+
+            It also defines where the application is reachable (/$cell/$name).
+
+            It must be a valid k8s label name as defined by [RFC 1035](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#rfc-1035-label-names).
+          type: string
+          pattern: ^[a-z][a-z0-9-]{0,61}[a-z0-9]$
+          minLength: 1
+        app_icon:
+          description: The path of the icon for the App (/$cell/$name/$app_icon).
+          type: string
+          minLength: 1
+        container_image:
+          $ref: '#/components/schemas/ContainerImage'
+        port:
+          description: The port the containerized webserver is listening on.
+          type: integer
+          default: 8080
+        environment:
+          $ref: '#/components/schemas/ContainerEnvironment'
+        storage:
+          $ref: '#/components/schemas/ContainerStorage'
+        resources:
+          $ref: '#/components/schemas/ContainerResources'
+        health_path:
+          description: |
+            Defines the URL path suffix used to check the application's health status. The complete health check URL
+            is constructed as `/$cell/$name/$health_path`. When the application is working as expected,
+            the endpoint returns an HTTP 200 status code.
+
+            If not specified, the system will default to using the application icon path suffix
+            (the value of `app_icon`) as the health check endpoint, resulting in `/$cell/$name/$app_icon`.
+
+            If the health check fails (no response or non-200 status code), the system will
+            automatically restart the application container to restore service.
+          type: string
+        diagnosis_path:
+          description: |
+            Defines the URL path suffix used to provide an endpoint for diagnosis data collection.
+            The complete diagnosis check URL is constructed as `/$cell/$name/$diagnosis_path`.
+
+            The endpoint is called when a diagnosis package is requested via the diagnosis API.
+            The endpoint needs to return the data within a zip file `application/zip` response.
+          type: string
+    Cell:
+      type: object
+      description: |
+        To create a robot cell, only a valid name is required.
+        Once created, a robot cell provides access to the Wandelbots NOVA foundation services.
+        The configuration can be customized, e.g., robot controllers, also within apps.
+      required:
+        - name
+      additionalProperties: {}
+      properties:
+        name:
+          $ref: '#/components/schemas/CellName'
+          default: cell
+        version:
+          description: |
+            Wandelbots NOVA version of the cell.
+            This version must not exceed the current system version.
+          type: string
+        description:
+          $ref: '#/components/schemas/CellDescription'
+        controllers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RobotController'
+        apps:
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+    ProgramRunState:
+      title: ProgramRunState
+      description: The state of a program run.
+      type: string
+      format: enum
+      enum:
+        - PREPARING
+        - RUNNING
+        - COMPLETED
+        - FAILED
+        - STOPPED
+    ProgramStatus:
+      title: ProgramStatus
+      type: object
+      required:
+        - app
+        - program
+        - run
+        - state
+        - timestamp
+      properties:
+        app:
+          type: string
+          description: The app name where the program is hosted.
+        program:
+          type: string
+          description: Unique identifier of the program.
+        run:
+          type: string
+          description: Unique identifier of the program run.
+        state:
+          $ref: '#/components/schemas/ProgramRunState'
+          description: State of the program run.
+        error:
+          type: string
+          description: Error message if the program run failed.
+        start_time:
+          type: string
+          format: date-time
+          description: RFC3339 timestamp when the program run started.
+        end_time:
+          type: string
+          format: date-time
+          description: RFC3339 timestamp when the program run ended.
+        timestamp:
+          type: string
+          format: date-time
+          description: RFC3339 timestamp when the program run ended.
+    ServiceGroup:
+      type: string
+      enum:
+        - SystemService
+        - CellService
+        - RobotController
+        - App
+    ServiceStatusSeverity:
+      type: string
+      enum:
+        - INFO
+        - WARNING
+        - ERROR
+    ServiceStatusPhase:
+      type: string
+      enum:
+        - Terminating
+        - Initialized
+        - Running
+        - NoReady
+        - Completed
+        - ContainerCreating
+        - PodInitializing
+        - Unknown
+        - CrashLoopBackOff
+        - Error
+        - ImagePullBackOff
+        - OOMKilled
+        - Pending
+        - Evicted
+    ServiceStatus:
+      type: object
+      required:
+        - service
+        - group
+        - status
+      properties:
+        service:
+          type: string
+        group:
+          $ref: '#/components/schemas/ServiceGroup'
+        status:
+          type: object
+          required:
+            - severity
+            - code
+          properties:
+            severity:
+              $ref: '#/components/schemas/ServiceStatusSeverity'
+            code:
+              $ref: '#/components/schemas/ServiceStatusPhase'
+            reason:
+              type: string
+    ServiceStatusList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ServiceStatus'
+    CellCycleEvent:
+      title: CellCycleEvent
+      description: |
+        Lifecycle event for a cell cycle.
+      type: object
+      required:
+        - event_type
+        - id
+        - cycle_id
+        - timestamp
+        - cell
+      properties:
+        event_type:
+          type: string
+          description: Type of the cycle event.
+          enum:
+            - cycle_started
+            - cycle_finished
+            - cycle_failed
+        id:
+          type: string
+          description: Unique identifier of this cycle event.
+        cycle_id:
+          type: string
+          description: Unique identifier of the cycle this event belongs to.
+        timestamp:
+          type: string
+          description: Timestamp when the cycle event occurred, in ISO 8601 format.
+        cell:
+          type: string
+          description: Unique identifier of the cell the event belongs to.
+        extra:
+          type: object
+          description: Additional event-specific data. May be empty.
+          additionalProperties: true
+        duration_ms:
+          type: integer
+          description: Duration of the cycle in milliseconds.
+        reason:
+          type: string
+          description: Reason for cycle failure.
+    Sphere:
+      title: Sphere
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - sphere
+        radius:
+          type: number
+          format: double
+          description: The radius of the sphere in [mm].
+      required:
+        - shape_type
+        - radius
+      description: Defines a spherical shape centred around the origin.
+    Box:
+      title: Box
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - box
+        size_x:
+          type: number
+          format: double
+          description: The dimension in x-direction in [mm].
+        size_y:
+          type: number
+          format: double
+          description: The dimension in y-direction in [mm].
+        size_z:
+          type: number
+          format: double
+          description: The dimension in z-direction in [mm].
+        box_type:
+          type: string
+          enum:
+            - HOLLOW
+            - FULL
+          default: FULL
+          description: The box type defines if the box is hollow or full.
+      required:
+        - shape_type
+        - size_x
+        - size_y
+        - size_z
+        - box_type
+      description: |
+        Defines a cuboid shape centred around an origin.
+
+        If a margin is applied to the box type full, it is added to all size values. The shape will keep its edges.
+        The hollow box type consists of thin boxes that make up its walls.
+        If a margin is applied to the box type hollow, its size values are reduced by the margin.
+    Rectangle:
+      title: Rectangle
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - rectangle
+        size_x:
+          type: number
+          format: double
+          description: The dimension in x-direction in [mm].
+        size_y:
+          type: number
+          format: double
+          description: The dimension in y-direction in [mm].
+      required:
+        - shape_type
+        - size_x
+        - size_y
+      description: Defines an x/y-plane with finite size. Centred around the z-axis.
+    Plane:
+      title: Plane
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - plane
+      required:
+        - shape_type
+      description: Defines an x/y-plane with infinite size.
+    Cylinder:
+      title: Cylinder
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - cylinder
+        radius:
+          type: number
+          format: double
+          description: The radius of the cylinder in [mm].
+        height:
+          type: number
+          format: double
+          description: The height of the cylinder in [mm].
+      required:
+        - shape_type
+        - radius
+        - height
+      description: |
+        Defines a cylindrical shape.
+        Centred around origin, symmetric around z-axis.
+
+        If a margin is applied, it is added to radius and height. The shape will keep its edges.
+    Capsule:
+      title: Capsule
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - capsule
+        radius:
+          type: number
+          format: double
+          description: The radius of the cylinder and semi-spheres in [mm].
+        cylinder_height:
+          type: number
+          format: double
+          description: The height of the inner cylinder in [mm].
+      required:
+        - shape_type
+        - radius
+        - cylinder_height
+      description: |
+        Defines a cylindrical shape with 2 semi-spheres on the top and bottom.
+        Centred around origin, symmetric around z-axis.
+    RectangularCapsule:
+      title: RectangularCapsule
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - rectangular_capsule
+        radius:
+          type: number
+          format: double
+          description: The radius of the inner spheres in [mm].
+        sphere_center_distance_x:
+          type: number
+          format: double
+          description: The distance of the sphere center in x-direction in [mm].
+        sphere_center_distance_y:
+          type: number
+          format: double
+          description: The distance of the sphere center in y-direction in [mm].
+      required:
+        - shape_type
+        - radius
+        - sphere_center_distance_x
+        - sphere_center_distance_y
+      description: |
+        Convex hull around four spheres. Sphere center points in x/y-plane, offset by either combination "+/- sizeX" or "+/- sizeY".
+
+        Alternative description: Rectangle in x/y-plane with a 3D padding.
+    Vector3d:
+      title: Vector3d
+      type: array
+      maxItems: 3
+      minItems: 3
+      items:
+        type: number
+        format: double
+      description: |
+        A three-dimensional vector [x, y, z] with double precision.
+    ConvexHull:
+      title: ConvexHull
+      type: object
+      properties:
+        shape_type:
+          type: string
+          enum:
+            - convex_hull
+        vertices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vector3d'
+          description: The list of encapsulated points.
+      required:
+        - shape_type
+        - vertices
+      description: Defines a convex hull encapsulating a set of vertices.
+    RotationVector:
+      title: RotationVector
+      type: array
+      maxItems: 3
+      minItems: 3
+      items:
+        type: number
+        format: double
+      description: |
+        Defines a rotation in 3D space.
+        A three-dimensional Vector [rx, ry, rz] with double precision.
+        Rotation is applied around the vector.
+        The angle of rotation equals the length of the vector.
+    Pose:
+      title: Pose
+      type: object
+      properties:
+        position:
+          $ref: '#/components/schemas/Vector3d'
+        orientation:
+          $ref: '#/components/schemas/RotationVector'
+      default:
+        position:
+          - 0
+          - 0
+          - 0
+        orientation:
+          - 0
+          - 0
+          - 0
+      description: |
+        Defines a pose in 3D space.
+        A pose is a combination of a position and an orientation.
+        The position is applied before the orientation.
+    Collider:
+      title: Collider
+      type: object
+      description: |
+        Defines a collider with a single shape.
+
+        A collider is an object that is used for collision detection.
+        It defines the `shape` that is attached with the offset of `pose` to a reference frame.
+
+        Use colliders to:
+        - Define the shape of a workpiece. The reference frame is the scene origin.
+        - Define the shape of a link in a motion group. The reference frame is the link coordinate system.
+        - Define the shape of a tool. The reference frame is the flange coordinate system.
+      properties:
+        shape:
+          oneOf:
+            - $ref: '#/components/schemas/Sphere'
+            - $ref: '#/components/schemas/Box'
+            - $ref: '#/components/schemas/Rectangle'
+            - $ref: '#/components/schemas/Plane'
+            - $ref: '#/components/schemas/Cylinder'
+            - $ref: '#/components/schemas/Capsule'
+            - $ref: '#/components/schemas/RectangularCapsule'
+            - $ref: '#/components/schemas/ConvexHull'
+          discriminator: shape_type
+        pose:
+          $ref: '#/components/schemas/Pose'
+        margin:
+          type: number
+          description: Increases the shape's size in all dimensions. Applied in [mm]. Can be used to keep a safe distance to the shape.
+          format: float
+          default: 0
+      required:
+        - shape
+    ColliderDictionary:
+      type: object
+      title: ColliderDictionary
+      description: A collection of identifiable colliders.
+      additionalProperties:
+        $ref: '#/components/schemas/Collider'
+    Link:
+      type: object
+      title: Collision Motion Group Link
+      additionalProperties:
+        $ref: '#/components/schemas/Collider'
+    LinkChain:
+      title: Link Chain
+      type: array
+      description: |
+        A link chain is a kinematic chain of links that is connected via joints.
+        A motion group can be used to control the motion of the joints in a link chain.
+
+        A link is a group of colliders that is attached to the link reference frame.
+
+        The reference frame of a link is obtained after applying all sets of Denavit-Hartenberg-parameters from base to (including) the link index.
+
+        This means that the reference frame of the link is on the rotation axis of the next joint in the kinematic chain.
+        Example: For a motion group with 2 joints, the collider reference frame (CRF) for link 1 is on the rotation axis of joint 2. The chain looks like:
+        - Origin >> Mounting >> Base >> (CRF Base) Joint 0 >> Link 0 >> (CRF Link 0) Joint 1 >> Link 1 >> (CRF Link 1) Flange (CRF Tool) >> TCP
+
+        Adjacent links in the kinematic chain of the motion group are not checked for mutual collision.
+      items:
+        $ref: '#/components/schemas/Link'
+    Tool:
+      type: object
+      title: Collision Motion Group Tool
+      description: |
+        Defines the shape of a tool.
+
+        A tool is a dictionary of colliders.
+
+        All colliders that make up a tool are attached to the flange frame of the motion group.
+      additionalProperties:
+        $ref: '#/components/schemas/Collider'
+    CollisionSetup:
+      title: CollisionSetup
+      type: object
+      properties:
+        colliders:
+          $ref: '#/components/schemas/ColliderDictionary'
+          description: |
+            Colliders are checked against links and tool.
+        link_chain:
+          $ref: '#/components/schemas/LinkChain'
+          description: |
+            The shape of the motion groups links to validate against colliders.
+            Indexed along the kinematic chain, starting with a static base shape before first joint.
+            The base of the motion group is not checked for collision against the environment.
+        tool:
+          $ref: '#/components/schemas/Tool'
+          description: |
+            Shape of the tool to validate against colliders.
+        self_collision_detection:
+          type: boolean
+          description: |
+            If true, self-collision detection is enabled for the motion group.
+
+            Self-collision detection checks if links in the kinematic chain of the motion group collide with each other.
+            Adjacent links in the kinematic chain of the motion group are not checked for mutual collision.
+            The tool is treated like a link at the end of the kinematic chain. It is checked against all links except the last one.
+
+            Default is true.
+          default: true
+    BusIOsStateEnum:
+      enum:
+        - BUS_IOS_STATE_UNKNOWN
+        - BUS_IOS_STATE_INITIALIZING
+        - BUS_IOS_STATE_CONNECTED
+        - BUS_IOS_STATE_DISCONNECTED
+      type: string
+      format: enum
+      description: |
+        Current state of the BUS input/output service.
+    BusIOsState:
+      type: object
+      required:
+        - state
+      properties:
+        state:
+          $ref: '#/components/schemas/BusIOsStateEnum'
+        message:
+          type: string
+          description: |
+            A message providing additional information on the input/output service, e.g., BUS service status, encountered errors.
+            May be empty if no additional information is available.
+    IOBooleanValue:
+      title: IOBooleanValue
+      required:
+        - io
+        - value
+        - value_type
+      type: object
+      properties:
+        io:
+          type: string
+          description: Unique identifier of the input/output.
+        value:
+          type: boolean
+          description: |
+            Value of a digital input/output.
+        value_type:
+          type: string
+          enum:
+            - boolean
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+      description: Input/Output boolean value representation.
+    IOIntegerValue:
+      required:
+        - value_type
+        - io
+        - value
+      type: object
+      properties:
+        io:
+          type: string
+          description: Unique identifier of the input/output.
+        value:
+          type: string
+          description: |
+            Value of an input/output with integer representation.
+
+            > The integral value is transmitted as a string to avoid precision loss during conversion to JSON.
+            > Recommended: Use int64 in your implementation. If you want to interact with int64 in numbers,
+            > JS bigint libraries can help you to parse the string into an integral value.
+        value_type:
+          type: string
+          enum:
+            - integer
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+      title: IOIntegerValue
+    IOFloatValue:
+      required:
+        - value_type
+        - io
+        - value
+      type: object
+      properties:
+        io:
+          type: string
+          description: Unique identifier of the input/output.
+        value:
+          type: number
+          description: |
+            Value of an analog input/output in floating number representation.
+          format: double
+        value_type:
+          type: string
+          enum:
+            - float
+          x-go-type-skip-optional-pointer: true
+          x-is-discriminator: true
+      title: IOFloatValue
+    IOValue:
+      oneOf:
+        - $ref: '#/components/schemas/IOBooleanValue'
+        - $ref: '#/components/schemas/IOIntegerValue'
+        - $ref: '#/components/schemas/IOFloatValue'
+      discriminator: value_type
+    ListIOValuesResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/IOValue'
+      description: Array of input/output values.
+      example:
+        - io: io1
+          value: true
+          value_type: boolean
+        - io: io2
+          value: '42'
+          value_type: integer
+        - io: io3
+          value: 3.14
+          value_type: float
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    SelectIOs:
+      type: object
+      required:
+        - ios
+      properties:
+        ios:
+          type: array
+          description: Array of input/output identifiers to retrieve the values for.
+          items:
+            type: string
+        update_type:
+          type: string
+          description: |
+            Type of update.
+                - changes: Only send updates when the value changes.
+                - full: Send the full list of values at the update rate.
+          default: full
+          enum:
+            - changes
+            - full
+    StreamIOValuesResponse:
+      required:
+        - io_values
+        - timestamp
+        - sequence_number
+      type: object
+      properties:
+        io_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/IOValue'
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp indicating when the represented information was received from the robot controller.
+        sequence_number:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: |
+            Sequence number of the controller state. It starts with 0 upon establishing the connection with a physical controller.
+            The sequence number is reset when the connection to the physical controller is closed and re-established.
+      description: Array of input/output values.
+      example:
+        io_values:
+          - io: io1
+            value: true
+            value_type: boolean
+          - io: io2
+            value: '42'
+            value_type: integer
+          - io: io3
+            value: 3.14
+            value_type: float
+    RobotSystemMode:
+      enum:
+        - MODE_CONTROLLER_NOT_CONFIGURED
+        - MODE_INITIALIZING
+        - MODE_MONITOR
+        - MODE_CONTROL
+        - MODE_FREE_DRIVE
+      type: string
+      description: |
+        Defines the current system mode of the robot system, including NOVA communicating with the robot controller.
+
+        ### MODE_CONTROLLER_NOT_CONFIGURED
+
+        No controller with the specified identifier is configured. Call [addRobotController](#/operations/addRobotController) to register a controller.
+
+        ### MODE_INITIALIZING
+
+        Indicates that a connection to the robot controller is established or reestablished in case of a disconnect.
+        On success, the controller is set to MODE_MONITOR.
+        On failure, the initialization process is retried until successful or cancelled by the user.
+
+        ### MODE_MONITOR
+
+        Read-only mode with an active controller connection.
+        - Receives robot state and I/O signals
+        - Move requests are rejected
+        - No commands are sent to the controller
+
+        ### MODE_CONTROL
+
+        Active control mode.
+
+        **Movement is possible in this mode**
+
+        The robot is cyclically commanded to hold its current position.
+        The robot state is received in sync with the controller cycle.
+        Motion and jogging requests are accepted and executed.
+        Input/Output interaction is enabled.
+
+        ### MODE_FREE_DRIVE
+
+        Read-only mode with servo motors enabled for manual movement (Free Drive).
+
+        Move requests are rejected.
+
+        Not supported by all robots: Use [getSupportedModes](#/operations/getSupportedModes) to check Free Drive availability.
+      format: enum
+    OperationMode:
+      enum:
+        - OPERATION_MODE_UNKNOWN
+        - OPERATION_MODE_NO_CONTROLLER
+        - OPERATION_MODE_DISCONNECTED
+        - OPERATION_MODE_POWER_ON
+        - OPERATION_MODE_PENDING
+        - OPERATION_MODE_MANUAL
+        - OPERATION_MODE_MANUAL_T1
+        - OPERATION_MODE_MANUAL_T2
+        - OPERATION_MODE_AUTO
+        - OPERATION_MODE_RECOVERY
+      type: string
+      format: enum
+      description: |
+        Current operation mode of the configured robot controller.
+        Operation modes in which the attached motion groups can be moved are:
+        - OPERATION_MODE_MANUAL (if enabling switch is pressed)
+        - OPERATION_MODE_MANUAL_T1 (if enabling switch is pressed)
+        - OPERATION_MODE_MANUAL_T2 (if enabling switch is pressed)
+        - OPERATION_MODE_AUTO (without needing to press enabling switch)
+        All other modes are considered as non-operational.
+    SafetyStateType:
+      enum:
+        - SAFETY_STATE_UNKNOWN
+        - SAFETY_STATE_FAULT
+        - SAFETY_STATE_NORMAL
+        - SAFETY_STATE_MASTERING
+        - SAFETY_STATE_CONFIRM_SAFETY
+        - SAFETY_STATE_OPERATOR_SAFETY
+        - SAFETY_STATE_PROTECTIVE_STOP
+        - SAFETY_STATE_REDUCED
+        - SAFETY_STATE_STOP
+        - SAFETY_STATE_STOP_0
+        - SAFETY_STATE_STOP_1
+        - SAFETY_STATE_STOP_2
+        - SAFETY_STATE_RECOVERY
+        - SAFETY_STATE_DEVICE_EMERGENCY_STOP
+        - SAFETY_STATE_ROBOT_EMERGENCY_STOP
+        - SAFETY_STATE_VIOLATION
+      type: string
+      format: enum
+      description: |
+        Current safety state of the configured robot controller.
+        Operation modes in which the attached motion groups can be moved are:
+        - SAFETY_STATE_NORMAL
+        - SAFETY_STATE_REDUCED
+        All other modes are considered as non-operational.
+    Joints:
+      type: array
+      items:
+        type: number
+        format: double
+      description: |
+        This structure describes a set of joint values, e.g., positions, currents, torques, of a motion group.
+
+        Float precision is the default.
+    MotionGroupState_JointLimitReached:
+      type: object
+      required:
+        - limit_reached
+      properties:
+        limit_reached:
+          type: array
+          items:
+            type: boolean
+          description: If true, operational (soft) jointLimit is reached for specific joint.
+      description: |
+        Indicates which joint of the motion group is in a limit.
+        If a joint is in its limit, only this joint can be moved. Movements that affect any other joints are not executed.
+    JoggingRunning:
+      title: JoggingRunning
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - RUNNING
+      description: |
+        Jogging is active.
+    JoggingPausedByUser:
+      title: JoggingPausedByUser
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - PAUSED_BY_USER
+      description: |
+        User has paused jogging.
+    JoggingPausedOnIO:
+      title: JoggingPausedOnIO
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - PAUSED_ON_IO
+      description: |
+        Jogging was paused because of an I/O event.
+    JoggingPausedNearJointLimit:
+      title: JoggingPausedNearJointLimit
+      type: object
+      required:
+        - kind
+        - joint_indices
+      properties:
+        kind:
+          type: string
+          enum:
+            - PAUSED_NEAR_JOINT_LIMIT
+        joint_indices:
+          type: array
+          items:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 2147483647
+      description: |
+        Jogging was paused because a joint is near its limit.
+    JoggingPausedNearCollision:
+      title: JoggingPausedNearCollision
+      type: object
+      required:
+        - kind
+        - description
+      properties:
+        kind:
+          type: string
+          enum:
+            - PAUSED_NEAR_COLLISION
+        description:
+          type: string
+      description: |
+        Jogging was paused because the motion group neared a collision.
+    JoggingPausedNearSingularity:
+      title: JoggingPausedNearSingularity
+      type: object
+      required:
+        - kind
+        - description
+      properties:
+        kind:
+          type: string
+          enum:
+            - PAUSED_NEAR_SINGULARITY
+        description:
+          type: string
+      description: |
+        Jogging was paused because the motion group neared a singularity or the workspace boundary.
+    JoggingDetails:
+      title: JoggingDetails
+      type: object
+      required:
+        - state
+        - kind
+      properties:
+        state:
+          oneOf:
+            - $ref: '#/components/schemas/JoggingRunning'
+            - $ref: '#/components/schemas/JoggingPausedByUser'
+            - $ref: '#/components/schemas/JoggingPausedOnIO'
+            - $ref: '#/components/schemas/JoggingPausedNearJointLimit'
+            - $ref: '#/components/schemas/JoggingPausedNearCollision'
+            - $ref: '#/components/schemas/JoggingPausedNearSingularity'
+          discriminator: kind
+        jogger_session_timestamp_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9223372036854776000
+          description: |
+            Timestamp of the current jogger session in milliseconds.
+            Only waypoint sessions are supported. Other sessions return 0.
+
+            > **NOTE**
+            >
+            > This field is experimental and its behavior may change in future releases.
+        kind:
+          type: string
+          enum:
+            - JOGGING
+      description: |
+        State of jogging execution.
+        This state is sent during jogging movement, response-rate closest to the nearest multiple of controller step-rate but not exceeding the configured rate.
+        The jogging state can be one of the following:
+        - RUNNING: Jogging is active.
+        - PAUSED_BY_USER: User has paused jogging.
+        - PAUSED_NEAR_JOINT_LIMIT: Jogging was paused because a joint is near its limit.
+        - PAUSED_NEAR_COLLISION: Jogging was paused because the motion group neared a collision.
+        - PAUSED_NEAR_SINGULARITY: Jogging was paused because the motion group neared a singularity or the workspace boundary.
+        - PAUSED_ON_IO: Jogging was paused because of an I/O event.
+    Location:
+      type: number
+      format: double
+      description: |
+        - The location is a scalar value that defines a position along a path, typically ranging from 0 to `n`,
+          where `n` denotes the number of motion commands
+        - Each integer value of the location corresponds to a specific motion command,
+          while non-integer values interpolate positions within the segments.
+        - The location is calculated from the joint path
+    TrajectoryRunning:
+      title: TrajectoryRunning
+      type: object
+      required:
+        - kind
+        - time_to_end
+      properties:
+        kind:
+          type: string
+          enum:
+            - RUNNING
+        time_to_end:
+          type: integer
+          description: Remaining time in milliseconds (ms) to reach the end of the motion.
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+      description: |
+        Trajectory is being executed.
+    TrajectoryPausedByUser:
+      title: TrajectoryPausedByUser
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - PAUSED_BY_USER
+      description: |
+        User has paused execution.
+    TrajectoryEnded:
+      title: TrajectoryEnded
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - END_OF_TRAJECTORY
+      description: |
+        First or last sample (depending on direction) of trajectory has been sent.
+    TrajectoryWaitForIO:
+      title: TrajectoryWaitForIO
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - WAIT_FOR_IO
+      description: |
+        Waiting for an I/O event to start execution.
+    TrajectoryPausedOnIO:
+      title: TrajectoryPausedOnIO
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - PAUSED_ON_IO
+      description: |
+        Execution was paused because of an I/O event.
+    TrajectoryDetails:
+      title: TrajectoryDetails
+      type: object
+      required:
+        - trajectory
+        - location
+        - state
+        - kind
+      properties:
+        trajectory:
+          type: string
+          description: |
+            Unique identifier of the trajectory being executed.
+        location:
+          $ref: '#/components/schemas/Location'
+          description: |
+            Location of current joint position commmand on the trajectory being executed.
+        state:
+          oneOf:
+            - $ref: '#/components/schemas/TrajectoryRunning'
+            - $ref: '#/components/schemas/TrajectoryPausedByUser'
+            - $ref: '#/components/schemas/TrajectoryEnded'
+            - $ref: '#/components/schemas/TrajectoryWaitForIO'
+            - $ref: '#/components/schemas/TrajectoryPausedOnIO'
+          discriminator: kind
+        kind:
+          type: string
+          enum:
+            - TRAJECTORY
+          description: |
+            Discriminator for OpenApi generators, which is always "TRAJECTORY" for this schema.
+      description: |
+        State of trajectory execution.
+        This state is sent during trajectory movement, response-rate closest to the nearest multiple of controller step-rate but not exceeding the configured rate.
+        The trajectory state can be one of the following:
+        - RUNNING: Trajectory is being executed.
+        - PAUSED_BY_USER: User has paused execution.
+        - END_OF_TRAJECTORY: First or last sample (depending on direction) of trajectory has been sent.
+        - WAIT_FOR_IO: Waiting for an I/O event to start execution.
+        - PAUSED_ON_IO: Execution was paused because of an I/O event.
+    Execute:
+      title: Execute
+      type: object
+      required:
+        - joint_position
+      properties:
+        joint_position:
+          type: array
+          items:
+            type: number
+            format: double
+          description: |
+            Commanded joint position of each joint. This command was sent in the time step the corresponding state was received.
+            The unit depends on the type of joint: For revolute joints, the angle is given in [rad]; for prismatic joints, the displacement is given in [mm].
+        details:
+          oneOf:
+            - $ref: '#/components/schemas/JoggingDetails'
+            - $ref: '#/components/schemas/TrajectoryDetails'
+          discriminator: kind
+      description: |
+        Details about the state of the motion execution.
+        The details are either for a jogging or a trajectory.
+        If NOVA is not controlling this motion group at the moment, this field is omitted.
+    MotionGroupState:
+      required:
+        - timestamp
+        - sequence_number
+        - motion_group
+        - controller
+        - joint_position
+        - joint_limit_reached
+        - standstill
+        - description_revision
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp for when data was received from the robot controller.
+        sequence_number:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: |
+            Sequence number of the controller state. It starts with 0 upon establishing the connection with a physical controller.
+            The sequence number is reset when the connection to the physical controller is closed and re-established.
+        motion_group:
+          type: string
+          description: Identifier of the motion group.
+        controller:
+          type: string
+          description: 'Convenience: Identifier of the robot controller the motion group is attached to.'
+        joint_position:
+          $ref: '#/components/schemas/Joints'
+          description: |
+            Current joint position of each joint.
+            The unit depends on the type of joint: For revolute joints, the angle is given in [rad]; for prismatic joints, the displacement is given in [mm].
+        joint_limit_reached:
+          $ref: '#/components/schemas/MotionGroupState_JointLimitReached'
+          description: |
+            Indicates whether the joint is in a limit for all joints of the motion group.
+        joint_torque:
+          $ref: '#/components/schemas/Joints'
+          description: |
+            Current joint torque of each joint in [Nm].
+            Is only available if the robot controller supports it, e.g., available for UR controllers.
+        joint_current:
+          $ref: '#/components/schemas/Joints'
+          description: |
+            Current at TCP in [A].
+            Is only available if the robot controller supports it, e.g., available for UR controllers.
+        flange_pose:
+          $ref: '#/components/schemas/Pose'
+          description: |
+            Pose of the flange.
+            Positions are in [mm].
+            Orientations are in [rad].
+            The pose is relative to the response_coordinate_system specified in the request.
+            For robot arms, a flange pose is always returned. For positioners, the flange might not be available, depending on the model.
+        tcp:
+          type: string
+          description: |
+            Unique identifier addressing the active TCP.
+            Might not be returned for positioners as some do not support TCPs, depending on the model.
+        tcp_pose:
+          $ref: '#/components/schemas/Pose'
+          description: |
+            Pose of the TCP selected on the robot control panel.
+            Positions are in [mm].
+            Orientations are in [rad].
+            The pose is relative to the response_coordinate_system specified in the request.
+            Might not be returned for positioners as some do not support TCPs, depending on the model.
+        coordinate_system:
+          type: string
+          description: |
+            Unique identifier addressing the reference coordinate system of the cartesian data.
+            Might not be returned for positioners as some do not support TCPs, depending on the model.
+            Default: world coordinate system of corresponding controller.
+        payload:
+          type: string
+          description: |
+            Unique identifier addressing the active payload.
+            Only fetchable via GET endpoint, not available in WebSocket.
+        standstill:
+          type: boolean
+          description: |
+            Indicates whether the motion group is in standstill.
+            Convenience: Signals that NOVA treats measured joint velocities as 0.
+        execute:
+          $ref: '#/components/schemas/Execute'
+          description: |
+            Data that was commanded to the motion group. Includes additional data on NOVA's execution components for executing trajectories and jogging.
+            This is a convenience field to indicate the last command sent to the motion group.
+            It is not available in all cases, e.g., if the motion group is not moved by NOVA.
+        description_revision:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          description: |
+            Revision number of the motion group description.
+            The revision is incremented whenever the motion group description changes due to a modification of the tools or the payloads in the robot configuration.
+            The robot controller is polled every 10 s during Monitoring Mode to detect those changes.
+            Use to trigger fetching based on robot configuration changes.
+      description: Presents the current state of the motion group.
+    RobotControllerState:
+      required:
+        - mode
+        - timestamp
+        - sequence_number
+        - controller
+        - operation_mode
+        - safety_state
+        - motion_groups
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/RobotSystemMode'
+          description: Mode of communication and control between NOVA and the robot controller.
+        last_error:
+          type: array
+          items:
+            type: string
+          description: |
+            Last error stack encountered during initialization process or after a controller disconnect.
+            At this stage, it's unclear whether the error is fatal.
+
+            Evaluate `last_error` to decide whether to remove the controller using `deleteController`.
+            Examples:
+            - Delete required: Host resolution fails repeatedly due to an incorrect IP.
+            - Delete not required: Temporary network delay caused a disconnect; the system will auto-reconnect.
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp indicating when the represented information was received from the robot controller.
+        sequence_number:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: |
+            Sequence number of the controller state. It starts with 0 upon establishing the connection with a physical controller.
+            The sequence number is reset when the connection to the physical controller is closed and re-established.
+        controller:
+          type: string
+          default: controller
+          description: Identifier of the configured robot controller.
+        operation_mode:
+          $ref: '#/components/schemas/OperationMode'
+        safety_state:
+          $ref: '#/components/schemas/SafetyStateType'
+        velocity_override:
+          type: integer
+          description: |
+            If made available by the robot controller, returns the current velocity override in
+            [percentage] for movements adjusted on robot control panel.
+            Valid value range: 1 - 100.
+          format: int32
+          minimum: 1
+          maximum: 100
+        motion_groups:
+          title: MotionGroupState[]
+          type: array
+          items:
+            $ref: '#/components/schemas/MotionGroupState'
+          description: |
+            State of indicated motion groups.
+            In case of state request via controller all configured motion groups are returned.
+            In case of executing a motion only the affected motion groups are returned.
+      description: Returns the whole current state of robot controller.
+    TcpOffset:
+      title: TcpOffset
+      required:
+        - name
+        - pose
+      type: object
+      properties:
+        name:
+          type: string
+          description: A readable and changeable name for frontend visualization.
+        pose:
+          $ref: '#/components/schemas/Pose'
+    LimitRange:
+      type: object
+      properties:
+        lower_limit:
+          type: number
+          format: double
+        upper_limit:
+          type: number
+          format: double
+      description: The upper_limit must be greater then the lower_limit.
+    JointLimits:
+      title: JointLimits
+      type: object
+      properties:
+        position:
+          $ref: '#/components/schemas/LimitRange'
+        velocity:
+          type: number
+          format: double
+        acceleration:
+          type: number
+          format: double
+        jerk:
+          type: number
+          format: double
+          description: |
+            > **NOTE**
+            >
+            > This limit type is experimental and its behavior may change in future releases.
+        torque:
+          type: number
+          format: double
+    CartesianLimits:
+      title: CartesianLimits
+      type: object
+      properties:
+        velocity:
+          type: number
+          format: double
+        acceleration:
+          type: number
+          format: double
+        jerk:
+          type: number
+          format: double
+          description: |
+            > **NOTE**
+            >
+            > This limit type is experimental and its behavior may change in future releases.
+        orientation_velocity:
+          type: number
+          format: double
+        orientation_acceleration:
+          type: number
+          format: double
+        orientation_jerk:
+          type: number
+          format: double
+          description: |
+            > **NOTE**
+            >
+            > This limit type is experimental and its behavior may change in future releases.
+    LimitSet:
+      title: LimitSet
+      type: object
+      properties:
+        joints:
+          type: array
+          items:
+            $ref: '#/components/schemas/JointLimits'
+        tcp:
+          $ref: '#/components/schemas/CartesianLimits'
+        elbow:
+          $ref: '#/components/schemas/CartesianLimits'
+        flange:
+          $ref: '#/components/schemas/CartesianLimits'
+        coupled_shoulder_elbow_joint:
+          $ref: '#/components/schemas/JointLimits'
+    OperationLimits:
+      title: OperationLimits
+      type: object
+      properties:
+        auto_limits:
+          $ref: '#/components/schemas/LimitSet'
+        manual_limits:
+          $ref: '#/components/schemas/LimitSet'
+        manual_t1_limits:
+          $ref: '#/components/schemas/LimitSet'
+        manual_t2_limits:
+          $ref: '#/components/schemas/LimitSet'
+        safety_limit_elbow_flange_velocity_in_auto:
+          type: boolean
+          default: false
+          description: Flag to indicate whether the TCP velocity limit is also applied for the elbow and flange in auto mode.
+    Payload:
+      required:
+        - name
+        - payload
+      type: object
+      properties:
+        name:
+          type: string
+        payload:
+          type: number
+          description: Mass of payload in [kg].
+          format: double
+        center_of_mass:
+          $ref: '#/components/schemas/Vector3d'
+          description: Center of mass of payload as a three-dimensional position vector [x, y, z] in [mm].
+        moment_of_inertia:
+          $ref: '#/components/schemas/Vector3d'
+          description: Principal moments of inertia of payload as three-dimensional vector [I_xx, I_yy, I_zz] in [kg·m²].
+    JointTypeEnum:
+      type: string
+      enum:
+        - REVOLUTE_JOINT
+        - PRISMATIC_JOINT
+      default: REVOLUTE_JOINT
+    DHParameter:
+      type: object
+      properties:
+        alpha:
+          type: number
+          description: Angle about x-axis in [rad].
+          format: double
+        theta:
+          type: number
+          description: Angle about z-axis in [rad].
+          format: double
+        a:
+          type: number
+          description: Offset along x-axis in [mm].
+          format: double
+        d:
+          type: number
+          description: Offset along z-axis in [mm].
+          format: double
+        reverse_rotation_direction:
+          type: boolean
+          description: True, if rotation direction of joint is reversed.
+        type:
+          $ref: '#/components/schemas/JointTypeEnum'
+      description: A single set of DH parameters.
+    MotionGroupDescription:
+      required:
+        - motion_group_model
+        - operation_limits
+      type: object
+      properties:
+        motion_group_model:
+          $ref: '#/components/schemas/MotionGroupModel'
+        mounting:
+          $ref: '#/components/schemas/Pose'
+          description: The offset from the world frame to the motion group base.
+        tcps:
+          type: object
+          title: TcpOffsetDictionary
+          description: |
+            Maps a TCP name to its offset relative to the flange coordinate system. Key must be a TCP identifier.
+            Values are TcpOffsets.
+          additionalProperties:
+            $ref: '#/components/schemas/TcpOffset'
+        safety_zones:
+          $ref: '#/components/schemas/ColliderDictionary'
+          description: |
+            SafetyZones are areas which cannot be entered or where certain limits apply.
+            SafetyZones are defined in the world coordinate system.
+        safety_link_colliders:
+          type: array
+          items:
+            $ref: '#/components/schemas/ColliderDictionary'
+          description: |
+            The shape of the MotionGroups links to validate against safety zones.
+            Indexed along the kinematic chain, starting with a static base shape before first joint.
+        safety_tool_colliders:
+          type: object
+          title: SafetyToolColliders
+          additionalProperties:
+            $ref: '#/components/schemas/ColliderDictionary'
+          description: |
+            Maps a TCP name to its tool collider. Key must be a TCP identifier.
+            Values are ColliderDictionaries that make up the shape of one tool to validate against safety zones.
+        operation_limits:
+          $ref: '#/components/schemas/OperationLimits'
+        payloads:
+          type: object
+          title: PayloadDictionary
+          description: |
+            Maps a payload name to its configuration. Key must be a payload identifier.
+            Values are payload objects.
+          additionalProperties:
+            $ref: '#/components/schemas/Payload'
+        cycle_time:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          description: '[ms] cycle time of the motion group controller. A trajectory for this motion group should be computed to this resolution.'
+        dh_parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/DHParameter'
+          description: The Denavit-Hartenberg parameters describing the motion group kinematics.
+        kinematic_chain_offset:
+          description: |
+            Constant coordinate transformation between the motion group base frame and the start of the kinematic chain modelled by Denavit-Hartenberg parameters.
+            Unlike the mounting, which is used to set the actual position and orientation of the motion group within a cell, this offset is fixed.
+            It is part of the description of the kinematical structure of the motion group.
+          $ref: '#/components/schemas/Pose'
+        flange_offset:
+          description: |
+            Constant coordinate transformation between the end of the kinematic chain modelled by Denavit-Hartenberg parameters and the flange frame.
+            This can be used, e.g., to ensure that the flange frame has a certain orientation.
+          $ref: '#/components/schemas/Pose'
+        serial_number:
+          type: string
+          description: |
+            The serial number of the motion group, if available. If not available, the serial number of the robot controller. If not available, empty.
+        description_revision:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          description: |
+            Revision number of the motion group description.
+            The revision is incremented whenever the motion group description changes due to a modification of the tools or the payloads in the robot configuration.
+            The robot controller is polled every 10 s in Monitoring Mode to detect those changes.
+            Use to detect changes since the last retrieval.
+      description: |
+        The configuration of a motion-group used for motion planning.
+        The parameters `mounting`, `kinematic_chain_offset`, `dh_parameters`, `flange_offset` and `tcp_offset` are used to model the kinematic structure of the motion group.
+        They can be used to compute the coordinate transformations from world to tcp frame:
+        [world frame] -> mounting -> [base frame] -> kinematic chain offset + motion group kinematics (Denavit-Hartenberg parameters) -> [end of kinematic chain frame]
+        -> flange_offset -> [flange frame] -> tcp_offset -> [tcp frame].
+    CloudEvent:
+      type: object
+      description: |
+        CloudEvents specification v1.0.2 compliant event structure.
+        This schema defines the standardized format for event data across all NOVA services.
+      required:
+        - specversion
+        - type
+        - source
+        - id
+      properties:
+        specversion:
+          type: string
+          description: The version of the CloudEvents specification which the event uses
+          enum:
+            - '1.0'
+          example: '1.0'
+        type:
+          type: string
+          description: Type of the event related to the source occurrence
+          pattern: ^[a-z0-9\-\.]+$
+          example: com.wandelbots.nova.system.update.started
+        source:
+          type: string
+          format: uri-reference
+          description: Identifies the context in which an event happened
+          example: /nova/service-manager
+        id:
+          type: string
+          description: Unique identifier for the event
+          pattern: ^[a-zA-Z0-9\-_]+$
+          example: update-2025-01-27-001
+        time:
+          type: string
+          format: date-time
+          description: Timestamp of when the occurrence happened (RFC3339)
+          example: '2025-01-27T10:00:00Z'
+        datacontenttype:
+          type: string
+          description: Content type of the data value
+          default: application/json
+          example: application/json
+        dataschema:
+          type: string
+          format: uri
+          description: URI reference that identifies the schema that the data adheres to
+          example: https://schemas.wandelbots.com/nova/system-update/v2
+        subject:
+          type: string
+          description: Subject of the event in the context of the event producer
+          example: system/update
+        data:
+          type: object
+          description: The event payload specific to the event type
+          additionalProperties: true
+    SystemUpdateStartedEvent:
+      allOf:
+        - $ref: '#/components/schemas/CloudEvent'
+        - type: object
+          description: |
+            Event published when a system update process is started.
+            Uses CloudEvents default fields for ID and timestamp, minimal data payload.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.system.update.started
+              example: nova.v2.events.system.update.started
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this update process
+              pattern: ^update-[a-zA-Z0-9\-_]+$
+              example: update-nova-20250127T100000Z
+            time:
+              description: Timestamp when the update process started (RFC3339)
+            data:
+              type: object
+              description: System update started event payload
+              required:
+                - newVersion
+              properties:
+                newVersion:
+                  type: string
+                  description: New system version being installed
+                  example: 2.1.0
+                oldVersion:
+                  type: string
+                  description: Previous system version, if available
+                  example: 2.0.5
+              additionalProperties: false
+    SystemUpdateCompletedEvent:
+      allOf:
+        - $ref: '#/components/schemas/CloudEvent'
+        - type: object
+          description: |
+            Event published once a system update process is completed.
+            Uses CloudEvents default fields for ID and timestamp, minimal data payload.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.system.update.completed
+              example: nova.v2.events.system.update.completed
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Same unique identifier from the started event for correlation
+              pattern: ^update-[a-zA-Z0-9\-_]+$
+              example: update-nova-20250127T100000Z
+            time:
+              description: Timestamp when the update process completed (RFC3339)
+            data:
+              type: object
+              description: System update completed event payload
+              required:
+                - newVersion
+              properties:
+                newVersion:
+                  type: string
+                  description: New system version that was installed
+                  example: 2.1.0
+                error:
+                  type: string
+                  description: Error message if update failed
+                  example: 'Helm upgrade failed: context deadline exceeded'
+              additionalProperties: false
+    NetworkState:
+      type: object
+      required:
+        - internet_connected
+      properties:
+        internet_connected:
+          type: boolean
+          description: |
+            Indicates whether the system is connected to the internet.
+        connection_type:
+          type: string
+          description: |
+            Type of the active network link (e.g., ethernet, wifi, cellular, vpn, unknown).
+          enum:
+            - ethernet
+            - wifi
+            - cellular
+            - vpn
+            - unknown
+        signal_strength:
+          type: integer
+          format: int32
+          description: |
+            Received signal strength in dBm for wireless interfaces; negative values indicate weaker signals.
+        link_quality:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: |
+            Normalized link quality metric from 0 (poor) to 1 (excellent) when provided by the interface.
+        latency_ms:
+          type: number
+          format: float
+          description: |
+            Round-trip latency to the probe endpoint measured in milliseconds.
+        bandwidth_mbps:
+          type: number
+          format: float
+          description: |
+            Estimated downstream bandwidth in megabits per second based on the probe.
+    NetworkStatusChangedEvent:
+      type: object
+      description: |
+        CloudEvents v1.0 compliant event published when system network status changes.
+        This event wraps the NetworkState payload in a standard CloudEvents envelope.
+      required:
+        - specversion
+        - type
+        - source
+        - id
+        - time
+        - data
+      properties:
+        specversion:
+          type: string
+          description: The version of the CloudEvents specification which the event uses
+          enum:
+            - '1.0'
+          example: '1.0'
+        type:
+          type: string
+          description: Type of the event related to the source occurrence
+          enum:
+            - nova.v2.events.system.network.status.changed
+          example: nova.v2.events.system.network.status.changed
+        source:
+          type: string
+          description: Identifies the context in which an event happened
+          enum:
+            - /nova/system-info
+          example: /nova/system-info
+        id:
+          type: string
+          description: Unique identifier for this network status change event
+          pattern: ^network-status-change-[a-zA-Z0-9\-]+$
+          example: network-status-change-20240615T101500Z
+        time:
+          type: string
+          format: date-time
+          description: Timestamp when the network status changed (RFC3339)
+          example: '2024-06-15T10:15:00Z'
+        datacontenttype:
+          type: string
+          description: Content type of the data value
+          default: application/json
+          example: application/json
+        data:
+          $ref: '#/components/schemas/NetworkState'
+    OperatingState:
+      format: enum
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+      description: The operating state.
+    CellEventData:
+      type: object
+      description: Payload for a cell lifecycle event.
+      required:
+        - version
+        - operating_state
+      properties:
+        version:
+          type: string
+          description: Chart version of the cell foundation release.
+          example: 2.1.0
+        operating_state:
+          $ref: '#/components/schemas/OperatingState'
+      additionalProperties: false
+    CellCreatedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when a cell foundation release is created.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.created
+              example: nova.v2.events.cells.demo.created
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this cell created event.
+              example: cells-demo-created-550e8400-e29b-41d4-a716-446655440000
+            time:
+              description: Timestamp when the cell foundation release was created.
+            data:
+              $ref: '#/components/schemas/CellEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    CellUpdatedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when a cell foundation release is updated.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.updated
+              example: nova.v2.events.cells.demo.updated
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this cell updated event.
+              example: cells-demo-updated-a3bb189e-8bf9-4c8b-a7b4-8e78f6e5e7b1
+            time:
+              description: Timestamp when the cell foundation release was updated.
+            data:
+              $ref: '#/components/schemas/CellEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    CellDeletedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when a cell foundation release is deleted.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.deleted
+              example: nova.v2.events.cells.demo.deleted
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this cell deleted event.
+              example: cells-demo-deleted-b5e2e4f3-7c1d-4f2b-8e5f-9a3c6b7d8e0f
+            time:
+              description: Timestamp when the cell foundation release was deleted.
+            data:
+              $ref: '#/components/schemas/CellEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    AppEventData:
+      type: object
+      description: Payload for an app lifecycle event.
+      required:
+        - image
+        - operating_state
+      properties:
+        image:
+          type: string
+          description: OCI image reference of the app release.
+          example: example.com/demo/portal:1.0.0
+        operating_state:
+          $ref: '#/components/schemas/OperatingState'
+      additionalProperties: false
+    AppCreatedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when an app release is created in a cell.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.apps.{app}.created
+              example: nova.v2.events.cells.demo.apps.portal.created
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this app created event.
+              example: apps-portal-created-c7f3a5b2-9d4e-4f6a-b8c1-2d3e4f5a6b7c
+            time:
+              description: Timestamp when the app release was created.
+            data:
+              $ref: '#/components/schemas/AppEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    AppUpdatedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when an app release is updated in a cell.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.apps.{app}.updated
+              example: nova.v2.events.cells.demo.apps.portal.updated
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this app updated event.
+              example: apps-portal-updated-d8e4b6c3-ae5f-4a7b-9d2e-3e4f5a6b7c8d
+            time:
+              description: Timestamp when the app release was updated.
+            data:
+              $ref: '#/components/schemas/AppEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    AppDeletedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when an app release is deleted from a cell.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.apps.{app}.deleted
+              example: nova.v2.events.cells.demo.apps.portal.deleted
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this app deleted event.
+              example: apps-portal-deleted-e9f5c7d4-bf6a-4b8c-8a3e-4f5a6b7c8d9e
+            time:
+              description: Timestamp when the app release was deleted.
+            data:
+              $ref: '#/components/schemas/AppEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    RobotControllerEventData:
+      type: object
+      description: Payload for a robot controller lifecycle event.
+      required:
+        - manufacturer
+        - virtual
+        - operating_state
+      properties:
+        manufacturer:
+          $ref: '#/components/schemas/Manufacturer'
+        virtual:
+          type: boolean
+          description: Indicates whether the controller is virtual.
+        operating_state:
+          $ref: '#/components/schemas/OperatingState'
+      additionalProperties: false
+    RobotControllerCreatedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when a robot controller release is created in a cell.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.controllers.{controller}.created
+              example: nova.v2.events.cells.demo.controllers.ur10e.created
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this robot controller created event.
+              example: controllers-ur10e-created-f0a6d8e5-ca7b-4c9d-ab4f-5a6b7c8d9e0f
+            time:
+              description: Timestamp when the robot controller release was created.
+            data:
+              $ref: '#/components/schemas/RobotControllerEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    RobotControllerUpdatedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when a robot controller release is updated in a cell.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.controllers.{controller}.updated
+              example: nova.v2.events.cells.demo.controllers.ur10e.updated
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this robot controller updated event.
+              example: controllers-ur10e-updated-1b7e9f06-db8c-4dae-9c50-6b7c8d9e0f1a
+            time:
+              description: Timestamp when the robot controller release was updated.
+            data:
+              $ref: '#/components/schemas/RobotControllerEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+    RobotControllerDeletedEvent:
+      allOf:
+        - type: object
+          description: CloudEvent published when a robot controller release is deleted from a cell.
+          required:
+            - id
+            - time
+            - data
+          properties:
+            type:
+              enum:
+                - nova.v2.events.cells.{cell}.controllers.{controller}.deleted
+              example: nova.v2.events.cells.demo.controllers.ur10e.deleted
+            source:
+              enum:
+                - /nova/service-manager
+              example: /nova/service-manager
+            id:
+              description: Unique identifier for this robot controller deleted event.
+              example: controllers-ur10e-deleted-2c8f0a17-ec9d-4ebf-8d61-7c8d9e0f1a2b
+            time:
+              description: Timestamp when the robot controller release was deleted.
+            data:
+              $ref: '#/components/schemas/RobotControllerEventData'
+        - $ref: '#/components/schemas/CloudEvent'
+asyncapi: 3.0.0
+operations:
+  publishCell:
+    action: send
+    title: Cell Configuration
+    description: |
+      Publishes the configuration for a cell.
+
+      The latest status message is persisted NATS JetStream, documented in `x-nats-jetstream-stream`
+    tags:
+      - name: Cell
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}'
+  publishApp:
+    action: send
+    title: App Configuration
+    description: |
+      Publishes the configuration for a GUI application in the cell.
+
+      The latest status message is persisted NATS JetStream, documented in `x-nats-jetstream-stream`
+    tags:
+      - name: Cell
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.apps.{app}'
+  publishProgramStatus:
+    action: send
+    title: Program Status
+    description: |
+      Publishes status messages for programs running in an app within a cell.
+      The status messages provide information about the current state of a program run.
+    tags:
+      - name: Program
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.programs'
+  publishRobotController:
+    action: send
+    title: Robot Controller Configuration
+    description: Publishes the configuration of a robot controller.
+    tags:
+      - name: Cell
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.controllers.{controller}'
+  publishCellStatus:
+    action: send
+    title: Service Status
+    description: |
+      Publishes the status of all cell resources.
+
+      The latest status message is persisted NATS JetStream, documented in `x-nats-jetstream-stream`
+    tags:
+      - name: Cell
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.status'
+  publishCellCycle:
+    action: send
+    title: Cell Cycle Event
+    description: |
+      Publishes the cycle events for a cell.
+    tags:
+      - name: Cell
+        description: Cell-scoped messaging operations.
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.cycle'
+  publishSystemStatus:
+    action: send
+    title: Wandelbots NOVA status
+    description: |
+      Publishes the status of all system services.
+
+      The latest status message is persisted NATS JetStream, documented in `x-nats-jetstream-stream`
+    tags:
+      - name: System
+    channel:
+      $ref: '#/channels/{instance}.v2.system.status'
+  publishCollisionSetup:
+    action: send
+    title: Collision Setup
+    description: |
+      Publishes the stored collision setup.
+
+      The latest status message is persisted NATS JetStream, documented in `x-nats-jetstream-stream`
+    tags:
+      - name: Store Collision Setups
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.collision.setups.{setup}'
+  publishBUSIOStatus:
+    action: send
+    title: BUS Inputs/Outputs Service Status
+    description: |
+      Publishes the status of BUS inputs/outputs service.
+
+      The latest status message is persisted NATS JetStream, documented in `x-nats-jetstream-stream`.
+    tags:
+      - name: BUS Inputs/Outputs
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.bus-ios.status'
+  publishBUSIOsIOs:
+    action: send
+    title: BUS Input/Output Values
+    description: Publishes updates of BUS input/output values.
+    tags:
+      - name: BUS Inputs/Outputs
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.bus-ios.ios'
+  setBUSIOsIOs:
+    action: receive
+    title: Set Output Values
+    description: |
+      Set output values published with the BUS inputs/outputs service.
+      If you're using a virtual service, you can set inputs as well.
+    tags:
+      - name: BUS Inputs/Outputs
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.bus-ios.ios.set'
+    reply:
+      channel:
+        $ref: '#/channels/{instance}.v2.cells.{cell}.bus-ios.ios.set.reply'
+      address:
+        location: $message.header#/replyTo
+  selectRobotControllerIOs:
+    action: receive
+    title: Select Input/Output Values
+    description: Select input/output values published by the controller.
+    tags:
+      - name: Controller
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.controllers.{controller}.ios.select'
+    reply:
+      channel:
+        $ref: '#/channels/{instance}.v2.cells.{cell}.controllers.{controller}.ios.select.reply'
+      address:
+        location: $message.header#/replyTo
+  publishRobotControllerIOs:
+    action: send
+    title: Input/Output Values
+    description: Publishes updates of input/output values.
+    tags:
+      - name: Controller
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.controllers.{controller}.ios'
+  publishRobotControllersState:
+    action: send
+    title: State of Robot Controller
+    description: Publishes the current state of a robot controller.
+    tags:
+      - name: Controller
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.controllers.{controller}.state'
+  publishMotionGroupDescription:
+    action: send
+    title: Description of Motion Group
+    description: Publishes the description of a motion group, including TCPs, mounting, safety zones, limits, etc.
+    tags:
+      - name: Controller
+    channel:
+      $ref: '#/channels/{instance}.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description'
+  eventSystemUpdateStarted:
+    action: send
+    title: System Update Started
+    description: |
+      Publishes an event when a system update process is initiated.
+
+      This event is triggered once the service-manager begins a system update process,
+      providing details about the update metadata, trigger information, and pre-update checks.
+
+      The event follows CloudEvents v1.0 specification and is persisted in NATS JetStream
+      for reliable delivery and event replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.system.update.started'
+  eventSystemUpdateCompleted:
+    action: send
+    title: System Update Completed
+    description: |
+      Publishes an event when a system update process is completed.
+
+      This event is triggered once the service-manager completes a system update process,
+      providing comprehensive results including success status, component outcomes,
+      error details, and post-update validation results.
+
+      The event follows CloudEvents v1.0 specification and is persisted in NATS JetStream
+      for reliable delivery and event replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.system.update.completed'
+  eventSystemNetworkStatusChanged:
+    action: send
+    title: System Network Status Changed
+    description: |
+      Publishes an event when a system network status changes.
+
+      This event is triggered once system-info service detects a change in the system network status,
+      providing details about the new network state and related information.
+
+      The event follows CloudEvents v1.0 specification and is persisted in NATS JetStream
+      for reliable delivery and event replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.system.network.status.changed'
+  eventCellCreated:
+    action: send
+    title: Cell Created
+    description: |
+      Publishes an event when a cell foundation release is created.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.created'
+  eventCellUpdated:
+    action: send
+    title: Cell Updated
+    description: |
+      Publishes an event when a cell foundation release is updated.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.updated'
+  eventCellDeleted:
+    action: send
+    title: Cell Deleted
+    description: |
+      Publishes an event when a cell foundation release is deleted.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.deleted'
+  eventAppCreated:
+    action: send
+    title: App Created
+    description: |
+      Publishes an event when an app release is created in a cell.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.apps.{app}.created'
+  eventAppUpdated:
+    action: send
+    title: App Updated
+    description: |
+      Publishes an event when an app release is updated in a cell.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.apps.{app}.updated'
+  eventAppDeleted:
+    action: send
+    title: App Deleted
+    description: |
+      Publishes an event when an app release is deleted from a cell.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.apps.{app}.deleted'
+  eventRobotControllerCreated:
+    action: send
+    title: Robot Controller Created
+    description: |
+      Publishes an event when a robot controller release is created in a cell.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.controllers.{controller}.created'
+  eventRobotControllerUpdated:
+    action: send
+    title: Robot Controller Updated
+    description: |
+      Publishes an event when a robot controller release is updated in a cell.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.controllers.{controller}.updated'
+  eventRobotControllerDeleted:
+    action: send
+    title: Robot Controller Deleted
+    description: |
+      Publishes an event when a robot controller release is deleted from a cell.
+
+      The event follows CloudEvents v1.0 and is persisted in NATS JetStream for reliable delivery and replay capabilities.
+    tags:
+      - name: Events
+    channel:
+      $ref: '#/channels/{instance}.v2.events.cells.{cell}.controllers.{controller}.deleted'
+channels:
+  '{instance}.v2.cells.{cell}':
+    address: '{instance}.v2.cells.{cell}'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      Cell:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/Cell'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.cells.{cell}.apps.{app}':
+    address: '{instance}.v2.cells.{cell}.apps.{app}'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      app:
+        description: |
+          Name of the provided application.
+          Must be unique within the cell and is used as an identifier for addressing the application in all API calls, e.g., when updating the application.
+    messages:
+      App:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/App'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.cells.{cell}.programs':
+    address: '{instance}.v2.cells.{cell}.programs'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      ProgramStatus:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/ProgramStatus'
+  '{instance}.v2.cells.{cell}.controllers.{controller}':
+    address: '{instance}.v2.cells.{cell}.controllers.{controller}'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier to address a controller in the cell.
+    messages:
+      RobotController:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/RobotController'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.cells.{cell}.status':
+    address: '{instance}.v2.cells.{cell}.status'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      StatusList:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/ServiceStatusList'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.cells.{cell}.cycle':
+    address: '{instance}.v2.cells.{cell}.cycle'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      CellCycleEvent:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/CellCycleEvent'
+  '{instance}.v2.system.status':
+    address: '{instance}.v2.system.status'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+    messages:
+      StatusList:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/ServiceStatusList'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.cells.{cell}.collision.setups.{setup}':
+    address: '{instance}.v2.cells.{cell}.collision.setups.{setup}'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      setup:
+        description: Unique identifier addressing a collision setup.
+    messages:
+      StatusList:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/CollisionSetup'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.cells.{cell}.bus-ios.status':
+    address: '{instance}.v2.cells.{cell}.bus-ios.status'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      Status:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/BusIOsState'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.cells.{cell}.bus-ios.ios':
+    address: '{instance}.v2.cells.{cell}.bus-ios.ios'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      IOValues:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/ListIOValuesResponse'
+  '{instance}.v2.cells.{cell}.bus-ios.ios.set':
+    address: '{instance}.v2.cells.{cell}.bus-ios.ios.set'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      BUSIOValues:
+        contentType: application/json
+        headers:
+          type: object
+          properties:
+            replyTo:
+              type: string
+              description: Address to send the response to.
+        payload:
+          $ref: '#/components/schemas/ListIOValuesResponse'
+  '{instance}.v2.cells.{cell}.bus-ios.ios.set.reply':
+    address: null
+    messages:
+      Response:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/Error'
+  '{instance}.v2.cells.{cell}.controllers.{controller}.ios.select':
+    address: '{instance}.v2.cells.{cell}.controllers.{controller}.ios.select'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier to address a controller in a cell.
+    messages:
+      IOValues:
+        contentType: application/json
+        headers:
+          type: object
+          properties:
+            replyTo:
+              type: string
+              description: Address to send the response to.
+        payload:
+          $ref: '#/components/schemas/SelectIOs'
+  '{instance}.v2.cells.{cell}.controllers.{controller}.ios.select.reply':
+    address: null
+    messages:
+      Response:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/Error'
+  '{instance}.v2.cells.{cell}.controllers.{controller}.ios':
+    address: '{instance}.v2.cells.{cell}.controllers.{controller}.ios'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier to address a controller in the cell.
+    messages:
+      IOValues:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/StreamIOValuesResponse'
+  '{instance}.v2.cells.{cell}.controllers.{controller}.state':
+    address: '{instance}.v2.cells.{cell}.controllers.{controller}.state'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier to address a controller in the cell.
+    messages:
+      RobotControllerState:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/RobotControllerState'
+  '{instance}.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description':
+    address: '{instance}.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier addressing a controller in the cell.
+      motion-group:
+        description: Motion group identifier.
+    messages:
+      MotionGroupDescription:
+        contentType: application/json
+        payload:
+          $ref: '#/components/schemas/MotionGroupDescription'
+    x-nats-jetstream-stream:
+      name: system-state
+      description: Stream for system state messages, only the latest message per subject is kept.
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs_per_subject: 1
+  '{instance}.v2.events.system.update.started':
+    address: '{instance}.v2.events.system.update.started'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+    messages:
+      SystemUpdateStarted:
+        name: SystemUpdateStarted
+        title: System Update Started Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a system update is initiated.
+          Contains comprehensive metadata about the update process and pre-update checks.
+        payload:
+          $ref: '#/components/schemas/SystemUpdateStartedEvent'
+        examples:
+          - name: successful_update
+            summary: Update successfully initiated
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.system.update.started
+              source: /nova/service-manager
+              id: update-nova-20250127T100000Z
+              time: '2025-01-27T10:00:00Z'
+              datacontenttype: application/json
+              data:
+                newVersion: 2.1.0
+                oldVersion: 2.0.5
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.system.update.completed':
+    address: '{instance}.v2.events.system.update.completed'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+    messages:
+      SystemUpdateCompleted:
+        name: SystemUpdateCompleted
+        title: System Update Completed Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a system update is completed.
+          Success is indicated by absence of error field.
+        payload:
+          $ref: '#/components/schemas/SystemUpdateCompletedEvent'
+        examples:
+          - name: successful_update
+            summary: Successful system update
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.system.update.completed
+              source: /nova/service-manager
+              id: update-nova-20250127T100000Z
+              time: '2025-01-27T10:05:00Z'
+              datacontenttype: application/json
+              data:
+                newVersion: 2.1.0
+          - name: failed_update
+            summary: Failed system update with error
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.system.update.completed
+              source: /nova/service-manager
+              id: update-nova-20250127T120000Z
+              time: '2025-01-27T12:30:00Z'
+              datacontenttype: application/json
+              data:
+                newVersion: 2.1.0
+                error: 'Helm upgrade failed: context deadline exceeded'
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.system.network.status.changed':
+    address: '{instance}.v2.events.system.network.status.changed'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+    messages:
+      NetworkStatusChanged:
+        name: NetworkStatusChanged
+        title: System Network Status Changed Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a system network status changes.
+        payload:
+          $ref: '#/components/schemas/NetworkStatusChangedEvent'
+        examples:
+          - name: network_status_disconnected
+            summary: System network disconnected event
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.system.network.status.changed
+              source: /nova/system-info
+              id: network-status-change-20240615T101500Z
+              time: '2024-06-15T10:15:00Z'
+              datacontenttype: application/json
+              data:
+                internet_connected: false
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.created':
+    address: '{instance}.v2.events.cells.{cell}.created'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      CellCreated:
+        name: CellCreated
+        title: Cell Created Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a cell foundation release is created.
+        payload:
+          $ref: '#/components/schemas/CellCreatedEvent'
+        examples:
+          - name: cell_created
+            summary: Cell foundation release created.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.created
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.created.1737972000
+              time: '2025-01-27T10:00:00Z'
+              datacontenttype: application/json
+              data:
+                version: 2.1.0
+                operating_state: ACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.updated':
+    address: '{instance}.v2.events.cells.{cell}.updated'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      CellUpdated:
+        name: CellUpdated
+        title: Cell Updated Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a cell foundation release is updated.
+        payload:
+          $ref: '#/components/schemas/CellUpdatedEvent'
+        examples:
+          - name: cell_updated
+            summary: Cell foundation release updated.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.updated
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.updated.1737972600
+              time: '2025-01-27T10:10:00Z'
+              datacontenttype: application/json
+              data:
+                version: 2.1.1
+                operating_state: ACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.deleted':
+    address: '{instance}.v2.events.cells.{cell}.deleted'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+    messages:
+      CellDeleted:
+        name: CellDeleted
+        title: Cell Deleted Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a cell foundation release is deleted.
+        payload:
+          $ref: '#/components/schemas/CellDeletedEvent'
+        examples:
+          - name: cell_deleted
+            summary: Cell foundation release deleted.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.deleted
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.deleted.1737973200
+              time: '2025-01-27T10:20:00Z'
+              datacontenttype: application/json
+              data:
+                version: 2.1.1
+                operating_state: ACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.apps.{app}.created':
+    address: '{instance}.v2.events.cells.{cell}.apps.{app}.created'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      app:
+        description: Unique identifier addressing an app in the cell.
+    messages:
+      AppCreated:
+        name: AppCreated
+        title: App Created Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when an app release is created in a cell.
+        payload:
+          $ref: '#/components/schemas/AppCreatedEvent'
+        examples:
+          - name: app_created
+            summary: App release created.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.apps.portal.created
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.apps.portal.created.1737972000
+              time: '2025-01-27T10:00:00Z'
+              datacontenttype: application/json
+              data:
+                image: example.com/demo/portal:1.0.0
+                operating_state: ACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.apps.{app}.updated':
+    address: '{instance}.v2.events.cells.{cell}.apps.{app}.updated'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      app:
+        description: Unique identifier addressing an app in the cell.
+    messages:
+      AppUpdated:
+        name: AppUpdated
+        title: App Updated Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when an app release is updated in a cell.
+        payload:
+          $ref: '#/components/schemas/AppUpdatedEvent'
+        examples:
+          - name: app_updated
+            summary: App release updated.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.apps.portal.updated
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.apps.portal.updated.1737972600
+              time: '2025-01-27T10:10:00Z'
+              datacontenttype: application/json
+              data:
+                image: example.com/demo/portal:1.1.0
+                operating_state: INACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.apps.{app}.deleted':
+    address: '{instance}.v2.events.cells.{cell}.apps.{app}.deleted'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      app:
+        description: Unique identifier addressing an app in the cell.
+    messages:
+      AppDeleted:
+        name: AppDeleted
+        title: App Deleted Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when an app release is deleted from a cell.
+        payload:
+          $ref: '#/components/schemas/AppDeletedEvent'
+        examples:
+          - name: app_deleted
+            summary: App release deleted.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.apps.portal.deleted
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.apps.portal.deleted.1737973200
+              time: '2025-01-27T10:20:00Z'
+              datacontenttype: application/json
+              data:
+                image: example.com/demo/portal:1.1.0
+                operating_state: INACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.controllers.{controller}.created':
+    address: '{instance}.v2.events.cells.{cell}.controllers.{controller}.created'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier to address a controller in the cell.
+    messages:
+      RobotControllerCreated:
+        name: RobotControllerCreated
+        title: Robot Controller Created Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a robot controller release is created in a cell.
+        payload:
+          $ref: '#/components/schemas/RobotControllerCreatedEvent'
+        examples:
+          - name: robot_controller_created
+            summary: Robot controller release created.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.controllers.ur10e.created
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.controllers.ur10e.created.1737972000
+              time: '2025-01-27T10:00:00Z'
+              datacontenttype: application/json
+              data:
+                manufacturer: universalrobots
+                virtual: false
+                operating_state: ACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.controllers.{controller}.updated':
+    address: '{instance}.v2.events.cells.{cell}.controllers.{controller}.updated'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier to address a controller in the cell.
+    messages:
+      RobotControllerUpdated:
+        name: RobotControllerUpdated
+        title: Robot Controller Updated Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a robot controller release is updated in a cell.
+        payload:
+          $ref: '#/components/schemas/RobotControllerUpdatedEvent'
+        examples:
+          - name: robot_controller_updated
+            summary: Robot controller release updated.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.controllers.ur10e.updated
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.controllers.ur10e.updated.1737972600
+              time: '2025-01-27T10:10:00Z'
+              datacontenttype: application/json
+              data:
+                manufacturer: universalrobots
+                virtual: false
+                operating_state: ACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
+  '{instance}.v2.events.cells.{cell}.controllers.{controller}.deleted':
+    address: '{instance}.v2.events.cells.{cell}.controllers.{controller}.deleted'
+    parameters:
+      instance:
+        description: Unique identifier addressing an instance in all API calls.
+        default: nova
+      cell:
+        description: Unique identifier addressing a cell in all API calls.
+      controller:
+        description: Unique identifier to address a controller in the cell.
+    messages:
+      RobotControllerDeleted:
+        name: RobotControllerDeleted
+        title: Robot Controller Deleted Event
+        contentType: application/json
+        description: |
+          CloudEvents v1.0 compliant event published when a robot controller release is deleted from a cell.
+        payload:
+          $ref: '#/components/schemas/RobotControllerDeletedEvent'
+        examples:
+          - name: robot_controller_deleted
+            summary: Robot controller release deleted.
+            payload:
+              specversion: '1.0'
+              type: nova.v2.events.cells.demo.controllers.ur10e.deleted
+              source: /nova/service-manager
+              id: nova.v2.events.cells.demo.controllers.ur10e.deleted.1737973200
+              time: '2025-01-27T10:20:00Z'
+              datacontenttype: application/json
+              data:
+                manufacturer: universalrobots
+                virtual: false
+                operating_state: ACTIVE
+    x-nats-jetstream-stream:
+      name: system-events
+      description: '|'
+      retention: limits
+      discard: old
+      storage: file
+      max_msgs: 10000
+      max_bytes: '104857600  # 100MiB'
+      max_age: '2592000  # 30 days in seconds'
+      max_msg_size: '10240  # 10KiB'
+      duplicate_window: '300  # 5 minutes for duplicate detection'
+      subjects:
+        - nova.v2.events.>
