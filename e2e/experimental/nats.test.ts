@@ -1,7 +1,4 @@
-import {
-  buildNatsServerUrl,
-  NovaNatsClient,
-} from "@wandelbots/nova-js/experimental/nats"
+import { NovaNatsClient } from "@wandelbots/nova-js/experimental/nats"
 import { Nova } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
 import { env } from "../env.ts"
@@ -11,9 +8,7 @@ import { env } from "../env.ts"
 // `token` (see NovaNatsClientConfig) alongside `servers`.
 test("receives a NATS message when the cell configuration changes via REST", async () => {
   const nova = new Nova({ instanceUrl: env.NOVA })
-  const natsClient = new NovaNatsClient({
-    servers: buildNatsServerUrl(env.NOVA),
-  })
+  const nats = new NovaNatsClient(nova)
 
   try {
     let resolveReceived!: (payload: {
@@ -28,10 +23,10 @@ test("receives a NATS message when the cell configuration changes via REST", asy
 
     // Subscribe before triggering the update below, so we don't miss the
     // message that update publishes.
-    const unsubscribe = await natsClient.subscribe(
+    const unsubscribe = await nats.subscribe(
       "nova.v2.cells.{cell}",
       { cell: "*" },
-      (payload) => resolveReceived(payload)
+      (payload) => resolveReceived(payload),
     )
 
     const cell = await nova.api.cell.getCell("cell")
@@ -47,6 +42,6 @@ test("receives a NATS message when the cell configuration changes via REST", asy
     expect(payload.name).toBe("cell")
     expect(payload.description).toBe(expectedDescription)
   } finally {
-    await natsClient.close()
+    await nats.close()
   }
 }, 20_000)

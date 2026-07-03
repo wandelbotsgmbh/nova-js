@@ -23,7 +23,7 @@ export interface NatsOperationParams {
   "nova.v2.cells.{cell}.cycle": {
     cell: string;
   };
-  "nova.v2.system.status": Record<string, never>;
+  "nova.v2.system.status": Record<never, never>;
   "nova.v2.cells.{cell}.collision.setups.{setup}": {
     cell: string;
     setup: string;
@@ -54,9 +54,9 @@ export interface NatsOperationParams {
     controller: string;
     "motion-group": string;
   };
-  "nova.v2.events.system.update.started": Record<string, never>;
-  "nova.v2.events.system.update.completed": Record<string, never>;
-  "nova.v2.events.system.network.status.changed": Record<string, never>;
+  "nova.v2.events.system.update.started": Record<never, never>;
+  "nova.v2.events.system.update.completed": Record<never, never>;
+  "nova.v2.events.system.network.status.changed": Record<never, never>;
   "nova.v2.events.cells.{cell}.created": {
     cell: string;
   };
@@ -138,13 +138,14 @@ export type NovaNatsClientConfig = ConnectionOptions;
 export declare class NovaNatsClient {
   readonly config: NovaNatsClientConfig;
   private connectionPromise;
-  constructor(_: NovaNatsClientConfig);
+  constructor(_: Nova, _?: NovaNatsClientConfig);
   connect(): Promise<NatsConnection>;
   close(): Promise<void>;
-  subscribe<K extends NatsSubscribeSubject>(_: K, _: NatsOperationParams[K], _: (_: NatsSubscribePayloads[K], _: Msg) => void): Promise<() => void>;
+  subscribe<K extends NatsSubscribeSubject>(_: K, ..._: SubscribeArgs<K>): Promise<() => void>;
   request<K extends NatsRequestSubject>(_: K, _: NatsOperationParams[K], _: NatsRequestPayloads[K], _?: {
     timeout?: number;
   }): Promise<NatsReplyPayloads[K]>;
+  publish<K extends NatsRequestSubject>(_: K, _: NatsOperationParams[K], _: NatsRequestPayloads[K]): Promise<void>;
 }
 // #endregion
 

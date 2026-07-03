@@ -5,11 +5,12 @@
 export class NovaNatsClient {
   config
   connectionPromise
-  constructor(_) {}
+  constructor(_, _) {}
   connect() {}
   async close() {}
-  async subscribe(_, _, _) {}
+  async subscribe(_, ..._) {}
   async request(_, _, _, _) {}
+  async publish(_, _, _) {}
 }
 // #endregion
 

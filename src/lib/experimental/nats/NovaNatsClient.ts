@@ -4,6 +4,8 @@ import {
   type NatsConnection,
   wsconnect,
 } from "@nats-io/nats-core"
+import type { Nova } from "../../Nova.ts"
+import { buildNatsServerUrl } from "./buildNatsServerUrl.ts"
 import { buildSubject } from "./buildSubject.ts"
 import type {
   NatsOperationParams,
@@ -16,6 +18,16 @@ import type {
 
 export type NovaNatsClientConfig = ConnectionOptions
 
+type NatsMessageHandler<K extends NatsSubscribeSubject> = (
+  payload: NatsSubscribePayloads[K],
+  msg: Msg,
+) => void
+
+type SubscribeArgs<K extends NatsSubscribeSubject> =
+  keyof NatsOperationParams[K] extends never
+    ? [handler: NatsMessageHandler<K>]
+    : [params: NatsOperationParams[K], handler: NatsMessageHandler<K>]
+
 /**
  * Typed NATS client for the Wandelbots NOVA messaging API, generated from
  * src/asyncapi.yaml (see scripts/generate-nats-client.ts).
@@ -26,8 +38,11 @@ export class NovaNatsClient {
   readonly config: NovaNatsClientConfig
   private connectionPromise: Promise<NatsConnection> | null = null
 
-  constructor(config: NovaNatsClientConfig) {
-    this.config = config
+  constructor(nova: Nova, config: NovaNatsClientConfig = {}) {
+    this.config = {
+      servers: buildNatsServerUrl(nova.instanceUrl.href),
+      ...config,
+    }
   }
 
   /**
@@ -71,9 +86,13 @@ export class NovaNatsClient {
    */
   async subscribe<K extends NatsSubscribeSubject>(
     subject: K,
-    params: NatsOperationParams[K],
-    handler: (payload: NatsSubscribePayloads[K], msg: Msg) => void,
+    ...args: SubscribeArgs<K>
   ): Promise<() => void> {
+    const [params, handler] =
+      args.length === 1
+        ? ([{}, args[0]] as const)
+        : ([args[0], args[1]] as const)
+
     const nc = await this.connect()
     const resolvedSubject = buildSubject(subject, params)
     const sub = nc.subscribe(resolvedSubject)
@@ -112,5 +131,23 @@ export class NovaNatsClient {
       timeout: opts.timeout ?? 5000,
     })
     return msg.json<NatsReplyPayloads[K]>()
+  }
+
+  /**
+   * Publishes a JSON payload to a NATS subject the server receives, without
+   * waiting for a reply.
+   *
+   * `subject` is the subject template as it appears on the wire, e.g.
+   * `"nova.v2.cells.{cell}.bus-ios.ios.set"`, with `{param}` placeholders
+   * filled in from `params`.
+   */
+  async publish<K extends NatsRequestSubject>(
+    subject: K,
+    params: NatsOperationParams[K],
+    payload: NatsRequestPayloads[K],
+  ): Promise<void> {
+    const nc = await this.connect()
+    const resolvedSubject = buildSubject(subject, params)
+    nc.publish(resolvedSubject, JSON.stringify(payload))
   }
 }

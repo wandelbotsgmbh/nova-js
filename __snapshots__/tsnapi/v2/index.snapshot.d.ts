@@ -9,56 +9,11 @@ export type NovaClientConfig = {
   password?: string;
   accessToken?: string;
 } & Omit<Configuration, "isJsonMime" | "basePath">;
-export type NovaConfig = {
-  instanceUrl: string;
-  accessToken?: string;
-} & Omit<Configuration, "isJsonMime" | "basePath">;
-export type WithCellId<T> = { [P in keyof T]: UnwrapAxiosResponseReturn$1<OmitFirstArg<T[P]>> };
-export type WithUnwrappedAxiosResponse<T> = { [P in keyof T]: UnwrapAxiosResponseReturn$1<T[P]> };
+export type WithCellId<T> = { [P in keyof T]: UnwrapAxiosResponseReturn<OmitFirstArg<T[P]>> };
+export type WithUnwrappedAxiosResponse<T> = { [P in keyof T]: UnwrapAxiosResponseReturn<T[P]> };
 // #endregion
 
 // #region Classes
-export declare class Nova {
-  readonly api: NovaAPIClient;
-  readonly config: NovaConfig;
-  readonly mock?: MockNovaInstance;
-  readonly instanceUrl: URL;
-  authPromise: Promise<string | null> | null;
-  accessToken: string | null;
-  constructor(_: NovaConfig);
-  renewAuthentication(): Promise<void>;
-  makeWebsocketURL(_: string): string;
-  openReconnectingWebsocket(_: string): AutoReconnectingWebsocket;
-}
-export declare class NovaAPIClient {
-  readonly opts: NovaAPIClientOpts;
-  readonly application: WithUnwrappedAxiosResponse$1<ApplicationApi>;
-  readonly busIOs: WithUnwrappedAxiosResponse$1<BUSInputsOutputsApi>;
-  readonly cell: WithUnwrappedAxiosResponse$1<CellApi>;
-  readonly controller: WithUnwrappedAxiosResponse$1<ControllerApi>;
-  readonly controllerIOs: WithUnwrappedAxiosResponse$1<ControllerInputsOutputsApi>;
-  readonly jogging: WithUnwrappedAxiosResponse$1<JoggingApi>;
-  readonly kinematics: WithUnwrappedAxiosResponse$1<KinematicsApi>;
-  readonly license: WithUnwrappedAxiosResponse$1<LicenseApi>;
-  readonly motionGroup: WithUnwrappedAxiosResponse$1<MotionGroupApi>;
-  readonly motionGroupModels: WithUnwrappedAxiosResponse$1<MotionGroupModelsApi>;
-  readonly novaCloud: WithUnwrappedAxiosResponse$1<NOVACloudApi>;
-  readonly program: WithUnwrappedAxiosResponse$1<ProgramApi>;
-  readonly robotConfigurations: WithUnwrappedAxiosResponse$1<RobotConfigurationsApi>;
-  readonly session: WithUnwrappedAxiosResponse$1<SessionApi>;
-  readonly storeCollisionComponents: WithUnwrappedAxiosResponse$1<StoreCollisionComponentsApi>;
-  readonly storeCollisionSetups: WithUnwrappedAxiosResponse$1<StoreCollisionSetupsApi>;
-  readonly storeObject: WithUnwrappedAxiosResponse$1<StoreObjectApi>;
-  readonly system: WithUnwrappedAxiosResponse$1<SystemApi>;
-  readonly trajectoryCaching: WithUnwrappedAxiosResponse$1<TrajectoryCachingApi>;
-  readonly trajectoryExecution: WithUnwrappedAxiosResponse$1<TrajectoryExecutionApi>;
-  readonly trajectoryPlanning: WithUnwrappedAxiosResponse$1<TrajectoryPlanningApi>;
-  readonly version: WithUnwrappedAxiosResponse$1<VersionApi>;
-  readonly virtualController: WithUnwrappedAxiosResponse$1<VirtualControllerApi>;
-  readonly virtualControllerBehavior: WithUnwrappedAxiosResponse$1<VirtualControllerBehaviorApi>;
-  readonly virtualControllerIOs: WithUnwrappedAxiosResponse$1<VirtualControllerInputsOutputsApi>;
-  constructor(_: NovaAPIClientOpts);
-}
 export declare class NovaCellAPIClient {
   readonly system: WithUnwrappedAxiosResponse<SystemApi>;
   readonly cell: WithUnwrappedAxiosResponse<CellApi>;
@@ -118,4 +73,10 @@ export declare function poseToWandelscriptString(_: Pick<Pose, "position" | "ori
 
 // #region Re-exports
 export * from "@wandelbots/nova-api/v2";
+// #endregion
+
+// #region Other
+export { Nova }
+export { NovaAPIClient }
+export { NovaConfig }
 // #endregion

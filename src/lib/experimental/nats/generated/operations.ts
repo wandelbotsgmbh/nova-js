@@ -51,7 +51,7 @@ export interface NatsOperationParams {
   /** publishCellCycle */
   "nova.v2.cells.{cell}.cycle": { cell: string }
   /** publishSystemStatus */
-  "nova.v2.system.status": Record<string, never>
+  "nova.v2.system.status": Record<never, never>
   /** publishCollisionSetup */
   "nova.v2.cells.{cell}.collision.setups.{setup}": {
     cell: string
@@ -85,11 +85,11 @@ export interface NatsOperationParams {
     "motion-group": string
   }
   /** eventSystemUpdateStarted */
-  "nova.v2.events.system.update.started": Record<string, never>
+  "nova.v2.events.system.update.started": Record<never, never>
   /** eventSystemUpdateCompleted */
-  "nova.v2.events.system.update.completed": Record<string, never>
+  "nova.v2.events.system.update.completed": Record<never, never>
   /** eventSystemNetworkStatusChanged */
-  "nova.v2.events.system.network.status.changed": Record<string, never>
+  "nova.v2.events.system.network.status.changed": Record<never, never>
   /** eventCellCreated */
   "nova.v2.events.cells.{cell}.created": { cell: string }
   /** eventCellUpdated */

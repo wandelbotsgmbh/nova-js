@@ -1,4 +1,5 @@
 import { NovaNatsClient } from "@wandelbots/nova-js/experimental/nats"
+import { Nova } from "@wandelbots/nova-js/v2"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
 const { mockConnection, wsconnect } = vi.hoisted(() => {
@@ -23,6 +24,7 @@ const { mockConnection, wsconnect } = vi.hoisted(() => {
 
   const mockConnection = {
     subscribe: vi.fn(() => mockSubscription),
+    publish: vi.fn(),
     request: vi.fn(async () => ({ json: () => ({ message: "ok" }) })),
     close: vi.fn(async () => {}),
   }
@@ -35,15 +37,18 @@ const { mockConnection, wsconnect } = vi.hoisted(() => {
 vi.mock("@nats-io/nats-core", () => ({ wsconnect }))
 
 describe("NovaNatsClient", () => {
+  const nova = new Nova({ instanceUrl: "https://example.com" })
+
   beforeEach(() => {
     wsconnect.mockClear()
     mockConnection.subscribe.mockClear()
+    mockConnection.publish.mockClear()
     mockConnection.request.mockClear()
     mockConnection.close.mockClear()
   })
 
   test("connect() calls wsconnect once and reuses the connection", async () => {
-    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    const client = new NovaNatsClient(nova)
     const nc1 = await client.connect()
     const nc2 = await client.connect()
     expect(wsconnect).toHaveBeenCalledTimes(1)
@@ -59,7 +64,7 @@ describe("NovaNatsClient", () => {
         }),
     )
 
-    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    const client = new NovaNatsClient(nova)
     const p1 = client.connect()
     const p2 = client.connect()
 
@@ -71,7 +76,7 @@ describe("NovaNatsClient", () => {
   })
 
   test("close() allows a subsequent connect() to reconnect", async () => {
-    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    const client = new NovaNatsClient(nova)
     await client.connect()
     await client.close()
     await client.connect()
@@ -79,7 +84,7 @@ describe("NovaNatsClient", () => {
   })
 
   test("subscribe() builds the subject and invokes handler with decoded JSON payloads", async () => {
-    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    const client = new NovaNatsClient(nova)
     const handler = vi.fn()
     await client.subscribe("nova.v2.cells.{cell}", { cell: "cell" }, handler)
 
@@ -89,8 +94,19 @@ describe("NovaNatsClient", () => {
     expect(handler).toHaveBeenCalledWith({ name: "cell" }, expect.anything())
   })
 
+  test("subscribe() allows omitting params for subjects with no placeholders", async () => {
+    const client = new NovaNatsClient(nova)
+    const handler = vi.fn()
+
+    await client.subscribe("nova.v2.system.status", handler)
+
+    expect(mockConnection.subscribe).toHaveBeenCalledWith(
+      "nova.v2.system.status",
+    )
+  })
+
   test("request() builds the subject, sends the JSON payload, and returns the decoded reply", async () => {
-    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    const client = new NovaNatsClient(nova)
     const requestPayload = [
       { io: "io1", value: true, value_type: "boolean" as const },
     ]
@@ -107,8 +123,26 @@ describe("NovaNatsClient", () => {
     expect(reply).toEqual({ message: "ok" })
   })
 
+  test("publish() builds the subject and sends the JSON payload", async () => {
+    const client = new NovaNatsClient(nova)
+    const publishPayload = [
+      { io: "io1", value: true, value_type: "boolean" as const },
+    ]
+
+    await client.publish(
+      "nova.v2.cells.{cell}.bus-ios.ios.set",
+      { cell: "cell" },
+      publishPayload,
+    )
+
+    expect(mockConnection.publish).toHaveBeenCalledWith(
+      "nova.v2.cells.cell.bus-ios.ios.set",
+      JSON.stringify(publishPayload),
+    )
+  })
+
   test("close() closes the underlying connection", async () => {
-    const client = new NovaNatsClient({ servers: "wss://example.com" })
+    const client = new NovaNatsClient(nova)
     await client.connect()
     await client.close()
     expect(mockConnection.close).toHaveBeenCalled()

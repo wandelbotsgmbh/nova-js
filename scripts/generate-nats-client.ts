@@ -264,7 +264,7 @@ function generateOperations(
   for (const op of operations) {
     const paramsType = op.paramNames.length
       ? `{ ${op.paramNames.map((p) => `${paramsKey(p)}: string`).join("; ")} }`
-      : "Record<string, never>"
+      : "Record<never, never>"
     lines.push(`  /** ${op.name} */`)
     lines.push(`  ${JSON.stringify(op.subject)}: ${paramsType}`)
   }
