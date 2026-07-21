@@ -1,14 +1,14 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: dynamic API class discovery
-import * as novaApiV2 from "@wandelbots/nova-api/v2"
+import * as novaApiV2 from "@wandelbots/nova-js/v2"
 import { Nova, NovaAPIClient } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
 
 /**
- * This test ensures that every API class exported from @wandelbots/nova-api/v2
- * is wrapped by NovaAPIClient. If a new API is added to the upstream
- * package without being exposed here, this test will fail.
+ * This test ensures that every generated API class exported from nova-js/v2 is
+ * wrapped by NovaAPIClient. If a new API is added upstream without being
+ * exposed here, this test will fail.
  */
-test("NovaAPIClient covers all API classes from @wandelbots/nova-api/v2", () => {
+test("NovaAPIClient covers all generated API classes", () => {
   const allApiClassNames = Object.entries(novaApiV2)
     .filter(
       ([name, value]) =>

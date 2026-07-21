@@ -1,12 +1,19 @@
 name: "Setup Node.js & pnpm"
 description: "Install Node.js and pnpm dependencies with caching"
 
+inputs:
+  node-version:
+    description: "Node.js version to install"
+    required: false
+
 runs:
   using: composite
   steps:
     - id: node-version
       shell: bash
-      run: echo "version=$(yq '.useNodeVersion' pnpm-workspace.yaml)" >> "$GITHUB_OUTPUT"
+      env:
+        NODE_VERSION: ${{ inputs.node-version }}
+      run: echo "version=${NODE_VERSION:-$(yq '.useNodeVersion' pnpm-workspace.yaml)}" >> "$GITHUB_OUTPUT"
     - uses: actions/setup-node@v6
       with:
         node-version: ${{ steps.node-version.outputs.version }}

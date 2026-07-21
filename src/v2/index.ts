@@ -1,7 +1,4 @@
 export * from "@wandelbots/nova-api/v2"
-export * from "../lib/deprecated/v2/NovaCellAPIClient.ts"
-export * from "../lib/deprecated/v2/NovaClient.ts"
-export * from "../lib/deprecated/v2/wandelscriptUtils.ts"
 export { Nova } from "../lib/Nova.ts"
 export type { NovaConfig } from "../lib/Nova.ts"
 export { NovaAPIClient } from "../lib/NovaAPIClient.ts"

@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { execFileSync } from "node:child_process"
+import { readFileSync } from "node:fs"
 import { describe, expect, test } from "vitest"
 
 // Test that require(esm) fallback will work in node 20+ once
@@ -7,7 +8,6 @@ import { describe, expect, test } from "vitest"
 describe("require(esm) fallback", () => {
   const entries = [
     ["@wandelbots/nova-js", "."],
-    ["@wandelbots/nova-js/v1", "./v1"],
     ["@wandelbots/nova-js/v2", "./v2"],
     ["@wandelbots/nova-js/experimental/nats", "./experimental/nats"],
   ] as const
@@ -32,5 +32,44 @@ describe("require(esm) fallback", () => {
       expect(exports).toBeInstanceOf(Array)
       expect(exports.length).toBeGreaterThan(0)
     })
+  }
+})
+
+test("deprecated APIs are not exported", async () => {
+  const packageJson = JSON.parse(readFileSync("package.json", "utf-8"))
+  expect(packageJson.exports).not.toHaveProperty("./v1")
+
+  const root = await import("@wandelbots/nova-js")
+  expect(root).not.toHaveProperty("NovaClient")
+  expect(root).not.toHaveProperty("poseToWandelscriptString")
+  expect(root).not.toHaveProperty("makeShortErrorMessage")
+
+  const v2 = await import("@wandelbots/nova-js/v2")
+  expect(v2).not.toHaveProperty("NovaClient")
+  expect(v2).not.toHaveProperty("NovaCellAPIClient")
+  expect(v2).not.toHaveProperty("poseToWandelscriptString")
+})
+
+test("package exports are ESM-only", () => {
+  const packageJson = JSON.parse(readFileSync("package.json", "utf-8"))
+
+  expect(packageJson.types).toBe("./dist/index.d.mts")
+  for (const entry of Object.values(packageJson.exports)) {
+    expect(entry).toEqual({
+      default: expect.stringMatching(/\.mjs$/),
+      types: expect.stringMatching(/\.d\.mts$/),
+    })
+  }
+})
+
+test("nova-api is inlined at build time", () => {
+  const packageJson = JSON.parse(readFileSync("package.json", "utf-8"))
+  expect(packageJson.dependencies).not.toHaveProperty("@wandelbots/nova-api")
+  expect(packageJson.devDependencies).toHaveProperty("@wandelbots/nova-api")
+
+  for (const artifact of ["dist/v2/index.mjs", "dist/v2/index.d.mts"]) {
+    expect(readFileSync(artifact, "utf-8")).not.toMatch(
+      /(?:from|import)\s*["']@wandelbots\/nova-api/,
+    )
   }
 })

@@ -16,22 +16,6 @@ export class AutoReconnectingWebsocket extends ReconnectingWebSocket {
   async firstMessage() {}
   async nextMessage() {}
 }
-export class NovaClient {
-  api
-  config
-  mock
-  instanceUrl
-  authPromise
-  accessToken
-  constructor(_) {}
-  async renewAuthentication() {}
-  makeWebsocketURL(_) {}
-  openReconnectingWebsocket(_) {}
-  async connectMotionStream(_) {}
-  async connectJogger(_) {}
-  async connectMotionGroups(_) {}
-  async connectMotionGroup(_) {}
-}
 // #endregion
 
 // #region Functions
@@ -40,11 +24,9 @@ export function delay(_) {}
 export function guardedPageReload(_) {}
 export function isSameCoordinateSystem(_, _) {}
 export function makeErrorMessage(_) {}
-export function makeShortErrorMessage(_) {}
 export function makeUrlQueryString(_) {}
 export function parseNovaInstanceUrl(_) {}
 export function parseUrl(_, _) {}
-export function poseToWandelscriptString(_) {}
 export function radiansToDegrees(_) {}
 export function tryParseJson(_) {}
 export function tryParseUrl(_, _) {}

@@ -41,7 +41,7 @@ export const loginWithAuth0 = async (
 ): Promise<string | null> => {
   if (typeof window === "undefined") {
     throw new Error(
-      `Access token must be set to use NovaClient when not in a browser environment.`,
+      `Access token must be set to use Nova when not in a browser environment.`,
     )
   }
 
