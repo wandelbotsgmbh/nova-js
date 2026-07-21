@@ -6,13 +6,6 @@ export function delay(ms: number) {
 }
 
 /**
- * @deprecated Use makeErrorMessage instead and truncate the error for display as needed, or make a situation-specific localized error message based on a response code
- */
-export function makeShortErrorMessage(err: unknown) {
-  return makeErrorMessage(err)
-}
-
-/**
  * Attempts to make a helpful error message from an unknown thrown error
  * or promise rejection.
  *

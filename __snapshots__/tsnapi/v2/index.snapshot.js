@@ -43,55 +43,6 @@ export class NovaAPIClient {
   virtualControllerIOs
   constructor(_) {}
 }
-export class NovaCellAPIClient {
-  system
-  cell
-  motionGroup
-  motionGroupModels
-  controller
-  controllerIOs
-  trajectoryPlanning
-  trajectoryExecution
-  trajectoryCaching
-  application
-  applicationGlobal
-  jogging
-  kinematics
-  busInputsOutputs
-  virtualController
-  virtualControllerBehavior
-  virtualControllerIOs
-  storeObject
-  storeCollisionComponents
-  storeCollisionSetups
-  program
-  license
-  novaCloud
-  robotConfigurations
-  version
-  session
-  cellId
-  opts
-  constructor(_, _) {}
-  withCellId(_) {}
-  withUnwrappedResponsesOnly(_) {}
-}
-export class NovaClient {
-  api
-  config
-  mock
-  instanceUrl
-  authPromise
-  accessToken
-  constructor(_) {}
-  async renewAuthentication() {}
-  makeWebsocketURL(_) {}
-  openReconnectingWebsocket(_) {}
-}
-// #endregion
-
-// #region Functions
-export function poseToWandelscriptString(_) {}
 // #endregion
 
 // #region Re-exports

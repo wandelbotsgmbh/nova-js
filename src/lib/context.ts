@@ -1,6 +1,6 @@
 // Some general checks about the context the nova-js code is running in
 
-export const isBrowser = typeof window !== "undefined"
+const isBrowser = typeof window !== "undefined"
 
 export const isLocalhostDev =
   isBrowser &&

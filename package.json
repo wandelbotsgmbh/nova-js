@@ -10,10 +10,6 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
-    "./v1": {
-      "import": "./dist/v1/index.mjs",
-      "require": "./dist/v1/index.cjs"
-    },
     "./v2": {
       "import": "./dist/v2/index.mjs",
       "require": "./dist/v2/index.cjs"
@@ -77,12 +73,9 @@
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.21.0",
     "@nats-io/nats-core": "^3.4.0",
-    "@types/three": "^0.183.1",
     "@wandelbots/nova-api": "26.5.0",
     "axios": "^1.16.1",
-    "mobx": "^6.15.4",
     "path-to-regexp": "^8.4.2",
-    "reconnecting-websocket": "^4.4.0",
-    "three": "^0.183.2"
+    "reconnecting-websocket": "^4.4.0"
   }
 }

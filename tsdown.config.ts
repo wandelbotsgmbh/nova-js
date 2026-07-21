@@ -4,7 +4,6 @@ import ApiSnapshot from "tsnapi/rolldown"
 
 const entry = [
   "src/index.ts",
-  "src/v1/index.ts",
   "src/v2/index.ts",
   "src/experimental/nats/index.ts",
 ]
