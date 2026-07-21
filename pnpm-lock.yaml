@@ -19,9 +19,6 @@ importers:
       '@nats-io/nats-core':
         specifier: ^3.4.0
         version: 3.4.0
-      '@wandelbots/nova-api':
-        specifier: 26.5.0
-        version: 26.5.0
       axios:
         specifier: ^1.18.1
         version: 1.18.1
@@ -44,6 +41,9 @@ importers:
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
+      '@wandelbots/nova-api':
+        specifier: 26.5.0
+        version: 26.5.0
       concurrently:
         specifier: ^10.0.3
         version: 10.0.3

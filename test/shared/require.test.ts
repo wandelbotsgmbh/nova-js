@@ -61,3 +61,15 @@ test("package exports are ESM-only", () => {
     })
   }
 })
+
+test("nova-api is inlined at build time", () => {
+  const packageJson = JSON.parse(readFileSync("package.json", "utf-8"))
+  expect(packageJson.dependencies).not.toHaveProperty("@wandelbots/nova-api")
+  expect(packageJson.devDependencies).toHaveProperty("@wandelbots/nova-api")
+
+  for (const artifact of ["dist/v2/index.mjs", "dist/v2/index.d.mts"]) {
+    expect(readFileSync(artifact, "utf-8")).not.toMatch(
+      /(?:from|import)\s*["']@wandelbots\/nova-api/,
+    )
+  }
+})
