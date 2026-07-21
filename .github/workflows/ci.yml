@@ -1,4 +1,4 @@
-name: check
+name: ci
 
 on:
   pull_request:
@@ -39,3 +39,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: pnpm run test
+  ci:
+    if: ${{ always() }}
+    needs: [typecheck, biome, knip, test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          test "${{ needs.typecheck.result }}" = success
+          test "${{ needs.biome.result }}" = success
+          test "${{ needs.knip.result }}" = success
+          test "${{ needs.test.result }}" = success
