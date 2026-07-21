@@ -8,18 +8,10 @@ const entry = [
   "src/experimental/nats/index.ts",
 ]
 
-export default defineConfig([
-  {
-    entry,
-    format: "esm",
-    clean: true,
-    sourcemap: true,
-    plugins: [ApiSnapshot({ update: !process.env.CI })],
-  },
-  {
-    entry,
-    format: "cjs",
-    clean: true,
-    sourcemap: true,
-  },
-])
+export default defineConfig({
+  entry,
+  format: "esm",
+  clean: true,
+  sourcemap: true,
+  plugins: [ApiSnapshot({ update: !process.env.CI })],
+})

@@ -49,3 +49,15 @@ test("deprecated APIs are not exported", async () => {
   expect(v2).not.toHaveProperty("NovaCellAPIClient")
   expect(v2).not.toHaveProperty("poseToWandelscriptString")
 })
+
+test("package exports are ESM-only", () => {
+  const packageJson = JSON.parse(readFileSync("package.json", "utf-8"))
+
+  expect(packageJson.types).toBe("./dist/index.d.mts")
+  for (const entry of Object.values(packageJson.exports)) {
+    expect(entry).toEqual({
+      default: expect.stringMatching(/\.mjs$/),
+      types: expect.stringMatching(/\.d\.mts$/),
+    })
+  }
+})
