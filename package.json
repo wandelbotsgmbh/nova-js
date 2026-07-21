@@ -10,16 +10,16 @@
   },
   "exports": {
     ".": {
-      "default": "./dist/index.mjs",
-      "types": "./dist/index.d.mts"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
     "./v2": {
-      "default": "./dist/v2/index.mjs",
-      "types": "./dist/v2/index.d.mts"
+      "types": "./dist/v2/index.d.mts",
+      "default": "./dist/v2/index.mjs"
     },
     "./experimental/nats": {
-      "default": "./dist/experimental/nats/index.mjs",
-      "types": "./dist/experimental/nats/index.d.mts"
+      "types": "./dist/experimental/nats/index.d.mts",
+      "default": "./dist/experimental/nats/index.mjs"
     }
   },
   "main": "./dist/index.mjs",
