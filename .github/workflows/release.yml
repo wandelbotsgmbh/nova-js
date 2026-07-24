@@ -9,6 +9,21 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+  schedule:
+    # Check for new @wandelbots/nova-api dev builds and publish a matching
+    # @wandelbots/nova-js@dev build if one hasn't been published yet
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      nova-api-version:
+        description: "@wandelbots/nova-api version/tag to build against (defaults to its 'dev' dist-tag)"
+        required: false
+        type: string
+      dry-run:
+        description: "Run npm publish with --dry-run (skips the actual publish) to test the workflow"
+        required: false
+        type: boolean
+        default: false
 
 # Note that this release.yml specifically has permission to publish to npm
 # given by the "trusted publishers" system; an action with a different
@@ -28,6 +43,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Skip for schedule/workflow_dispatch, which are handled entirely by the
+    # publish-nova-api-dev job below (it needs its own build with a bumped
+    # nova-api version, so reusing this job's artifacts wouldn't help)
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -176,3 +195,92 @@ jobs:
               issue_number: context.issue.number,
               body,
             });
+
+  # @wandelbots/nova-api is bundled into our dist at build time (see
+  # tsdown.config.ts), so consumers can no longer override its version via
+  # pnpm/npm overrides like they could when it was a plain dependency. This
+  # job gives an escape hatch: it tracks nova-api's own 'dev' dist-tag and
+  # publishes a matching @wandelbots/nova-js build under the 'dev' npm tag,
+  # so bleeding-edge API changes can be tried via `pnpm add @wandelbots/nova-js@dev`
+  # ahead of an official nova-api release. It also surfaces type-check/test
+  # failures early if nova-api makes a breaking change.
+  publish-nova-api-dev:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-node
+      - name: Determine target nova-api version
+        id: nova-api
+        run: |
+          VERSION="${{ github.event.inputs.nova-api-version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(npm view @wandelbots/nova-api dist-tags.dev)
+          fi
+          SANITIZED=$(echo "$VERSION" | tr '.' '-')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "sanitized=$SANITIZED" >> "$GITHUB_OUTPUT"
+      - name: Skip if this nova-api version was already published
+        id: skip-check
+        run: |
+          CURRENT=$(npm view "@wandelbots/nova-js@dev" version 2>/dev/null || true)
+          if [[ "$CURRENT" == *"nova-api-dev.${{ steps.nova-api.outputs.sanitized }}"* ]]; then
+            echo "Version for nova-api ${{ steps.nova-api.outputs.version }} already published as $CURRENT, skipping"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Bump @wandelbots/nova-api to target version
+        if: steps.skip-check.outputs.skip != 'true'
+        run: pnpm add -D "@wandelbots/nova-api@${{ steps.nova-api.outputs.version }}"
+      - name: Determine base version
+        id: base-version
+        if: steps.skip-check.outputs.skip != 'true'
+        run: echo "version=$(npm view @wandelbots/nova-js version)" >> "$GITHUB_OUTPUT"
+      - name: Set package.json version
+        if: steps.skip-check.outputs.skip != 'true'
+        run: |
+          DEV_VERSION="${{ steps.base-version.outputs.version }}-nova-api-dev.${{ steps.nova-api.outputs.sanitized }}"
+          echo "DEV_VERSION=$DEV_VERSION" >> "$GITHUB_ENV"
+          jq --arg version "$DEV_VERSION" '.version = $version' package.json > package.tmp.json && mv package.tmp.json package.json
+      - name: Build against the target nova-api version
+        if: steps.skip-check.outputs.skip != 'true'
+        env:
+          # tsdown.config.ts only lets tsnapi auto-update (rather than fail
+          # the build) the API snapshot when CI is unset; overriding it here
+          # is safe since this is a throwaway checkout, not committed back
+          CI: ""
+        run: pnpm run build
+      - name: Type-check & test for compatibility issues
+        if: steps.skip-check.outputs.skip != 'true'
+        run: |
+          pnpm run tsc
+          pnpm exec vitest run
+      - name: Install Node.js
+        if: steps.skip-check.outputs.skip != 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24 # Need a recent npm version for npm trusted publishers
+      - name: Publish to npm
+        if: steps.skip-check.outputs.skip != 'true'
+        run: |
+          if [ "${{ github.event.inputs.dry-run }}" = "true" ]; then
+            npm publish --tag dev --dry-run
+          else
+            npm publish --tag dev
+          fi
+      - name: Write summary
+        if: steps.skip-check.outputs.skip != 'true'
+        run: |
+          {
+            echo "### 📦 Published \`@wandelbots/nova-js@$DEV_VERSION\`"
+            echo ""
+            echo "Built against \`@wandelbots/nova-api@${{ steps.nova-api.outputs.version }}\`"
+            echo ""
+            echo '```'
+            echo "pnpm add @wandelbots/nova-js@dev"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
