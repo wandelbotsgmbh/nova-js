@@ -48,6 +48,18 @@ test("NovaAPIClient covers all generated API classes", () => {
     (name) => !usedApiClasses.has(name),
   )
 
+  if (missingApis.length > 0 && process.env.NOVA_API_DEV_BUILD) {
+    // When building against @wandelbots/nova-api's `dev` channel (ahead of a
+    // stable release), new API classes may show up here before NovaAPIClient
+    // has been updated to wrap them. Warn instead of failing so the
+    // publish-nova-api-dev workflow can still publish a preview build; a
+    // normal build/test run (this env var unset) still fails as usual.
+    console.warn(
+      `NovaAPIClient is missing wrappers for: ${missingApis.join(", ")}`,
+    )
+    return
+  }
+
   expect(
     missingApis,
     `NovaAPIClient is missing wrappers for: ${missingApis.join(", ")}`,
