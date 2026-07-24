@@ -217,27 +217,32 @@ jobs:
           SANITIZED=$(echo "$VERSION" | tr '.' '-')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "sanitized=$SANITIZED" >> "$GITHUB_OUTPUT"
-      - name: Skip if this nova-api version was already published
+      - name: Determine base nova-js version
+        id: base-version
+        run: echo "version=$(npm view @wandelbots/nova-js version)" >> "$GITHUB_OUTPUT"
+      - name: Compute dev version
+        id: dev-version
+        run: echo "version=${{ steps.base-version.outputs.version }}-nova-api-dev.${{ steps.nova-api.outputs.sanitized }}" >> "$GITHUB_OUTPUT"
+      - name: Skip if this exact version was already published
         id: skip-check
         run: |
+          # Compares the full computed version (base nova-js version + nova-api
+          # version), not just the nova-api part, so a nova-js release alone
+          # (unchanged nova-api) still gets a fresh @dev build published
           CURRENT=$(npm view "@wandelbots/nova-js@dev" version 2>/dev/null || true)
-          if [[ "$CURRENT" == *"nova-api-dev.${{ steps.nova-api.outputs.sanitized }}"* ]]; then
-            echo "Version for nova-api ${{ steps.nova-api.outputs.version }} already published as $CURRENT, skipping"
+          if [ "$CURRENT" = "${{ steps.dev-version.outputs.version }}" ]; then
+            echo "@wandelbots/nova-js@$CURRENT already published, skipping"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Bump @wandelbots/nova-api to target version
         if: steps.skip-check.outputs.skip != 'true'
-        run: pnpm add -D "@wandelbots/nova-api@${{ steps.nova-api.outputs.version }}"
-      - name: Determine base version
-        id: base-version
-        if: steps.skip-check.outputs.skip != 'true'
-        run: echo "version=$(npm view @wandelbots/nova-js version)" >> "$GITHUB_OUTPUT"
+        run: pnpm add -D -w "@wandelbots/nova-api@${{ steps.nova-api.outputs.version }}"
       - name: Set package.json version
         if: steps.skip-check.outputs.skip != 'true'
         run: |
-          DEV_VERSION="${{ steps.base-version.outputs.version }}-nova-api-dev.${{ steps.nova-api.outputs.sanitized }}"
+          DEV_VERSION="${{ steps.dev-version.outputs.version }}"
           echo "DEV_VERSION=$DEV_VERSION" >> "$GITHUB_ENV"
           jq --arg version "$DEV_VERSION" '.version = $version' package.json > package.tmp.json && mv package.tmp.json package.json
       - name: Build against the target nova-api version
