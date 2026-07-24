@@ -196,17 +196,11 @@ jobs:
               body,
             });
 
-  # @wandelbots/nova-api is bundled into our dist at build time (see
-  # tsdown.config.ts), so consumers can no longer override its version via
-  # pnpm/npm overrides like they could when it was a plain dependency. This
-  # job gives an escape hatch: it tracks nova-api's own 'dev' dist-tag and
-  # publishes a matching @wandelbots/nova-js build under the 'dev' npm tag,
-  # so bleeding-edge API changes can be tried via `pnpm add @wandelbots/nova-js@dev`
-  # ahead of an official nova-api release. It also surfaces type-check/test
-  # failures early if nova-api makes a breaking change.
+  # Publish a @wandelbots/nova-js@dev build against the latest @wandelbots/nova-api dev build
+  # for NOVA prerelease testing of new API endpoints
   publish-nova-api-dev:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
