@@ -31,12 +31,17 @@ import {
 } from "@wandelbots/nova-api/v2"
 import type { AxiosInstance } from "axios"
 import axios from "axios"
+import { augmentPoses, type DeepPoseAugmented } from "./pose/augmentPoses.ts"
 
 // biome-ignore lint/suspicious/noExplicitAny: metamagic
 type UnwrapAxiosResponseReturn<T> = T extends (...a: any[]) => any
   ? (
       ...a: Parameters<T>
-    ) => Promise<Awaited<ReturnType<T>> extends { data: infer D } ? D : never>
+    ) => Promise<
+      DeepPoseAugmented<
+        Awaited<ReturnType<T>> extends { data: infer D } ? D : never
+      >
+    >
   : never
 
 type WithUnwrappedAxiosResponse<T> = {
@@ -73,7 +78,9 @@ function unwrap<T extends BaseAPI>(
         ...args: unknown[]
       ) => Promise<{ data: unknown }>
       apiClient[key] = (...args: unknown[]) =>
-        originalFunction.apply(apiClient, args).then((res) => res.data)
+        originalFunction
+          .apply(apiClient, args)
+          .then((res) => augmentPoses(res.data))
     }
   }
 

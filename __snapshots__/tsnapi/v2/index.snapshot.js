@@ -158,6 +158,18 @@ export class NOVACloudApi extends BaseAPI {
   disconnectFromNovaCloud(_, _) {}
   getNovaCloudConfig(_) {}
 }
+export class Pose {
+  position
+  orientation
+  constructor(_, _) {}
+  static from(_) {}
+  static identity() {}
+  multiply(_) {}
+  inverse() {}
+  transformPoint(_) {}
+  equals(_, _) {}
+  toJSON() {}
+}
 export class ProgramApi extends BaseAPI {
   getProgram(_, _, _) {}
   listPrograms(_, _) {}
@@ -278,6 +290,7 @@ export class VirtualControllerInputsOutputsApi extends BaseAPI {
 export function ApplicationApiAxiosParamCreator(_) {}
 export function ApplicationApiFactory(_, _, _) {}
 export function ApplicationApiFp(_) {}
+export function augmentPoses(_) {}
 export function BUSInputsOutputsApiAxiosParamCreator(_) {}
 export function BUSInputsOutputsApiFactory(_, _, _) {}
 export function BUSInputsOutputsApiFp(_) {}
