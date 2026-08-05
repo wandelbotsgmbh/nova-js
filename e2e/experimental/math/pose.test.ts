@@ -1,6 +1,7 @@
-import { Nova, Pose } from "@wandelbots/nova-js/v2"
+import { Pose } from "@wandelbots/nova-js/experimental/math"
+import { Nova } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
-import { env } from "../env.ts"
+import { env } from "../../env.ts"
 
 // Ported from wandelbots/robot-pad's e2e/pose-transforms.test.ts, which checks
 // that robot-pad's client-side pose math matches the backend's. Here we check

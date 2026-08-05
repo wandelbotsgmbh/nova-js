@@ -24,15 +24,23 @@ export function axisAngleToQuaternion(r: number[]): Quaternion {
   return { w: Math.cos(half), x: rx * s, y: ry * s, z: rz * s }
 }
 
-/** Convert a unit quaternion back to an axis-angle rotation vector [rx, ry, rz]. */
+/**
+ * Convert a unit quaternion back to an axis-angle rotation vector [rx, ry, rz],
+ * matching wb-robotix's `Quaternion::toRotationVector()` (ported from
+ * QuaternionBasePlugin.h): using `atan2` rather than `acos` keeps the angle
+ * canonically within [0, pi] regardless of which of the two antipodal unit
+ * quaternions (q or -q) represents the rotation, rather than acos's [0, 2*pi]
+ * range - important since composed poses need to match the same canonical
+ * rotation vector the robot controller itself would report for a pose.
+ */
 export function quaternionToAxisAngle(q: Quaternion): number[] {
-  const w = Math.min(1, Math.max(-1, q.w))
-  const angle = 2 * Math.acos(w)
-  const s = Math.sqrt(1 - w * w)
-  if (s < EPSILON) {
+  const vecNorm = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z)
+  if (vecNorm < EPSILON) {
     return [0, 0, 0]
   }
-  return [(q.x / s) * angle, (q.y / s) * angle, (q.z / s) * angle]
+  const angle = 2 * Math.atan2(vecNorm, Math.abs(q.w))
+  const scale = (q.w >= 0 ? angle : -angle) / vecNorm
+  return [q.x * scale, q.y * scale, q.z * scale]
 }
 
 /** Hamilton product: composes rotations so that applying `multiplyQuaternions(a, b)` to a vector equals applying `b` then `a`. */

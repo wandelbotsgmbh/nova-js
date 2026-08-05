@@ -1,4 +1,4 @@
-import { Pose } from "@wandelbots/nova-js/v2"
+import { Pose } from "@wandelbots/nova-js/experimental/math"
 import { describe, expect, test } from "vitest"
 
 describe("Pose", () => {

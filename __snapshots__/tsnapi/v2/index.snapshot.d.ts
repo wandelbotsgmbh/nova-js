@@ -277,7 +277,7 @@ export interface CloudRegistrationSuccessResponse {
 }
 export interface Collider {
   'shape': ColliderShape;
-  'pose'?: Pose$1;
+  'pose'?: Pose;
   'margin'?: number;
 }
 export interface ColliderValue {
@@ -358,7 +358,7 @@ export interface ConfigurationResource {
   'children'?: Array<ConfigurationResource>;
 }
 export interface ConfiguredPose {
-  'pose': Pose$1;
+  'pose': Pose;
   'kinematic_configuration': KinematicConfiguration;
 }
 export interface ConfiguredPoseInverse422Response {
@@ -371,8 +371,8 @@ export interface ConfiguredPoseInverseFailedResponse {
 export interface ConfiguredPoseInverseRequest {
   'motion_group_model': string;
   'tcp_poses': Array<ConfiguredPose>;
-  'tcp_offset'?: Pose$1;
-  'mounting'?: Pose$1;
+  'tcp_offset'?: Pose;
+  'mounting'?: Pose;
   'joint_position_limits'?: Array<LimitRange>;
   'collision_setups'?: {
     [key: string]: CollisionSetup;
@@ -440,7 +440,7 @@ export interface CopyMotionGroupModelRequest {
   'name': string;
 }
 export interface CubicSplineParameter {
-  'pose': Pose$1;
+  'pose': Pose;
   'path_parameter': number;
 }
 export interface CycleTime {
@@ -529,7 +529,7 @@ export interface FeedbackAxisRangeExceeded {
 export interface FeedbackCollision {
   'collisions'?: Array<Collision>;
   'joint_position'?: Array<number>;
-  'tcp_pose'?: Pose$1;
+  'tcp_pose'?: Pose;
   'error_feedback_name': FeedbackCollisionErrorFeedbackNameEnum;
 }
 export interface FeedbackCommandsMissing {
@@ -542,8 +542,8 @@ export interface FeedbackCubicSplineIsNotIncreasing {
   'error_feedback_name': FeedbackCubicSplineIsNotIncreasingErrorFeedbackNameEnum;
 }
 export interface FeedbackCubicSplineNotAtStartPose {
-  'first_spline_pose'?: Pose$1;
-  'start_pose'?: Pose$1;
+  'first_spline_pose'?: Pose;
+  'start_pose'?: Pose;
   'error_feedback_name': FeedbackCubicSplineNotAtStartPoseErrorFeedbackNameEnum;
 }
 export interface FeedbackDirectionConstraintNoSolutionExists {
@@ -577,11 +577,11 @@ export interface FeedbackJointLimitExceeded {
   'error_feedback_name': FeedbackJointLimitExceededErrorFeedbackNameEnum;
 }
 export interface FeedbackNoSolutionInCurrentConfiguration {
-  'invalid_tcp_pose'?: Pose$1;
+  'invalid_tcp_pose'?: Pose;
   'error_feedback_name': FeedbackNoSolutionInCurrentConfigurationErrorFeedbackNameEnum;
 }
 export interface FeedbackOutOfWorkspace {
-  'invalid_tcp_pose'?: Pose$1;
+  'invalid_tcp_pose'?: Pose;
   'error_feedback_name': FeedbackOutOfWorkspaceErrorFeedbackNameEnum;
 }
 export interface FeedbackSingularity {
@@ -618,11 +618,11 @@ export interface ForwardKinematics422Response {
 export interface ForwardKinematicsRequest {
   'motion_group_model': string;
   'joint_positions': Array<Array<number>>;
-  'tcp_offset'?: Pose$1;
-  'mounting'?: Pose$1;
+  'tcp_offset'?: Pose;
+  'mounting'?: Pose;
 }
 export interface ForwardKinematicsResponse {
-  'tcp_poses': Array<Pose$1>;
+  'tcp_poses': Array<Pose>;
 }
 export interface ForwardKinematicsValidationError {
   'loc': Array<ValidationErrorLocInner>;
@@ -705,9 +705,9 @@ export interface InverseKinematics422Response {
 }
 export interface InverseKinematicsRequest {
   'motion_group_model': string;
-  'tcp_poses': Array<Pose$1>;
-  'tcp_offset'?: Pose$1;
-  'mounting'?: Pose$1;
+  'tcp_poses': Array<Pose>;
+  'tcp_offset'?: Pose;
+  'mounting'?: Pose;
   'joint_position_limits'?: Array<LimitRange>;
   'collision_setups'?: {
     [key: string]: CollisionSetup;
@@ -829,8 +829,8 @@ export interface KinematicConfiguration {
 }
 export interface KinematicModel {
   'dh_parameters'?: Array<DHParameter>;
-  'kinematic_chain_offset'?: Pose$1;
-  'flange_offset'?: Pose$1;
+  'kinematic_chain_offset'?: Pose;
+  'flange_offset'?: Pose;
   'inverse_solver'?: string;
 }
 export interface KukaConfiguredPose {
@@ -971,7 +971,7 @@ export interface MotionCommand {
 }
 export interface MotionGroupDescription {
   'motion_group_model': string;
-  'mounting'?: Pose$1;
+  'mounting'?: Pose;
   'tcps'?: {
     [key: string]: TcpOffset;
   };
@@ -992,8 +992,8 @@ export interface MotionGroupDescription {
   };
   'cycle_time'?: number;
   'dh_parameters'?: Array<DHParameter>;
-  'kinematic_chain_offset'?: Pose$1;
-  'flange_offset'?: Pose$1;
+  'kinematic_chain_offset'?: Pose;
+  'flange_offset'?: Pose;
   'serial_number'?: string;
   'description_revision'?: number;
 }
@@ -1028,8 +1028,8 @@ export interface MotionGroupModelDescription {
 export interface MotionGroupSetup {
   'motion_group_model': string;
   'cycle_time': number;
-  'mounting'?: Pose$1;
-  'tcp_offset'?: Pose$1;
+  'mounting'?: Pose;
+  'tcp_offset'?: Pose;
   'global_limits'?: LimitSet;
   'payload'?: Payload;
   'collision_setups'?: {
@@ -1045,9 +1045,9 @@ export interface MotionGroupState {
   'joint_limit_reached': MotionGroupStateJointLimitReached;
   'joint_torque'?: Array<number>;
   'joint_current'?: Array<number>;
-  'flange_pose'?: Pose$1;
+  'flange_pose'?: Pose;
   'tcp'?: string;
-  'tcp_pose'?: Pose$1;
+  'tcp_pose'?: Pose;
   'coordinate_system'?: string;
   'payload'?: string;
   'standstill': boolean;
@@ -1156,13 +1156,13 @@ export interface OpMode {
   'mode': OperationMode;
 }
 export interface PathCartesianPTP {
-  'target_pose': Pose$1;
+  'target_pose': Pose;
   'kinematic_configuration'?: KinematicConfiguration;
   'path_definition_name': PathCartesianPTPPathDefinitionNameEnum;
 }
 export interface PathCircle {
-  'via_pose': Pose$1;
-  'target_pose': Pose$1;
+  'via_pose': Pose;
+  'target_pose': Pose;
   'path_definition_name': PathCirclePathDefinitionNameEnum;
 }
 export interface PathCubicSpline {
@@ -1184,7 +1184,7 @@ export interface PathJointPTP {
   'path_definition_name': PathJointPTPPathDefinitionNameEnum;
 }
 export interface PathLine {
-  'target_pose': Pose$1;
+  'target_pose': Pose;
   'path_definition_name': PathLinePathDefinitionNameEnum;
 }
 export interface PauseJoggingRequest {
@@ -1264,13 +1264,13 @@ export interface PlaybackSpeedResponse {
   'message'?: string;
   'kind': PlaybackSpeedResponseKindEnum;
 }
-export interface PoseData {
+export interface Pose {
   'position'?: Array<number>;
   'orientation'?: Array<number>;
 }
 export interface PoseWaypoint {
   'timestamp': number;
-  'pose': Pose$1;
+  'pose': Pose;
 }
 export interface PoseWaypointsRequest {
   'message_type': PoseWaypointsRequestMessageTypeEnum;
@@ -1349,8 +1349,8 @@ export interface ProjectJointPositionDirectionConstraintRequest {
   'motion_group_model': string;
   'joint_positions': Array<Array<number>>;
   'constraint': DirectionConstraint;
-  'tcp_offset'?: Pose$1;
-  'mounting'?: Pose$1;
+  'tcp_offset'?: Pose;
+  'mounting'?: Pose;
   'joint_position_limits'?: Array<LimitRange>;
   'collision_setups'?: {
     [key: string]: CollisionSetup;
@@ -1566,7 +1566,7 @@ export interface StreamIOValuesResponse {
 }
 export interface TcpOffset {
   'name': string;
-  'pose': Pose$1;
+  'pose': Pose;
 }
 export interface TcpRequiredError {
   'kind': TcpRequiredErrorKindEnum;
@@ -1817,7 +1817,6 @@ export type ConfiguredPoseInverseResponseResponse = Array<Array<number>> | Confi
 export type ConvertVendorConfiguredPoseRequestVendorConfiguredPoses = Array<AbbConfiguredPose> | Array<KukaConfiguredPose>;
 export type ConvexHullShapeTypeEnum = typeof ConvexHullShapeTypeEnum[keyof typeof ConvexHullShapeTypeEnum];
 export type CylinderShapeTypeEnum = typeof CylinderShapeTypeEnum[keyof typeof CylinderShapeTypeEnum];
-export type DeepPoseAugmented<T, Depth extends readonly unknown[] = []> = T extends unknown ? AugmentPosesCore<T, Depth> : never;
 export type Direction = typeof Direction[keyof typeof Direction];
 export type DirectionConstraintConstraintNameEnum = typeof DirectionConstraintConstraintNameEnum[keyof typeof DirectionConstraintConstraintNameEnum];
 export type ErrorDirectionConstraintNotMetErrorFeedbackNameEnum = typeof ErrorDirectionConstraintNotMetErrorFeedbackNameEnum[keyof typeof ErrorDirectionConstraintNotMetErrorFeedbackNameEnum];
@@ -2228,18 +2227,6 @@ export declare class NOVACloudApi extends BaseAPI {
   disconnectFromNovaCloud(_?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<CloudDisconnectionStatusDisconnected, any, {}>>;
   getNovaCloudConfig(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<CloudConfigStatus, any, {}>>;
 }
-export declare class Pose implements Pose$1 {
-  readonly position: number[];
-  readonly orientation: number[];
-  constructor(_?: number[], _?: number[]);
-  static from(_: Pose$1): Pose;
-  static identity(): Pose;
-  multiply(_: Pose$1): Pose;
-  inverse(): Pose;
-  transformPoint(_: number[]): number[];
-  equals(_: Pose$1, _?: number): boolean;
-  toJSON(): Pose$1;
-}
 export declare class ProgramApi extends BaseAPI {
   getProgram(_: string, _: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<Program, any, {}>>;
   listPrograms(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<Program[], any, {}>>;
@@ -2383,10 +2370,6 @@ export declare class VirtualControllerInputsOutputsApi extends BaseAPI {
   listVirtualControllerIODescriptions(_: string, _: string, _?: Array<string>, _?: IODirection, _?: IOValueType, _?: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<IODescription[], any, {}>>;
   setIOValues(_: string, _: string, _: Array<IOValue>, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
 }
-// #endregion
-
-// #region Functions
-export declare function augmentPoses<T>(_: T): DeepPoseAugmented<T>;
 // #endregion
 
 // #region Variables

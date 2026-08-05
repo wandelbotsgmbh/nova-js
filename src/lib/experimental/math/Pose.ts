@@ -5,7 +5,7 @@ import {
   multiplyQuaternions,
   quaternionToAxisAngle,
   rotateVectorByQuaternion,
-} from "./quaternionMath.ts"
+} from "./Quaternion.ts"
 
 const ZERO_VECTOR = [0, 0, 0]
 

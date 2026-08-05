@@ -1,4 +1,5 @@
 import type { Pose as PoseData } from "@wandelbots/nova-api/v2"
+import type { Nova } from "../../Nova.ts"
 import { Pose } from "./Pose.ts"
 
 type PoseKeys = keyof PoseData
@@ -102,10 +103,73 @@ function augmentPosesInPlace(value: unknown): void {
  * Recursively walks a parsed API response/request body, upgrading any
  * `Pose`-shaped objects in place to `Pose` instances so they gain math
  * methods (`multiply`, `inverse`, ...) while remaining JSON/wire-compatible.
- * Used automatically by `NovaAPIClient` for REST responses; exported so it
- * can also be applied manually to e.g. websocket messages.
+ * Used by `augmentMath` for `nova.api.*` responses; exported so it can also
+ * be applied manually to e.g. websocket messages.
  */
 export function augmentPoses<T>(value: T): DeepPoseAugmented<T> {
   augmentPosesInPlace(value)
   return value as DeepPoseAugmented<T>
+}
+
+type WithAugmentedPosesCore<
+  T,
+  Depth extends readonly unknown[],
+> = Depth["length"] extends MaxDepth["length"]
+  ? T
+  : T extends (...args: infer A) => Promise<infer R>
+    ? (...args: A) => Promise<DeepPoseAugmented<R>>
+    : T extends object
+      ? { [K in keyof T]: WithAugmentedPosesCore<T[K], [...Depth, unknown]> }
+      : T
+
+/**
+ * Recursively maps every method on `Nova["api"]` (and its nested API groups)
+ * so calls are typed as returning `DeepPoseAugmented` results, matching what
+ * `augmentMath` does at runtime.
+ */
+type WithAugmentedPoses<T> = WithAugmentedPosesCore<T, []>
+
+export type NovaWithMath = Omit<Nova, "api"> & {
+  readonly api: WithAugmentedPoses<Nova["api"]>
+}
+
+function wrapWithPoseAugmentation<T extends object>(target: T): T {
+  return new Proxy(target, {
+    get(t, prop) {
+      const value = Reflect.get(t, prop, t)
+      if (typeof value === "function") {
+        return (...args: unknown[]) => {
+          const result = (value as (...a: unknown[]) => unknown).apply(t, args)
+          return result instanceof Promise
+            ? result.then((data) => augmentPoses(data))
+            : result
+        }
+      }
+      if (value !== null && typeof value === "object") {
+        return wrapWithPoseAugmentation(value)
+      }
+      return value
+    },
+  }) as T
+}
+
+/**
+ * Wraps a `Nova` instance so every `nova.api.*` call automatically upgrades
+ * `Pose`-shaped fields in its response to `Pose` instances (with math
+ * methods like `multiply`/`inverse`). Returns a new proxied view - does not
+ * mutate the original `nova` instance.
+ */
+export function augmentMath(nova: Nova): NovaWithMath {
+  const proxy = new Proxy(nova, {
+    get(target, prop) {
+      if (prop === "api") {
+        return wrapWithPoseAugmentation(target.api)
+      }
+      // receiver is `target`, not the proxy, so `this` inside Nova's own
+      // methods stays bound to the original (un-proxied) instance.
+      return Reflect.get(target, prop, target)
+    },
+  })
+
+  return proxy as unknown as NovaWithMath
 }

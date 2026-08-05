@@ -6,6 +6,7 @@ const entry = [
   "src/index.ts",
   "src/v2/index.ts",
   "src/experimental/nats/index.ts",
+  "src/experimental/math/index.ts",
 ]
 
 export default defineConfig({
