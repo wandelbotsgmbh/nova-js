@@ -33,7 +33,3 @@ export class Quaternion {
   toJSON() {}
 }
 // #endregion
-
-// #region Functions
-export function augmentPoses(_) {}
-// #endregion

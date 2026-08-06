@@ -9,7 +9,6 @@ export interface PoseData {
 // #endregion
 
 // #region Types
-export type DeepPoseAugmented<T, Depth extends readonly unknown[] = []> = T extends unknown ? AugmentPosesCore<T, Depth> : never;
 export type QuaternionData = {
   w: number;
   x: number;
@@ -49,8 +48,4 @@ export declare class Quaternion implements QuaternionData {
   rotateVector(_: number[]): number[];
   toJSON(): QuaternionData;
 }
-// #endregion
-
-// #region Functions
-export declare function augmentPoses<T>(_: T): DeepPoseAugmented<T>;
 // #endregion
