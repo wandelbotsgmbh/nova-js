@@ -1,11 +1,5 @@
 import type { Pose as PoseData } from "@wandelbots/nova-api/v2"
-import {
-  axisAngleToQuaternion,
-  conjugateQuaternion,
-  multiplyQuaternions,
-  quaternionToAxisAngle,
-  rotateVectorByQuaternion,
-} from "./Quaternion.ts"
+import { Quaternion } from "./Quaternion.ts"
 
 const ZERO_VECTOR = [0, 0, 0]
 
@@ -27,10 +21,6 @@ function negateVector(a: number[]): number[] {
  * wire-format `PoseData` type (own `position`/`orientation` properties only,
  * no enumerable methods), so they can be passed directly back into API calls
  * that expect a pose.
- *
- * Poses returned from `NovaAPIClient`/`Nova` are automatically upgraded to
- * `Pose` instances; construct one directly only when you have a pose from
- * elsewhere (e.g. a websocket message).
  */
 export class Pose implements PoseData {
   readonly position: number[]
@@ -65,27 +55,23 @@ export class Pose implements PoseData {
    * applying `other` first, then `this`.
    */
   multiply(other: PoseData): Pose {
-    const q1 = axisAngleToQuaternion(this.orientation)
-    const q2 = axisAngleToQuaternion(other.orientation ?? ZERO_VECTOR)
+    const q1 = Quaternion.fromRotationVector(this.orientation)
+    const q2 = Quaternion.fromRotationVector(other.orientation ?? ZERO_VECTOR)
 
     const position = addVectors(
       this.position,
-      rotateVectorByQuaternion(q1, other.position ?? ZERO_VECTOR),
+      q1.rotateVector(other.position ?? ZERO_VECTOR),
     )
-    const orientation = quaternionToAxisAngle(multiplyQuaternions(q1, q2))
+    const orientation = q1.multiply(q2).toRotationVector()
 
     return new Pose(position, orientation)
   }
 
   /** The inverse transform, such that `pose.multiply(pose.inverse())` is the identity pose. */
   inverse(): Pose {
-    const q = axisAngleToQuaternion(this.orientation)
-    const qInverse = conjugateQuaternion(q)
+    const qInverse = Quaternion.fromRotationVector(this.orientation).inverse()
 
-    const position = rotateVectorByQuaternion(
-      qInverse,
-      negateVector(this.position),
-    )
+    const position = qInverse.rotateVector(negateVector(this.position))
     // Negating an axis-angle vector gives the inverse rotation directly.
     const orientation = negateVector(this.orientation)
 
@@ -94,12 +80,12 @@ export class Pose implements PoseData {
 
   /** Apply this pose's transform to a point, returning the transformed point. */
   transformPoint(point: number[]): number[] {
-    const q = axisAngleToQuaternion(this.orientation)
-    return addVectors(this.position, rotateVectorByQuaternion(q, point))
+    const q = Quaternion.fromRotationVector(this.orientation)
+    return addVectors(this.position, q.rotateVector(point))
   }
 
   /** Compare to another pose within a tolerance, since floating-point pose math rarely produces exact equality. */
-  equals(other: PoseData, epsilon = 1e-9): boolean {
+  isApprox(other: PoseData, epsilon = 1e-9): boolean {
     const otherPosition = other.position ?? ZERO_VECTOR
     const otherOrientation = other.orientation ?? ZERO_VECTOR
 

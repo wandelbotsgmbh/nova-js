@@ -11,7 +11,22 @@ export class Pose {
   multiply(_) {}
   inverse() {}
   transformPoint(_) {}
-  equals(_, _) {}
+  isApprox(_, _) {}
+  toJSON() {}
+}
+export class Quaternion {
+  w
+  x
+  y
+  z
+  constructor(_, _, _, _) {}
+  static identity() {}
+  static fromRotationVector(_) {}
+  toRotationVector() {}
+  multiply(_) {}
+  conjugate() {}
+  inverse() {}
+  rotateVector(_) {}
   toJSON() {}
 }
 // #endregion
@@ -19,9 +34,4 @@ export class Pose {
 // #region Functions
 export function augmentMath(_) {}
 export function augmentPoses(_) {}
-export function axisAngleToQuaternion(_) {}
-export function conjugateQuaternion(_) {}
-export function multiplyQuaternions(_, _) {}
-export function quaternionToAxisAngle(_) {}
-export function rotateVectorByQuaternion(_, _) {}
 // #endregion

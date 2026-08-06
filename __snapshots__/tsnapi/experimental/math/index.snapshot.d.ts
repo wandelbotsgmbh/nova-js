@@ -13,7 +13,7 @@ export type DeepPoseAugmented<T, Depth extends readonly unknown[] = []> = T exte
 export type NovaWithMath = Omit<Nova, "api"> & {
   readonly api: WithAugmentedPoses<Nova["api"]>;
 };
-export type Quaternion = {
+export type QuaternionData = {
   w: number;
   x: number;
   y: number;
@@ -31,17 +31,27 @@ export declare class Pose implements Pose$1 {
   multiply(_: Pose$1): Pose;
   inverse(): Pose;
   transformPoint(_: number[]): number[];
-  equals(_: Pose$1, _?: number): boolean;
+  isApprox(_: Pose$1, _?: number): boolean;
   toJSON(): Pose$1;
+}
+export declare class Quaternion implements QuaternionData {
+  readonly w: number;
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+  constructor(_?: number, _?: number, _?: number, _?: number);
+  static identity(): Quaternion;
+  static fromRotationVector(_: number[]): Quaternion;
+  toRotationVector(): number[];
+  multiply(_: QuaternionData): Quaternion;
+  conjugate(): Quaternion;
+  inverse(): Quaternion;
+  rotateVector(_: number[]): number[];
+  toJSON(): QuaternionData;
 }
 // #endregion
 
 // #region Functions
 export declare function augmentMath(_: Nova): NovaWithMath;
 export declare function augmentPoses<T>(_: T): DeepPoseAugmented<T>;
-export declare function axisAngleToQuaternion(_: number[]): Quaternion;
-export declare function conjugateQuaternion(_: Quaternion): Quaternion;
-export declare function multiplyQuaternions(_: Quaternion, _: Quaternion): Quaternion;
-export declare function quaternionToAxisAngle(_: Quaternion): number[];
-export declare function rotateVectorByQuaternion(_: Quaternion, _: number[]): number[];
 // #endregion

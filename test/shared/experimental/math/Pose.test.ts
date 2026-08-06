@@ -6,7 +6,7 @@ describe("Pose", () => {
     const pose = new Pose([1, 2, 3], [0.1, 0.2, 0.3])
     const result = Pose.identity().multiply(pose)
 
-    expect(result.equals(pose)).toBe(true)
+    expect(result.isApprox(pose)).toBe(true)
   })
 
   test("multiply composes translation for poses with no rotation", () => {
@@ -36,7 +36,7 @@ describe("Pose", () => {
 
     const result = pose.multiply(pose.inverse())
 
-    expect(result.equals(Pose.identity(), 1e-9)).toBe(true)
+    expect(result.isApprox(Pose.identity(), 1e-9)).toBe(true)
   })
 
   test("transformPoint applies position and orientation", () => {

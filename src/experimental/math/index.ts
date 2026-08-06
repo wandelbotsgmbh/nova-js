@@ -14,11 +14,5 @@ export type {
   NovaWithMath,
 } from "../../lib/experimental/math/augmentMath.ts"
 export { Pose } from "../../lib/experimental/math/Pose.ts"
-export {
-  axisAngleToQuaternion,
-  conjugateQuaternion,
-  multiplyQuaternions,
-  quaternionToAxisAngle,
-  rotateVectorByQuaternion,
-} from "../../lib/experimental/math/Quaternion.ts"
-export type { Quaternion } from "../../lib/experimental/math/Quaternion.ts"
+export { Quaternion } from "../../lib/experimental/math/Quaternion.ts"
+export type { QuaternionData } from "../../lib/experimental/math/Quaternion.ts"
