@@ -85,9 +85,21 @@ export class Quaternion implements QuaternionData {
     return new Quaternion(this.w, -this.x, -this.y, -this.z)
   }
 
-  /** Inverse rotation. Equivalent to `conjugate()` since a `Pose`'s orientation is always a unit quaternion. */
+  /** Inverse: `conjugate()` scaled by `1 / squaredNorm()`, matching `Eigen::Quaternion::inverse()`. Equal to `conjugate()` for unit quaternions. */
   inverse(): Quaternion {
-    return this.conjugate()
+    const squaredNorm =
+      this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z
+    // Degenerate (zero) quaternion has no inverse - flag it the same way Eigen does.
+    if (squaredNorm < EPSILON) {
+      return new Quaternion(0, 0, 0, 0)
+    }
+    const conjugate = this.conjugate()
+    return new Quaternion(
+      conjugate.w / squaredNorm,
+      conjugate.x / squaredNorm,
+      conjugate.y / squaredNorm,
+      conjugate.z / squaredNorm,
+    )
   }
 
   /**

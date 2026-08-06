@@ -94,6 +94,17 @@ describe("Quaternion", () => {
     expect(result.z).toBeCloseTo(0, 9)
   })
 
+  test("inverse divides by squaredNorm, so it's correct even for a non-unit quaternion", () => {
+    // Deliberately not a unit quaternion (norm^2 = 4 + 9 + 16 + 25 = 54).
+    const q = new Quaternion(2, 3, 4, 5)
+    const result = q.multiply(q.inverse())
+
+    expect(result.w).toBeCloseTo(1, 9)
+    expect(result.x).toBeCloseTo(0, 9)
+    expect(result.y).toBeCloseTo(0, 9)
+    expect(result.z).toBeCloseTo(0, 9)
+  })
+
   test("rotateVector applies the rotation to a point", () => {
     // 90 degree rotation around Z
     const q = Quaternion.fromRotationVector([0, 0, Math.PI / 2])
