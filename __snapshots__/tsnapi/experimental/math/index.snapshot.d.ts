@@ -9,6 +9,10 @@ export interface PoseData {
 // #endregion
 
 // #region Types
+export type DeepPoseAugmented<T, Depth extends readonly unknown[] = []> = T extends unknown ? AugmentPosesCore<T, Depth> : never;
+export type NovaWithMath = Omit<Nova, "api"> & {
+  readonly api: WithAugmentedPoses<Nova["api"]>;
+};
 export type QuaternionData = {
   w: number;
   x: number;
@@ -48,4 +52,9 @@ export declare class Quaternion implements QuaternionData {
   rotateVector(_: number[]): number[];
   toJSON(): QuaternionData;
 }
+// #endregion
+
+// #region Functions
+export declare function augmentPoses<T>(_: T): DeepPoseAugmented<T>;
+export declare function withMath(_: Nova): NovaWithMath;
 // #endregion
