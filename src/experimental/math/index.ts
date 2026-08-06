@@ -1,5 +1,5 @@
 /**
- * Experimental pose math helpers (`Pose`, `augmentPoses`) for working with
+ * Experimental pose math helpers (`Pose`, `Quaternion`) for working with
  * position + axis-angle orientation values from the NOVA API.
  *
  * This API is experimental and may change without a major version bump.
