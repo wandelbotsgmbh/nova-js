@@ -47,8 +47,10 @@ export class Pose implements PoseData {
         `Pose constructor: orientation must be an array of 3 finite numbers, got ${JSON.stringify(orientation)}`,
       )
     }
-    this.position = position
-    this.orientation = orientation
+    // Copy defensively so mutating the caller's arrays afterward can't
+    // change this (supposedly immutable) instance's state.
+    this.position = [...position]
+    this.orientation = [...orientation]
   }
 
   static from(pose: PoseData): Pose {

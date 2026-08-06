@@ -2,6 +2,18 @@ import { Pose } from "@wandelbots/nova-js/experimental/math"
 import { describe, expect, test } from "vitest"
 
 describe("Pose", () => {
+  test("constructor copies the position/orientation arrays, so later mutating the source arrays doesn't affect the Pose", () => {
+    const position = [1, 2, 3]
+    const orientation = [0.1, 0.2, 0.3]
+    const pose = new Pose(position, orientation)
+
+    position[0] = 999
+    orientation[0] = 999
+
+    expect(pose.position).toEqual([1, 2, 3])
+    expect(pose.orientation).toEqual([0.1, 0.2, 0.3])
+  })
+
   test("identity multiplied by any pose returns that pose", () => {
     const pose = new Pose([1, 2, 3], [0.1, 0.2, 0.3])
     const result = Pose.identity().multiply(pose)
