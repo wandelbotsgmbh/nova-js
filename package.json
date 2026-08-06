@@ -20,6 +20,10 @@
     "./experimental/nats": {
       "types": "./dist/experimental/nats/index.d.mts",
       "default": "./dist/experimental/nats/index.mjs"
+    },
+    "./experimental/math": {
+      "types": "./dist/experimental/math/index.d.mts",
+      "default": "./dist/experimental/math/index.mjs"
     }
   },
   "main": "./dist/index.mjs",
