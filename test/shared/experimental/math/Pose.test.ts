@@ -36,7 +36,7 @@ describe("Pose", () => {
 
     const result = pose.multiply(pose.inverse())
 
-    expect(result.isApprox(Pose.identity(), 1e-9)).toBe(true)
+    expect(result.isApprox(Pose.identity(), 1e-9, 1e-9)).toBe(true)
   })
 
   test("transformPoint applies position and orientation", () => {
@@ -64,5 +64,49 @@ describe("Pose", () => {
       position: [1, 2, 3],
       orientation: [0.1, 0.2, 0.3],
     })
+  })
+
+  test("isApprox uses separate position/orientation tolerances", () => {
+    const pose = new Pose([1, 2, 3], [0, 0, Math.PI])
+
+    // Same rotation, represented via the antipodal quaternion's canonical
+    // form (0, 0, -pi) - angularDistance should treat these as identical,
+    // unlike a naive per-component comparison of the raw rotation vectors.
+    const sameRotationDifferentSign = new Pose([1, 2, 3], [0, 0, -Math.PI])
+    expect(pose.isApprox(sameRotationDifferentSign)).toBe(true)
+
+    expect(
+      pose.isApprox({ position: [1, 2, 3.002], orientation: [0, 0, Math.PI] }),
+    ).toBe(false)
+    expect(
+      pose.isApprox(
+        { position: [1, 2, 3.002], orientation: [0, 0, Math.PI] },
+        1e-2,
+      ),
+    ).toBe(true)
+  })
+
+  test("toCartesian returns position + roll/pitch/yaw euler angles", () => {
+    expect(Pose.identity().toCartesian()).toEqual([0, 0, 0, 0, 0, 0])
+
+    // 90 degree rotation around Z should be pure yaw
+    const pose = new Pose([1, 2, 3], [0, 0, Math.PI / 2])
+    const [x, y, z, roll, pitch, yaw] = pose.toCartesian()
+    expect(x).toBe(1)
+    expect(y).toBe(2)
+    expect(z).toBe(3)
+    expect(roll).toBeCloseTo(0, 9)
+    expect(pitch).toBeCloseTo(0, 9)
+    expect(yaw).toBeCloseTo(Math.PI / 2, 9)
+  })
+
+  test("toString formats position and orientation", () => {
+    const pose = new Pose([1, 2, 3], [0.1, 0.2, 0.3])
+    expect(pose.toString()).toBe("[1, 2, 3][0.1, 0.2, 0.3]")
+  })
+
+  test("constructor throws on malformed position/orientation", () => {
+    expect(() => new Pose([1, 2], [0, 0, 0])).toThrow()
+    expect(() => new Pose([1, 2, 3], [0, 0, Number.NaN])).toThrow()
   })
 })

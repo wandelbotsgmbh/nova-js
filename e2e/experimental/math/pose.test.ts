@@ -43,5 +43,5 @@ test("Pose.multiply reproduces the backend's flange->TCP transform", async () =>
     tcpOffset.pose,
   )
 
-  expect(computedTcpPose.isApprox(motionGroup.tcp_pose, 1e-6)).toBe(true)
+  expect(computedTcpPose.isApprox(motionGroup.tcp_pose, 1e-6, 1e-6)).toBe(true)
 })

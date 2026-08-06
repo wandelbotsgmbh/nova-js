@@ -90,6 +90,25 @@ export class Quaternion implements QuaternionData {
     return this.conjugate()
   }
 
+  /**
+   * The angle (in rad, always within [0, pi]) of the rotation that takes
+   * `other` to `this`, matching Eigen's built-in `Quaternion::angularDistance()`.
+   */
+  angularDistance(other: QuaternionData): number {
+    const relative = this.multiply({
+      w: other.w,
+      x: -other.x,
+      y: -other.y,
+      z: -other.z,
+    })
+    const vecNorm = Math.sqrt(
+      relative.x * relative.x +
+        relative.y * relative.y +
+        relative.z * relative.z,
+    )
+    return 2 * Math.atan2(vecNorm, Math.abs(relative.w))
+  }
+
   /** Rotate a 3D vector by this quaternion. */
   rotateVector(v: number[]): number[] {
     const vx = v[0] ?? 0

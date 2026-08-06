@@ -31,7 +31,9 @@ export declare class Pose implements Pose$1 {
   multiply(_: Pose$1): Pose;
   inverse(): Pose;
   transformPoint(_: number[]): number[];
-  isApprox(_: Pose$1, _?: number): boolean;
+  isApprox(_: Pose$1, _?: number, _?: number): boolean;
+  toCartesian(): number[];
+  toString(_?: number): string;
   toJSON(): Pose$1;
 }
 export declare class Quaternion implements QuaternionData {
@@ -46,6 +48,7 @@ export declare class Quaternion implements QuaternionData {
   multiply(_: QuaternionData): Quaternion;
   conjugate(): Quaternion;
   inverse(): Quaternion;
+  angularDistance(_: QuaternionData): number;
   rotateVector(_: number[]): number[];
   toJSON(): QuaternionData;
 }

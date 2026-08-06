@@ -3,6 +3,9 @@ import { Quaternion } from "./Quaternion.ts"
 
 const ZERO_VECTOR = [0, 0, 0]
 
+// Matches wb-robotix's Constants.h TOLERANCE_MILLI, the default isApprox tolerance.
+const TOLERANCE_MILLI = 1e-3
+
 function addVectors(a: number[], b: number[]): number[] {
   return [
     (a[0] ?? 0) + (b[0] ?? 0),
@@ -13,6 +16,10 @@ function addVectors(a: number[], b: number[]): number[] {
 
 function negateVector(a: number[]): number[] {
   return [-(a[0] ?? 0), -(a[1] ?? 0), -(a[2] ?? 0)]
+}
+
+function isFiniteVector3(v: number[]): boolean {
+  return v.length === 3 && v.every((n) => Number.isFinite(n))
 }
 
 /**
@@ -30,6 +37,16 @@ export class Pose implements PoseData {
     position: number[] = ZERO_VECTOR,
     orientation: number[] = ZERO_VECTOR,
   ) {
+    if (!isFiniteVector3(position)) {
+      throw new Error(
+        `Pose constructor: position must be an array of 3 finite numbers, got ${JSON.stringify(position)}`,
+      )
+    }
+    if (!isFiniteVector3(orientation)) {
+      throw new Error(
+        `Pose constructor: orientation must be an array of 3 finite numbers, got ${JSON.stringify(orientation)}`,
+      )
+    }
     this.position = position
     this.orientation = orientation
   }
@@ -84,19 +101,57 @@ export class Pose implements PoseData {
     return addVectors(this.position, q.rotateVector(point))
   }
 
-  /** Compare to another pose within a tolerance, since floating-point pose math rarely produces exact equality. */
-  isApprox(other: PoseData, epsilon = 1e-9): boolean {
+  /**
+   * Compare to another pose using separate position/orientation tolerances,
+   * matching wb-robotix's `Pose::isApprox()`: Euclidean distance for
+   * position, and quaternion angular distance for orientation - not a naive
+   * per-component diff, since two rotation vectors can represent nearly
+   * identical rotations while differing componentwise near a
+   * canonicalization boundary (e.g. close to the +/-pi wraparound).
+   */
+  isApprox(
+    other: PoseData,
+    deltaPosition = TOLERANCE_MILLI,
+    deltaOrientation = TOLERANCE_MILLI,
+  ): boolean {
     const otherPosition = other.position ?? ZERO_VECTOR
     const otherOrientation = other.orientation ?? ZERO_VECTOR
 
-    return (
-      this.position.every(
-        (v, i) => Math.abs(v - (otherPosition[i] ?? 0)) <= epsilon,
-      ) &&
-      this.orientation.every(
-        (v, i) => Math.abs(v - (otherOrientation[i] ?? 0)) <= epsilon,
-      )
+    const positionDistance = Math.sqrt(
+      this.position.reduce(
+        (sum, v, i) => sum + (v - (otherPosition[i] ?? 0)) ** 2,
+        0,
+      ),
     )
+    const orientationDistance = Quaternion.fromRotationVector(
+      this.orientation,
+    ).angularDistance(Quaternion.fromRotationVector(otherOrientation))
+
+    return (
+      positionDistance <= deltaPosition &&
+      orientationDistance <= deltaOrientation
+    )
+  }
+
+  /**
+   * Position + orientation as a 6-element [x, y, z, roll, pitch, yaw] vector
+   * (Euler angles in rad, XYZ Tait-Bryan / Rx*Ry*Rz convention), matching
+   * wb-robotix's `Pose::toCartesian()`.
+   */
+  toCartesian(): number[] {
+    const { w, x, y, z } = Quaternion.fromRotationVector(this.orientation)
+
+    const roll = Math.atan2(2 * (w * x - y * z), 1 - 2 * (x * x + y * y))
+    const pitch = Math.asin(Math.min(1, Math.max(-1, 2 * (x * z + w * y))))
+    const yaw = Math.atan2(2 * (w * z - x * y), 1 - 2 * (y * y + z * z))
+
+    return [...this.position, roll, pitch, yaw]
+  }
+
+  /** Human-readable `[x, y, z][rx, ry, rz]` representation, matching wb-robotix's `Pose::string()`. */
+  toString(precision = 6): string {
+    const fmt = (v: number) => Number(v.toPrecision(precision))
+    return `[${this.position.map(fmt).join(", ")}][${this.orientation.map(fmt).join(", ")}]`
   }
 
   toJSON(): PoseData {

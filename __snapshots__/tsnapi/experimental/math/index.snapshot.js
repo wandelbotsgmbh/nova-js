@@ -11,7 +11,9 @@ export class Pose {
   multiply(_) {}
   inverse() {}
   transformPoint(_) {}
-  isApprox(_, _) {}
+  isApprox(_, _, _) {}
+  toCartesian() {}
+  toString(_) {}
   toJSON() {}
 }
 export class Quaternion {
@@ -26,6 +28,7 @@ export class Quaternion {
   multiply(_) {}
   conjugate() {}
   inverse() {}
+  angularDistance(_) {}
   rotateVector(_) {}
   toJSON() {}
 }
