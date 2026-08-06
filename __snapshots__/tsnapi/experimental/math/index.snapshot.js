@@ -35,6 +35,5 @@ export class Quaternion {
 // #endregion
 
 // #region Functions
-export function augmentMath(_) {}
 export function augmentPoses(_) {}
 // #endregion
