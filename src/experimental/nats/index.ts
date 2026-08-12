@@ -5,6 +5,10 @@
  * This API is experimental and may change without a major version bump.
  */
 export { buildNatsServerUrl } from "../../lib/experimental/nats/buildNatsServerUrl.ts"
+// Extract the `{param}` values of a channel template back out of a received
+// message's concrete subject (the inverse of what the client does when
+// subscribing) — needed by consumers subscribing with wildcard params.
+export { matchSubject } from "../../lib/experimental/nats/matchSubject.ts"
 export type {
   NatsOperationParams,
   NatsPublishPayloads,
