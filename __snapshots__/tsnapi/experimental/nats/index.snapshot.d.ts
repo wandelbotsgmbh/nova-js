@@ -807,4 +807,5 @@ export declare class NovaNatsClient {
 
 // #region Functions
 export declare function buildNatsServerUrl(_: string): string;
+export declare function matchSubject(_: string, _: string): Record<string, string> | undefined;
 // #endregion
