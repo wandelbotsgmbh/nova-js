@@ -5,15 +5,17 @@
  * This API is experimental and may change without a major version bump.
  */
 export { buildNatsServerUrl } from "../../lib/experimental/nats/buildNatsServerUrl.ts"
-export type {
-  NatsOperationParams,
-  NatsPublishPayloads,
-  NatsPublishSubject,
-  NatsReplyPayloads,
-  NatsRequestPayloads,
-  NatsRequestSubject,
-  NatsSubscribePayloads,
-  NatsSubscribeSubject,
+export {
+  type NatsOperationParams,
+  type NatsPersistedSubject,
+  type NatsPublishPayloads,
+  type NatsPublishSubject,
+  type NatsReplyPayloads,
+  type NatsRequestPayloads,
+  type NatsRequestSubject,
+  natsStreamBySubject,
+  type NatsSubscribePayloads,
+  type NatsSubscribeSubject,
 } from "../../lib/experimental/nats/generated/operations.ts"
 // Message payload types for every schema in src/asyncapi.yaml, e.g. `Cell`,
 // `App`, `ProgramStatus` (see NatsSubscribePayloads/NatsRequestPayloads for
@@ -22,5 +24,6 @@ export type * from "../../lib/experimental/nats/generated/types.ts"
 export { NovaNatsClient } from "../../lib/experimental/nats/NovaNatsClient.ts"
 export type {
   NatsSubscribeMsg,
+  NatsSubscribeOptions,
   NovaNatsClientConfig,
 } from "../../lib/experimental/nats/NovaNatsClient.ts"

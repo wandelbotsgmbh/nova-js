@@ -17,3 +17,7 @@ export class NovaNatsClient {
 // #region Functions
 export function buildNatsServerUrl(_) {}
 // #endregion
+
+// #region Variables
+export var natsStreamBySubject /* const */
+// #endregion

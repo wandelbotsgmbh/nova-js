@@ -709,10 +709,16 @@ export type Location = number;
 export type Manufacturer = "abb" | "fanuc" | "kuka" | "staubli" | "universalrobots" | "yaskawa";
 export type MotionGroupModel = string;
 export type MotionGroupState1 = MotionGroupState[];
+export type NatsPersistedSubject = keyof typeof natsStreamBySubject;
 export type NatsPublishSubject = keyof NatsPublishPayloads;
 export type NatsRequestSubject = keyof NatsRequestPayloads;
-export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Msg & {
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = (Msg | JsMsg) & {
   subjectParams: NatsOperationParams[K];
+};
+export type NatsSubscribeOptions<K extends NatsSubscribeSubject> = K extends NatsPersistedSubject ? {
+  replayLast?: boolean;
+} : {
+  replayLast?: never;
 };
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
 export type NovaNatsClientConfig = ConnectionOptions;
@@ -810,4 +816,17 @@ export declare class NovaNatsClient {
 
 // #region Functions
 export declare function buildNatsServerUrl(_: string): string;
+// #endregion
+
+// #region Variables
+export declare const natsStreamBySubject: {
+  readonly "nova.v2.cells.{cell}": "system-state";
+  readonly "nova.v2.cells.{cell}.apps.{app}": "system-state";
+  readonly "nova.v2.cells.{cell}.controllers.{controller}": "system-state";
+  readonly "nova.v2.cells.{cell}.status": "system-state";
+  readonly "nova.v2.system.status": "system-state";
+  readonly "nova.v2.cells.{cell}.collision.setups.{setup}": "system-state";
+  readonly "nova.v2.cells.{cell}.bus-ios.status": "system-state";
+  readonly "nova.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description": "system-state";
+};
 // #endregion

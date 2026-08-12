@@ -1,3 +1,4 @@
+import { DeliverPolicy, jetstream, type JsMsg } from "@nats-io/jetstream"
 import {
   type ConnectionOptions,
   type Msg,
@@ -7,15 +8,17 @@ import {
 import type { Nova } from "../../Nova.ts"
 import { buildNatsServerUrl } from "./buildNatsServerUrl.ts"
 import { buildSubject } from "./buildSubject.ts"
-import type {
-  NatsOperationParams,
-  NatsPublishPayloads,
-  NatsPublishSubject,
-  NatsReplyPayloads,
-  NatsRequestPayloads,
-  NatsRequestSubject,
-  NatsSubscribePayloads,
-  NatsSubscribeSubject,
+import {
+  type NatsOperationParams,
+  type NatsPersistedSubject,
+  type NatsPublishPayloads,
+  type NatsPublishSubject,
+  type NatsReplyPayloads,
+  type NatsRequestPayloads,
+  type NatsRequestSubject,
+  natsStreamBySubject,
+  type NatsSubscribePayloads,
+  type NatsSubscribeSubject,
 } from "./generated/operations.ts"
 
 export type NovaNatsClientConfig = ConnectionOptions
@@ -27,7 +30,7 @@ export type NovaNatsClientConfig = ConnectionOptions
  * a handler knows which entity a message belongs to. Typed per subject via
  * the generated `NatsOperationParams`.
  */
-export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Msg & {
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = (Msg | JsMsg) & {
   subjectParams: NatsOperationParams[K]
 }
 
@@ -36,10 +39,35 @@ type NatsMessageHandler<K extends NatsSubscribeSubject> = (
   msg: NatsSubscribeMsg<K>,
 ) => void | Promise<void>
 
+/**
+ * Extra options for {@link NovaNatsClient.subscribe}. `replayLast` is only
+ * offered on subjects the spec marks as retaining their latest message, so
+ * asking for a replay that could never arrive is a compile error.
+ */
+export type NatsSubscribeOptions<K extends NatsSubscribeSubject> =
+  K extends NatsPersistedSubject
+    ? {
+        /**
+         * Deliver the subject's current value immediately on subscribe,
+         * before any subsequent updates. With a wildcard subscription (e.g.
+         * `{ cell: "*" }`) the current value of every matching subject is
+         * delivered, not just one.
+         */
+        replayLast?: boolean
+      }
+    : // Not `Record<never, never>`: that behaves like `{}` and so accepts any
+      // object, letting `replayLast` through unchecked. Typing the property as
+      // `never` is what makes passing it an error.
+      { replayLast?: never }
+
 type SubscribeArgs<K extends NatsSubscribeSubject> =
   keyof NatsOperationParams[K] extends never
-    ? [handler: NatsMessageHandler<K>]
-    : [params: NatsOperationParams[K], handler: NatsMessageHandler<K>]
+    ? [handler: NatsMessageHandler<K>, opts?: NatsSubscribeOptions<K>]
+    : [
+        params: NatsOperationParams[K],
+        handler: NatsMessageHandler<K>,
+        opts?: NatsSubscribeOptions<K>,
+      ]
 
 /**
  * Typed NATS client for the Wandelbots NOVA messaging API, generated from
@@ -110,20 +138,29 @@ export class NovaNatsClient {
    *     nats.subscribe("nova.v2.cells.{cell}.status", { cell: "*" },
    *       (services, msg) => console.log(msg.subjectParams.cell, services))
    *
+   * On subjects that retain their latest message, pass `{ replayLast: true }`
+   * to receive the current value immediately instead of waiting for the next
+   * update — useful for a subscriber that starts after the last change:
+   *
+   *     nats.subscribe("nova.v2.system.status", onStatus, { replayLast: true })
+   *
    * Returns a function that unsubscribes when called.
    */
   async subscribe<K extends NatsSubscribeSubject>(
     subject: K,
     ...args: SubscribeArgs<K>
   ): Promise<() => void> {
-    const [params, handler] =
-      args.length === 1
-        ? ([{}, args[0]] as const)
-        : ([args[0], args[1]] as const)
+    // `params` is omitted for subjects with no {param} placeholders, so the
+    // handler is the first argument in that case.
+    const hasParams = typeof args[0] !== "function"
+    const params = (hasParams ? args[0] : {}) as NatsOperationParams[K]
+    const handler = (hasParams ? args[1] : args[0]) as NatsMessageHandler<K>
+    const opts = (hasParams ? args[2] : args[1]) as
+      | { replayLast?: boolean }
+      | undefined
 
     const nc = await this.connect()
     const resolvedSubject = buildSubject(subject, params)
-    const sub = nc.subscribe(resolvedSubject)
 
     // The token positions of the template's {param} placeholders, computed
     // once here so each message's subjectParams is a plain index pick: a
@@ -136,36 +173,65 @@ export class NovaNatsClient {
       }
     }
 
-    ;(async () => {
-      for await (const msg of sub) {
-        // Handled per-message: a bad payload or a throwing/rejecting handler
-        // should not stop the subscription from processing later messages.
-        try {
-          const subjectTokens = msg.subject.split(".")
-          const subjectParams = Object.fromEntries(
-            paramPositions.map(([name, index]) => [
-              name,
-              subjectTokens[index] ?? "",
-            ]),
-          ) as NatsOperationParams[K]
-          await handler(
-            msg.json<NatsSubscribePayloads[K]>(),
-            Object.assign(msg, { subjectParams }),
-          )
-        } catch (err) {
-          console.error(
-            `Error handling NATS message on subject "${resolvedSubject}"`,
-            err,
-          )
-        }
+    const deliver = async (msg: Msg | JsMsg) => {
+      // Handled per-message: a bad payload or a throwing/rejecting handler
+      // should not stop the subscription from processing later messages.
+      try {
+        const subjectTokens = msg.subject.split(".")
+        const subjectParams = Object.fromEntries(
+          paramPositions.map(([name, index]) => [
+            name,
+            subjectTokens[index] ?? "",
+          ]),
+        ) as NatsOperationParams[K]
+        await handler(
+          msg.json<NatsSubscribePayloads[K]>(),
+          Object.assign(msg, { subjectParams }),
+        )
+      } catch (err) {
+        console.error(
+          `Error handling NATS message on subject "${resolvedSubject}"`,
+          err,
+        )
       }
-    })().catch((err: unknown) => {
-      console.error(
-        `NATS subscription iterator failed for "${resolvedSubject}"`,
-        err,
-      )
-    })
+    }
 
+    const deliverAll = (messages: AsyncIterable<Msg | JsMsg>) => {
+      ;(async () => {
+        for await (const msg of messages) {
+          await deliver(msg)
+        }
+      })().catch((err: unknown) => {
+        console.error(
+          `NATS subscription iterator failed for "${resolvedSubject}"`,
+          err,
+        )
+      })
+    }
+
+    if (opts?.replayLast) {
+      // Delivered by JetStream rather than core NATS: an ordered consumer
+      // starting at `last_per_subject` yields each matching subject's retained
+      // message and then continues with live ones on the same iterator, so
+      // there is no gap — and no possible duplicate — between the replayed
+      // value and the updates that follow it. Ordered consumers are ephemeral
+      // and need no acking, so stopping the iterator is the whole teardown.
+      const consumer = await jetstream(nc).consumers.get(
+        natsStreamBySubject[subject as NatsPersistedSubject],
+        {
+          filter_subjects: [resolvedSubject],
+          deliver_policy: DeliverPolicy.LastPerSubject,
+        },
+      )
+      const messages = await consumer.consume()
+      deliverAll(messages)
+      return () => {
+        messages.stop()
+      }
+    }
+
+    const sub = nc.subscribe(resolvedSubject)
+    deliverAll(sub)
     return () => sub.unsubscribe()
   }
 

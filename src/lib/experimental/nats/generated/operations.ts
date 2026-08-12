@@ -732,6 +732,26 @@ export interface NatsSubscribePayloads {
 
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads
 
+/**
+ * The JetStream stream backing each subject that retains only its latest
+ * message (`max_msgs_per_subject: 1` in src/asyncapi.yaml), so that
+ * message is the subject's current state.
+ */
+export const natsStreamBySubject = {
+  "nova.v2.cells.{cell}": "system-state",
+  "nova.v2.cells.{cell}.apps.{app}": "system-state",
+  "nova.v2.cells.{cell}.controllers.{controller}": "system-state",
+  "nova.v2.cells.{cell}.status": "system-state",
+  "nova.v2.system.status": "system-state",
+  "nova.v2.cells.{cell}.collision.setups.{setup}": "system-state",
+  "nova.v2.cells.{cell}.bus-ios.status": "system-state",
+  "nova.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description":
+    "system-state",
+} as const
+
+/** Subjects whose current value can be replayed via `{ replayLast: true }`. */
+export type NatsPersistedSubject = keyof typeof natsStreamBySubject
+
 /** Request payload types for subjects the client sends requests to. */
 export interface NatsRequestPayloads {
   /**
