@@ -1,6 +1,6 @@
 import { NovaNatsClient } from "@wandelbots/nova-js/experimental/nats"
 import { Nova } from "@wandelbots/nova-js/v2"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest"
 
 const { mockConnection, wsconnect } = vi.hoisted(() => {
   const mockSubscription = {
@@ -13,7 +13,10 @@ const { mockConnection, wsconnect } = vi.hoisted(() => {
           }
           done = true
           return {
-            value: { json: () => ({ name: "cell" }) },
+            value: {
+              subject: "nova.v2.cells.cell",
+              json: () => ({ name: "cell" }),
+            },
             done: false,
           }
         },
@@ -117,11 +120,92 @@ describe("NovaNatsClient", () => {
     expect(handler).toHaveBeenCalledWith({ name: "cell" }, expect.anything())
   })
 
+  test("subscribe() annotates each message with the subject params extracted from its concrete subject", async () => {
+    mockConnection.subscribe.mockReturnValueOnce({
+      [Symbol.asyncIterator]: () => {
+        let done = false
+        return {
+          next: async () => {
+            if (done) return { value: undefined, done: true }
+            done = true
+            return {
+              value: {
+                subject: "nova.v2.cells.factory-1.status",
+                json: () => [{ service: "a" }],
+              },
+              done: false,
+            }
+          },
+        }
+      },
+      unsubscribe: vi.fn(),
+    } as unknown as ReturnType<typeof mockConnection.subscribe>)
+
+    const client = new NovaNatsClient(nova)
+    const seen: Array<{ cell: string }> = []
+
+    await client.subscribe(
+      "nova.v2.cells.{cell}.status",
+      { cell: "*" },
+      (_services, msg) => {
+        // Typed from the template: exactly { cell: string }
+        expectTypeOf(msg.subjectParams).toEqualTypeOf<{ cell: string }>()
+        seen.push(msg.subjectParams)
+      },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(seen).toEqual([{ cell: "factory-1" }])
+  })
+
+  test("subscribe() extracts multiple subject params, including dashed names", async () => {
+    mockConnection.subscribe.mockReturnValueOnce({
+      [Symbol.asyncIterator]: () => {
+        let done = false
+        return {
+          next: async () => {
+            if (done) return { value: undefined, done: true }
+            done = true
+            return {
+              value: {
+                subject:
+                  "nova.v2.cells.factory-1.controllers.ur5e.motion-groups.0.description",
+                json: () => ({}),
+              },
+              done: false,
+            }
+          },
+        }
+      },
+      unsubscribe: vi.fn(),
+    } as unknown as ReturnType<typeof mockConnection.subscribe>)
+
+    const client = new NovaNatsClient(nova)
+    const seen: Array<Record<string, string>> = []
+
+    await client.subscribe(
+      "nova.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description",
+      { cell: "*", controller: "*", "motion-group": "*" },
+      (_description, msg) => {
+        seen.push(msg.subjectParams)
+      },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(seen).toEqual([
+      { cell: "factory-1", controller: "ur5e", "motion-group": "0" },
+    ])
+  })
+
   test("subscribe() allows omitting params for subjects with no placeholders", async () => {
     const client = new NovaNatsClient(nova)
-    const handler = vi.fn()
 
-    await client.subscribe("nova.v2.system.status", handler)
+    await client.subscribe("nova.v2.system.status", (_services, msg) => {
+      // A subject without params has no subjectParams to read — typed as
+      // property-less, so this is a compile error rather than `string`.
+      // @ts-expect-error there is no `cell` param in this subject
+      void msg.subjectParams.cell
+    })
 
     expect(mockConnection.subscribe).toHaveBeenCalledWith(
       "nova.v2.system.status",
@@ -130,8 +214,8 @@ describe("NovaNatsClient", () => {
 
   test("subscribe() isolates a handler error to one message and keeps processing later ones", async () => {
     const messages = [
-      { json: () => ({ name: "cell-1" }) },
-      { json: () => ({ name: "cell-2" }) },
+      { subject: "nova.v2.cells.cell", json: () => ({ name: "cell-1" }) },
+      { subject: "nova.v2.cells.cell", json: () => ({ name: "cell-2" }) },
     ]
     let index = 0
     mockConnection.subscribe.mockReturnValueOnce({
