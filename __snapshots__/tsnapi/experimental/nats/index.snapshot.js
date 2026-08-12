@@ -16,5 +16,4 @@ export class NovaNatsClient {
 
 // #region Functions
 export function buildNatsServerUrl(_) {}
-export function matchSubject(_, _) {}
 // #endregion

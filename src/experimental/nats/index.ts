@@ -5,10 +5,6 @@
  * This API is experimental and may change without a major version bump.
  */
 export { buildNatsServerUrl } from "../../lib/experimental/nats/buildNatsServerUrl.ts"
-// Extract the `{param}` values of a channel template back out of a received
-// message's concrete subject (the inverse of what the client does when
-// subscribing) — needed by consumers subscribing with wildcard params.
-export { matchSubject } from "../../lib/experimental/nats/matchSubject.ts"
 export type {
   NatsOperationParams,
   NatsPublishPayloads,
@@ -24,4 +20,7 @@ export type {
 // which type applies to which subject).
 export type * from "../../lib/experimental/nats/generated/types.ts"
 export { NovaNatsClient } from "../../lib/experimental/nats/NovaNatsClient.ts"
-export type { NovaNatsClientConfig } from "../../lib/experimental/nats/NovaNatsClient.ts"
+export type {
+  NatsSubscribeMsg,
+  NovaNatsClientConfig,
+} from "../../lib/experimental/nats/NovaNatsClient.ts"

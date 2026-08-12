@@ -20,9 +20,20 @@ import type {
 
 export type NovaNatsClientConfig = ConnectionOptions
 
+/**
+ * A received message, annotated with the values of the subject template's
+ * `{param}` placeholders as extracted from the message's concrete subject.
+ * With a wildcard subscription (e.g. `{ cell: "*" }`), `subjectParams` is how
+ * a handler knows which entity a message belongs to. Typed per subject via
+ * the generated `NatsOperationParams`.
+ */
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Msg & {
+  subjectParams: NatsOperationParams[K]
+}
+
 type NatsMessageHandler<K extends NatsSubscribeSubject> = (
   payload: NatsSubscribePayloads[K],
-  msg: Msg,
+  msg: NatsSubscribeMsg<K>,
 ) => void | Promise<void>
 
 type SubscribeArgs<K extends NatsSubscribeSubject> =
@@ -92,6 +103,13 @@ export class NovaNatsClient {
    * logged per-message, so one bad message doesn't stop later messages on
    * the same subscription from being handled.
    *
+   * Each message is annotated with `msg.subjectParams` — the template's
+   * `{param}` values extracted from the message's concrete subject — so a
+   * wildcard subscriber knows which entity a message belongs to:
+   *
+   *     nats.subscribe("nova.v2.cells.{cell}.status", { cell: "*" },
+   *       (services, msg) => console.log(msg.subjectParams.cell, services))
+   *
    * Returns a function that unsubscribes when called.
    */
   async subscribe<K extends NatsSubscribeSubject>(
@@ -107,12 +125,33 @@ export class NovaNatsClient {
     const resolvedSubject = buildSubject(subject, params)
     const sub = nc.subscribe(resolvedSubject)
 
+    // The token positions of the template's {param} placeholders, computed
+    // once here so each message's subjectParams is a plain index pick: a
+    // delivered message always matches the subscribed pattern token for
+    // token, so its params sit at the same positions as in the template.
+    const paramPositions: [name: string, index: number][] = []
+    for (const [index, token] of subject.split(".").entries()) {
+      if (token.startsWith("{") && token.endsWith("}")) {
+        paramPositions.push([token.slice(1, -1), index])
+      }
+    }
+
     ;(async () => {
       for await (const msg of sub) {
         // Handled per-message: a bad payload or a throwing/rejecting handler
         // should not stop the subscription from processing later messages.
         try {
-          await handler(msg.json<NatsSubscribePayloads[K]>(), msg)
+          const subjectTokens = msg.subject.split(".")
+          const subjectParams = Object.fromEntries(
+            paramPositions.map(([name, index]) => [
+              name,
+              subjectTokens[index] ?? "",
+            ]),
+          ) as NatsOperationParams[K]
+          await handler(
+            msg.json<NatsSubscribePayloads[K]>(),
+            Object.assign(msg, { subjectParams }),
+          )
         } catch (err) {
           console.error(
             `Error handling NATS message on subject "${resolvedSubject}"`,

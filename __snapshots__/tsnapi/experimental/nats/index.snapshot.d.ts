@@ -711,6 +711,9 @@ export type MotionGroupModel = string;
 export type MotionGroupState1 = MotionGroupState[];
 export type NatsPublishSubject = keyof NatsPublishPayloads;
 export type NatsRequestSubject = keyof NatsRequestPayloads;
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Msg & {
+  subjectParams: NatsOperationParams[K];
+};
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
 export type NovaNatsClientConfig = ConnectionOptions;
 export type OperatingState = "ACTIVE" | "INACTIVE";
@@ -807,5 +810,4 @@ export declare class NovaNatsClient {
 
 // #region Functions
 export declare function buildNatsServerUrl(_: string): string;
-export declare function matchSubject(_: string, _: string): Record<string, string> | undefined;
 // #endregion
