@@ -54,11 +54,21 @@ export type NatsSubscribeOptions<K extends NatsSubscribeSubject> =
          * delivered, not just one.
          */
         replayLast?: boolean
+        /**
+         * Called once every retained message has been passed to the handler,
+         * i.e. when the handler has seen the subject's current state and
+         * everything after it is a live update. Fires exactly once, and also
+         * when there is nothing retained at all (an empty wildcard, e.g. no
+         * apps installed) — where waiting for a first message would hang
+         * forever. Only meaningful together with `replayLast`; without it
+         * there is no retained state to wait for.
+         */
+        onReplayComplete?: () => void
       }
     : // Not `Record<never, never>`: that behaves like `{}` and so accepts any
       // object, letting `replayLast` through unchecked. Typing the property as
       // `never` is what makes passing it an error.
-      { replayLast?: never }
+      { replayLast?: never; onReplayComplete?: never }
 
 type SubscribeArgs<K extends NatsSubscribeSubject> =
   keyof NatsOperationParams[K] extends never
@@ -156,7 +166,7 @@ export class NovaNatsClient {
     const params = (hasParams ? args[0] : {}) as NatsOperationParams[K]
     const handler = (hasParams ? args[1] : args[0]) as NatsMessageHandler<K>
     const opts = (hasParams ? args[2] : args[1]) as
-      | { replayLast?: boolean }
+      | { replayLast?: boolean; onReplayComplete?: () => void }
       | undefined
 
     const nc = await this.connect()
@@ -196,10 +206,14 @@ export class NovaNatsClient {
       }
     }
 
-    const deliverAll = (messages: AsyncIterable<Msg | JsMsg>) => {
+    const deliverAll = (
+      messages: AsyncIterable<Msg | JsMsg>,
+      afterDeliver?: (msg: Msg | JsMsg) => void,
+    ) => {
       ;(async () => {
         for await (const msg of messages) {
           await deliver(msg)
+          afterDeliver?.(msg)
         }
       })().catch((err: unknown) => {
         console.error(
@@ -223,8 +237,29 @@ export class NovaNatsClient {
           deliver_policy: DeliverPolicy.LastPerSubject,
         },
       )
+
+      // How many retained messages this consumer will replay before it is
+      // caught up. Read before consuming, because a subject with nothing
+      // retained never delivers a message to end the replay on, and a caller
+      // waiting for one would wait forever.
+      const { num_pending } = await consumer.info()
+
+      let replayComplete = false
+      const completeReplay = () => {
+        if (replayComplete) return
+        replayComplete = true
+        opts.onReplayComplete?.()
+      }
+
       const messages = await consumer.consume()
-      deliverAll(messages)
+      // A JsMsg's `info.pending` counts what is still queued behind it, so
+      // the first message to report 0 is the last of the replay. Live
+      // messages report 0 too, which is why this only fires once.
+      deliverAll(messages, (msg) => {
+        if ("info" in msg && msg.info.pending === 0) completeReplay()
+      })
+      if (num_pending === 0) completeReplay()
+
       return () => {
         messages.stop()
       }

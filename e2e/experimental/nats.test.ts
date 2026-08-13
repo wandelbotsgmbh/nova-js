@@ -85,3 +85,75 @@ test("replayLast delivers the current cell state to a subscriber that starts aft
     await nats.close()
   }
 }, 20_000)
+
+test("onReplayComplete fires after the retained state has been delivered", async () => {
+  const nova = new Nova({ instanceUrl: env.NOVA })
+  const nats = new NovaNatsClient(nova)
+
+  try {
+    const seen: string[] = []
+
+    const unsubscribe = await nats.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "*" },
+      (payload) => {
+        seen.push(payload.name)
+      },
+      {
+        replayLast: true,
+        onReplayComplete: () => {
+          seen.push("complete")
+        },
+      },
+    )
+
+    try {
+      await vi.waitUntil(() => seen.includes("complete"), { timeout: 10_000 })
+    } finally {
+      unsubscribe()
+    }
+
+    // Completion comes last: every retained cell reached the handler first.
+    expect(seen.at(-1)).toBe("complete")
+    expect(seen).toContain("cell")
+  } finally {
+    await nats.close()
+  }
+}, 20_000)
+
+test("onReplayComplete fires on a subject with nothing retained", async () => {
+  const nova = new Nova({ instanceUrl: env.NOVA })
+  const nats = new NovaNatsClient(nova)
+
+  try {
+    // No apps are installed on a fresh instance, so this wildcard has no
+    // retained message and never will during the test. Waiting for a first
+    // message would hang; completion has to be reported from the consumer's
+    // pending count instead.
+    const handler = vi.fn()
+    let complete = false
+
+    const unsubscribe = await nats.subscribe(
+      "nova.v2.cells.{cell}.apps.{app}",
+      { cell: "*", app: "*" },
+      handler,
+      {
+        replayLast: true,
+        onReplayComplete: () => {
+          complete = true
+        },
+      },
+    )
+
+    try {
+      await vi.waitUntil(() => complete, { timeout: 10_000 })
+    } finally {
+      unsubscribe()
+    }
+
+    expect(complete).toBe(true)
+    expect(handler).not.toHaveBeenCalled()
+  } finally {
+    await nats.close()
+  }
+}, 20_000)

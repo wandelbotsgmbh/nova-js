@@ -717,8 +717,10 @@ export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = (Msg | JsMsg) & {
 };
 export type NatsSubscribeOptions<K extends NatsSubscribeSubject> = K extends NatsPersistedSubject ? {
   replayLast?: boolean;
+  onReplayComplete?: () => void;
 } : {
   replayLast?: never;
+  onReplayComplete?: never;
 };
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
 export type NovaNatsClientConfig = ConnectionOptions;
