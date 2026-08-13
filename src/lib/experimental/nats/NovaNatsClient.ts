@@ -230,13 +230,44 @@ export class NovaNatsClient {
       // there is no gap — and no possible duplicate — between the replayed
       // value and the updates that follow it. Ordered consumers are ephemeral
       // and need no acking, so stopping the iterator is the whole teardown.
-      const consumer = await jetstream(nc).consumers.get(
-        natsStreamBySubject[subject as NatsPersistedSubject],
-        {
-          filter_subjects: [resolvedSubject],
-          deliver_policy: DeliverPolicy.LastPerSubject,
-        },
-      )
+      const js = jetstream(nc)
+      // Typed as always present, but only because `replayLast` is a compile
+      // error off the persisted subjects; a JavaScript caller can still get
+      // here with a subject that has no marker.
+      const expectedStream = natsStreamBySubject[
+        subject as NatsPersistedSubject
+      ] as string | undefined
+
+      if (expectedStream === undefined) {
+        throw new Error(
+          `Cannot replay "${resolvedSubject}": the API spec does not mark it as retaining its latest message, so there is no stored value to replay. Subscribe without replayLast to receive live messages over core NATS.`,
+        )
+      }
+
+      // The spec's x-nats-jetstream-stream markers say which stream retains a
+      // subject, but a deployed instance can disagree, and JetStream creates a
+      // consumer whose filter matches none of the stream's subjects without
+      // complaint — it simply never delivers anything. Checking up front turns
+      // that permanent silence into an error at subscribe time.
+      const carryingStream = await js
+        .jetstreamManager()
+        .then((jsm) => jsm.streams.find(resolvedSubject))
+        .catch(() => undefined)
+
+      if (carryingStream !== expectedStream) {
+        throw new Error(
+          `Cannot replay "${resolvedSubject}": the API spec marks it as retained in the "${expectedStream}" JetStream stream, but on this instance it is ` +
+            (carryingStream === undefined
+              ? `carried by no stream at all`
+              : `carried by "${carryingStream}"`) +
+            `. A consumer on "${expectedStream}" would never deliver it. Subscribe without replayLast to receive live messages over core NATS.`,
+        )
+      }
+
+      const consumer = await js.consumers.get(expectedStream, {
+        filter_subjects: [resolvedSubject],
+        deliver_policy: DeliverPolicy.LastPerSubject,
+      })
 
       // How many retained messages this consumer will replay before it is
       // caught up. Read before consuming, because a subject with nothing

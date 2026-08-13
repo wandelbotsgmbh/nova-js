@@ -11,6 +11,7 @@ const {
   defaultReplayMessage,
   mockConnection,
   replay,
+  streamsFind,
   wsconnect,
 } = vi.hoisted(() => {
   const mockSubscription = {
@@ -86,6 +87,10 @@ const {
     consume: async () => consumerMessages,
   }))
 
+  // Which stream the server says carries a subject. Rejects the way a real
+  // JetStream manager does when nothing matches.
+  const streamsFind = vi.fn(async (_subject: string) => "system-state")
+
   return {
     consumerMessages,
     consumersGet,
@@ -93,13 +98,17 @@ const {
     mockConnection,
     mockSubscription,
     replay,
+    streamsFind,
     wsconnect,
   }
 })
 
 vi.mock("@nats-io/nats-core", () => ({ wsconnect }))
 vi.mock("@nats-io/jetstream", () => ({
-  jetstream: () => ({ consumers: { get: consumersGet } }),
+  jetstream: () => ({
+    consumers: { get: consumersGet },
+    jetstreamManager: async () => ({ streams: { find: streamsFind } }),
+  }),
   DeliverPolicy: { LastPerSubject: "last_per_subject" },
 }))
 
@@ -116,6 +125,8 @@ describe("NovaNatsClient", () => {
     consumerMessages.stop.mockClear()
     replay.messages = [defaultReplayMessage()]
     replay.numPending = undefined
+    streamsFind.mockClear()
+    streamsFind.mockImplementation(async () => "system-state")
   })
 
   test("connect() calls wsconnect once and reuses the connection", async () => {
@@ -460,6 +471,76 @@ describe("NovaNatsClient", () => {
     expect(onReplayComplete).toHaveBeenCalledTimes(1)
   })
 
+  test("replayLast fails loudly when no stream on the instance carries the subject", async () => {
+    // The spec's x-nats-jetstream-stream markers describe intent; a deployed
+    // instance can disagree. JetStream creates a consumer whose filter matches
+    // none of the stream's subjects without complaint and then delivers
+    // nothing, ever -- so without this check the subscription is silently dead.
+    streamsFind.mockRejectedValue(new Error("no stream matches subject"))
+
+    const client = new NovaNatsClient(nova)
+
+    await expect(
+      client.subscribe(
+        "nova.v2.cells.{cell}.bus-ios.status",
+        { cell: "*" },
+        vi.fn(),
+        { replayLast: true },
+      ),
+    ).rejects.toThrow(/nova\.v2\.cells\.\*\.bus-ios\.status/)
+
+    expect(consumersGet).not.toHaveBeenCalled()
+  })
+
+  test("the replayLast stream mismatch error names the stream the spec expected", async () => {
+    streamsFind.mockRejectedValue(new Error("no stream matches subject"))
+
+    const client = new NovaNatsClient(nova)
+
+    await expect(
+      client.subscribe(
+        "nova.v2.cells.{cell}.bus-ios.status",
+        { cell: "*" },
+        vi.fn(),
+        { replayLast: true },
+      ),
+    ).rejects.toThrow(/system-state/)
+  })
+
+  test("replayLast fails when a different stream than the spec's carries the subject", async () => {
+    // The consumer is created on the stream the marker names, so a subject
+    // living in some other stream is just as undeliverable as one in none.
+    streamsFind.mockResolvedValue("some-other-stream")
+
+    const client = new NovaNatsClient(nova)
+
+    await expect(
+      client.subscribe("nova.v2.cells.{cell}.status", { cell: "*" }, vi.fn(), {
+        replayLast: true,
+      }),
+    ).rejects.toThrow(/some-other-stream/)
+
+    expect(consumersGet).not.toHaveBeenCalled()
+  })
+
+  test("a subscription without replayLast does not check the stream at all", async () => {
+    // Core NATS delivers straight off the subject, so a subject no stream
+    // carries is perfectly normal there (e.g. controller state at ~125 Hz).
+    streamsFind.mockRejectedValue(new Error("no stream matches subject"))
+
+    const client = new NovaNatsClient(nova)
+    await client.subscribe(
+      "nova.v2.cells.{cell}.status",
+      { cell: "*" },
+      vi.fn(),
+    )
+
+    expect(streamsFind).not.toHaveBeenCalled()
+    expect(mockConnection.subscribe).toHaveBeenCalledWith(
+      "nova.v2.cells.*.status",
+    )
+  })
+
   test("onReplayComplete is rejected on a subject that does not retain its latest message", async () => {
     const client = new NovaNatsClient(nova)
 
@@ -489,13 +570,18 @@ describe("NovaNatsClient", () => {
   test("replayLast is rejected on a subject that does not retain its latest message", async () => {
     const client = new NovaNatsClient(nova)
 
-    await client.subscribe(
-      "nova.v2.cells.{cell}.programs",
-      { cell: "cell" },
-      vi.fn(),
-      // @ts-expect-error `programs` carries no x-nats-jetstream-stream marker
-      { replayLast: true },
-    )
+    await expect(
+      client.subscribe(
+        "nova.v2.cells.{cell}.programs",
+        { cell: "cell" },
+        vi.fn(),
+        // @ts-expect-error `programs` carries no x-nats-jetstream-stream marker
+        { replayLast: true },
+      ),
+      // A compile error for TypeScript callers, and — since the types can be
+      // bypassed from JavaScript — a runtime one too, rather than a consumer
+      // on an undefined stream.
+    ).rejects.toThrow(/does not mark it as retaining its latest message/)
   })
 
   test("replayable subjects follow the spec's markers, not the live stream's subjects", () => {
