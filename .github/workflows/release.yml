@@ -108,6 +108,13 @@ jobs:
           git config user.email "ci@users.noreply.github.com"
           git checkout -b ${{ github.base_ref }} origin/${{ github.base_ref }}
           git merge --squash "$GITHUB_SHA"
+
+          # Work-in-progress PRs are titled "draft: feat: ..."; the commit
+          # analyzer would read "draft" as the conventional type and decide no
+          # release is due, skipping the snapshot publish. Strip the prefix so
+          # the real type underneath is what gets analyzed.
+          PR_TITLE=$(sed -E 's/^[[:space:]]*draft(\([^)]*\))?!?:[[:space:]]*//I' <<< "$PR_TITLE")
+
           git commit -m "$PR_TITLE" --no-verify
 
           # Strip npm plugin since it demands an auth token even on dry-run
