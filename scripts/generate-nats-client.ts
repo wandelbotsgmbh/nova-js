@@ -45,6 +45,15 @@ type RawSpec = {
       address: string | null
       parameters?: Record<string, { description?: string }>
       messages?: Record<string, { payload?: { $ref?: string } }>
+      /**
+       * Present on channels whose subject is persisted in a JetStream stream.
+       * See `lastValueStream` below for why only some of these qualify for
+       * replay.
+       */
+      "x-nats-jetstream-stream"?: {
+        name: string
+        max_msgs_per_subject?: number
+      }
     }
   >
   operations: Record<
@@ -191,6 +200,8 @@ function generateOperations(
     replyPayloadTypeName?: string
     title?: string
     description?: string
+    /** Set only for subjects whose latest message can be replayed. */
+    lastValueStream?: string
   }
 
   const operations: OperationInfo[] = Object.entries(spec.operations).map(
@@ -223,6 +234,16 @@ function generateOperations(
       const payloadSchemaName = firstMessagePayloadSchemaName(channel)
       const payloadTypeName = schemaExportName(payloadSchemaName)
 
+      // Only a stream keeping exactly one message per subject
+      // (`max_msgs_per_subject: 1`) makes "the last message" mean "the
+      // subject's current state", which is what replaying one is for. Streams
+      // that retain a history — the `system-events` event log, with
+      // `max_msgs: 10000` over 30 days — are deliberately excluded: their last
+      // message is the most recent event, which may be weeks stale.
+      const jetStream = channel["x-nats-jetstream-stream"]
+      const lastValueStream =
+        jetStream?.max_msgs_per_subject === 1 ? jetStream.name : undefined
+
       if (op.action === "send") {
         return {
           name,
@@ -231,6 +252,7 @@ function generateOperations(
           paramDescriptions,
           payloadTypeName,
           kind: "subscribe",
+          lastValueStream,
           title: op.title,
           description: op.description,
         }
@@ -339,6 +361,34 @@ function generateOperations(
   }
   lines.push(`}\n`)
   lines.push(`export type NatsSubscribeSubject = keyof NatsSubscribePayloads\n`)
+
+  // Keyed by subject, and built from subscribe operations only, so every key is
+  // guaranteed to also be a `NatsSubscribeSubject`.
+  const streamBySubject = new Map<string, string>()
+  for (const op of subscribeOps) {
+    if (op.lastValueStream) streamBySubject.set(op.subject, op.lastValueStream)
+  }
+
+  lines.push(
+    [
+      `/**`,
+      ` * The JetStream stream backing each subject that retains only its latest`,
+      ` * message (\`max_msgs_per_subject: 1\` in src/asyncapi.yaml), so that`,
+      ` * message is the subject's current state.`,
+      ` */`,
+    ].join("\n"),
+  )
+  lines.push(`export const natsStreamBySubject = {`)
+  for (const [subject, stream] of streamBySubject) {
+    lines.push(`  ${JSON.stringify(subject)}: ${JSON.stringify(stream)},`)
+  }
+  lines.push(`} as const\n`)
+  lines.push(
+    `/** Subjects whose current value can be replayed via \`{ replayLast: true }\`. */`,
+  )
+  lines.push(
+    `export type NatsPersistedSubject = keyof typeof natsStreamBySubject\n`,
+  )
 
   lines.push(
     `/** Request payload types for subjects the client sends requests to. */`,
