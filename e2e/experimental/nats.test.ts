@@ -114,7 +114,7 @@ test("onReplayComplete fires after the retained state has been delivered", async
     }
 
     // Completion comes last: every retained cell reached the handler first.
-    expect(seen.at(-1)).toBe("complete")
+    expect(seen[seen.length - 1]).toBe("complete")
     expect(seen).toContain("cell")
   } finally {
     await nats.close()
