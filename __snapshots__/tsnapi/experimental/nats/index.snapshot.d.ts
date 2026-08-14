@@ -711,8 +711,11 @@ export type MotionGroupModel = string;
 export type MotionGroupState1 = MotionGroupState[];
 export type NatsPublishSubject = keyof NatsPublishPayloads;
 export type NatsRequestSubject = keyof NatsRequestPayloads;
-export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Msg & {
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Pick<Msg, "subject" | "data" | "headers" | "json" | "string"> & {
   subjectParams: NatsOperationParams[K];
+};
+export type NatsSubscribeOptions = {
+  lastMessage?: boolean;
 };
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
 export type NovaNatsClientConfig = ConnectionOptions;

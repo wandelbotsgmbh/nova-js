@@ -2,7 +2,28 @@ import { NovaNatsClient } from "@wandelbots/nova-js/experimental/nats"
 import { Nova } from "@wandelbots/nova-js/v2"
 import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest"
 
-const { mockConnection, wsconnect } = vi.hoisted(() => {
+const { mockConnection, wsconnect, jetstreamMocks } = vi.hoisted(() => {
+  const jetstreamMocks = {
+    messages: [] as Array<{ subject: string; json: () => unknown }>,
+    close: vi.fn(async () => {}),
+    consumerMessages() {
+      let index = 0
+      return {
+        [Symbol.asyncIterator]: () => ({
+          next: async () => {
+            if (index >= jetstreamMocks.messages.length) {
+              return { value: undefined, done: true }
+            }
+            return { value: jetstreamMocks.messages[index++], done: false }
+          },
+        }),
+        close: jetstreamMocks.close,
+      }
+    },
+    consume: vi.fn(async () => jetstreamMocks.consumerMessages()),
+    consumersGet: vi.fn(async () => ({ consume: jetstreamMocks.consume })),
+    streamsFind: vi.fn(async () => "the-stream"),
+  }
   const mockSubscription = {
     [Symbol.asyncIterator]: () => {
       let done = false
@@ -34,10 +55,17 @@ const { mockConnection, wsconnect } = vi.hoisted(() => {
 
   const wsconnect = vi.fn(async () => mockConnection)
 
-  return { mockSubscription, mockConnection, wsconnect }
+  return { mockSubscription, mockConnection, wsconnect, jetstreamMocks }
 })
 
 vi.mock("@nats-io/nats-core", () => ({ wsconnect }))
+vi.mock("@nats-io/jetstream", () => ({
+  DeliverPolicy: { LastPerSubject: "last_per_subject" },
+  jetstream: () => ({ consumers: { get: jetstreamMocks.consumersGet } }),
+  jetstreamManager: async () => ({
+    streams: { find: jetstreamMocks.streamsFind },
+  }),
+}))
 
 describe("NovaNatsClient", () => {
   const nova = new Nova({ instanceUrl: "https://example.com" })
@@ -48,6 +76,11 @@ describe("NovaNatsClient", () => {
     mockConnection.publish.mockClear()
     mockConnection.request.mockClear()
     mockConnection.close.mockClear()
+    jetstreamMocks.messages = []
+    jetstreamMocks.close.mockClear()
+    jetstreamMocks.consume.mockClear()
+    jetstreamMocks.consumersGet.mockClear()
+    jetstreamMocks.streamsFind.mockClear()
   })
 
   test("connect() calls wsconnect once and reuses the connection", async () => {
@@ -259,6 +292,62 @@ describe("NovaNatsClient", () => {
     )
 
     consoleErrorSpy.mockRestore()
+  })
+
+  test("subscribe() with lastMessage uses a JetStream ordered consumer with last-per-subject delivery", async () => {
+    jetstreamMocks.messages = [
+      {
+        subject: "nova.v2.cells.factory-1",
+        json: () => ({ name: "factory-1" }),
+      },
+    ]
+
+    const client = new NovaNatsClient(nova)
+    const handler = vi.fn()
+    const unsubscribe = await client.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "*" },
+      handler,
+      { lastMessage: true },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    // Delivered via JetStream, not a core subscription
+    expect(mockConnection.subscribe).not.toHaveBeenCalled()
+    expect(jetstreamMocks.streamsFind).toHaveBeenCalledWith("nova.v2.cells.*")
+    expect(jetstreamMocks.consumersGet).toHaveBeenCalledWith("the-stream", {
+      filter_subjects: ["nova.v2.cells.*"],
+      deliver_policy: "last_per_subject",
+    })
+    expect(handler).toHaveBeenCalledWith(
+      { name: "factory-1" },
+      expect.objectContaining({ subjectParams: { cell: "factory-1" } }),
+    )
+
+    unsubscribe()
+    expect(jetstreamMocks.close).toHaveBeenCalled()
+  })
+
+  test("subscribe() with lastMessage rejects when no stream captures the subject", async () => {
+    jetstreamMocks.streamsFind.mockRejectedValueOnce(
+      new Error("no stream matches subject"),
+    )
+
+    const client = new NovaNatsClient(nova)
+    await expect(
+      client.subscribe("nova.v2.cells.{cell}", { cell: "*" }, vi.fn(), {
+        lastMessage: true,
+      }),
+    ).rejects.toThrow("no stream matches subject")
+  })
+
+  test("subscribe() without lastMessage does not touch JetStream", async () => {
+    const client = new NovaNatsClient(nova)
+    await client.subscribe("nova.v2.cells.{cell}", { cell: "*" }, vi.fn())
+
+    expect(mockConnection.subscribe).toHaveBeenCalledWith("nova.v2.cells.*")
+    expect(jetstreamMocks.streamsFind).not.toHaveBeenCalled()
+    expect(jetstreamMocks.consumersGet).not.toHaveBeenCalled()
   })
 
   test("request() builds the subject, sends the JSON payload, and returns the decoded reply", async () => {

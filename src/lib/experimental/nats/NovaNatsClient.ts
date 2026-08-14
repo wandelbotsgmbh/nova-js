@@ -1,3 +1,4 @@
+import { DeliverPolicy, jetstream, jetstreamManager } from "@nats-io/jetstream"
 import {
   type ConnectionOptions,
   type Msg,
@@ -26,9 +27,27 @@ export type NovaNatsClientConfig = ConnectionOptions
  * With a wildcard subscription (e.g. `{ cell: "*" }`), `subjectParams` is how
  * a handler knows which entity a message belongs to. Typed per subject via
  * the generated `NatsOperationParams`.
+ *
+ * Restricted to the fields shared by core NATS messages and JetStream
+ * messages, since a subscription with `lastMessage: true` delivers the
+ * latter (see {@link NatsSubscribeOptions}).
  */
-export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Msg & {
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Pick<
+  Msg,
+  "subject" | "data" | "headers" | "json" | "string"
+> & {
   subjectParams: NatsOperationParams[K]
+}
+
+export type NatsSubscribeOptions = {
+  /**
+   * When true, the subscription immediately replays the last JetStream
+   * message persisted for each subject matching the subscription (one per
+   * concrete subject when subscribing with wildcards), then continues with
+   * live messages. Requires the server to have a JetStream stream capturing
+   * the subscribed subject; subscribing fails with an error if none exists.
+   */
+  lastMessage?: boolean
 }
 
 type NatsMessageHandler<K extends NatsSubscribeSubject> = (
@@ -38,8 +57,12 @@ type NatsMessageHandler<K extends NatsSubscribeSubject> = (
 
 type SubscribeArgs<K extends NatsSubscribeSubject> =
   keyof NatsOperationParams[K] extends never
-    ? [handler: NatsMessageHandler<K>]
-    : [params: NatsOperationParams[K], handler: NatsMessageHandler<K>]
+    ? [handler: NatsMessageHandler<K>, options?: NatsSubscribeOptions]
+    : [
+        params: NatsOperationParams[K],
+        handler: NatsMessageHandler<K>,
+        options?: NatsSubscribeOptions,
+      ]
 
 /**
  * Typed NATS client for the Wandelbots NOVA messaging API, generated from
@@ -110,20 +133,23 @@ export class NovaNatsClient {
    *     nats.subscribe("nova.v2.cells.{cell}.status", { cell: "*" },
    *       (services, msg) => console.log(msg.subjectParams.cell, services))
    *
+   * With `{ lastMessage: true }` as the final argument, the last JetStream
+   * message persisted for each matching subject is replayed to the handler
+   * immediately, before live messages (see {@link NatsSubscribeOptions}).
+   *
    * Returns a function that unsubscribes when called.
    */
   async subscribe<K extends NatsSubscribeSubject>(
     subject: K,
     ...args: SubscribeArgs<K>
   ): Promise<() => void> {
-    const [params, handler] =
-      args.length === 1
-        ? ([{}, args[0]] as const)
-        : ([args[0], args[1]] as const)
+    const [params, handler, options] =
+      typeof args[0] === "function"
+        ? ([{}, args[0], args[1] as NatsSubscribeOptions | undefined] as const)
+        : ([args[0], args[1] as NatsMessageHandler<K>, args[2]] as const)
 
     const nc = await this.connect()
     const resolvedSubject = buildSubject(subject, params)
-    const sub = nc.subscribe(resolvedSubject)
 
     // The token positions of the template's {param} placeholders, computed
     // once here so each message's subjectParams is a plain index pick: a
@@ -136,36 +162,61 @@ export class NovaNatsClient {
       }
     }
 
-    ;(async () => {
-      for await (const msg of sub) {
-        // Handled per-message: a bad payload or a throwing/rejecting handler
-        // should not stop the subscription from processing later messages.
-        try {
-          const subjectTokens = msg.subject.split(".")
-          const subjectParams = Object.fromEntries(
-            paramPositions.map(([name, index]) => [
-              name,
-              subjectTokens[index] ?? "",
-            ]),
-          ) as NatsOperationParams[K]
-          await handler(
-            msg.json<NatsSubscribePayloads[K]>(),
-            Object.assign(msg, { subjectParams }),
-          )
-        } catch (err) {
-          console.error(
-            `Error handling NATS message on subject "${resolvedSubject}"`,
-            err,
-          )
+    const dispatch = (
+      messages: AsyncIterable<Pick<NatsSubscribeMsg<K>, "subject" | "json">>,
+    ) => {
+      ;(async () => {
+        for await (const msg of messages) {
+          // Handled per-message: a bad payload or a throwing/rejecting
+          // handler should not stop the subscription from processing later
+          // messages.
+          try {
+            const subjectTokens = msg.subject.split(".")
+            const subjectParams = Object.fromEntries(
+              paramPositions.map(([name, index]) => [
+                name,
+                subjectTokens[index] ?? "",
+              ]),
+            ) as NatsOperationParams[K]
+            await handler(
+              msg.json<NatsSubscribePayloads[K]>(),
+              Object.assign(msg, { subjectParams }) as NatsSubscribeMsg<K>,
+            )
+          } catch (err) {
+            console.error(
+              `Error handling NATS message on subject "${resolvedSubject}"`,
+              err,
+            )
+          }
         }
-      }
-    })().catch((err: unknown) => {
-      console.error(
-        `NATS subscription iterator failed for "${resolvedSubject}"`,
-        err,
-      )
-    })
+      })().catch((err: unknown) => {
+        console.error(
+          `NATS subscription iterator failed for "${resolvedSubject}"`,
+          err,
+        )
+      })
+    }
 
+    if (options?.lastMessage) {
+      // Delivered through JetStream instead of a core subscription: an
+      // ordered (ephemeral, auto-acked, auto-cleaned-up) consumer with
+      // "last per subject" delivery replays the last persisted message of
+      // each matching subject, then seamlessly continues with live messages.
+      const jsm = await jetstreamManager(nc)
+      // Throws if no stream captures the subject, rather than silently
+      // never delivering anything.
+      const streamName = await jsm.streams.find(resolvedSubject)
+      const consumer = await jetstream(nc).consumers.get(streamName, {
+        filter_subjects: [resolvedSubject],
+        deliver_policy: DeliverPolicy.LastPerSubject,
+      })
+      const messages = await consumer.consume()
+      dispatch(messages)
+      return () => void messages.close()
+    }
+
+    const sub = nc.subscribe(resolvedSubject)
+    dispatch(sub)
     return () => sub.unsubscribe()
   }
 

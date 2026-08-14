@@ -80,6 +80,7 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.24.1",
+    "@nats-io/jetstream": "^3.4.0",
     "@nats-io/nats-core": "^3.4.0",
     "axios": "^1.19.0",
     "path-to-regexp": "^8.4.2",
