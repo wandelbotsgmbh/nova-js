@@ -1,7 +1,7 @@
 import { DeliverPolicy, jetstream, jetstreamManager } from "@nats-io/jetstream"
 import {
   type ConnectionOptions,
-  type Msg,
+  type MsgHdrs,
   type NatsConnection,
   wsconnect,
 } from "@nats-io/nats-core"
@@ -22,22 +22,35 @@ import type {
 export type NovaNatsClientConfig = ConnectionOptions
 
 /**
+ * The fields of a received message that exist on both a core NATS `Msg` and
+ * a JetStream `JsMsg` — a subscription delivers the former by default and
+ * the latter with `lastMessage: true` (see {@link NatsSubscribeOptions}),
+ * so handlers see only what both have in common.
+ */
+export interface NatsReceivedMsg {
+  /** The concrete subject the message was published to. */
+  subject: string
+  /** The message's raw payload bytes. */
+  data: Uint8Array
+  /** Headers set by the server or the publisher, if any. */
+  headers?: MsgHdrs
+  /** The payload decoded as JSON. */
+  json<T>(): T
+  /** The payload decoded as a string. */
+  string(): string
+}
+
+/**
  * A received message, annotated with the values of the subject template's
  * `{param}` placeholders as extracted from the message's concrete subject.
  * With a wildcard subscription (e.g. `{ cell: "*" }`), `subjectParams` is how
  * a handler knows which entity a message belongs to. Typed per subject via
  * the generated `NatsOperationParams`.
- *
- * Restricted to the fields shared by core NATS messages and JetStream
- * messages, since a subscription with `lastMessage: true` delivers the
- * latter (see {@link NatsSubscribeOptions}).
  */
-export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Pick<
-  Msg,
-  "subject" | "data" | "headers" | "json" | "string"
-> & {
-  subjectParams: NatsOperationParams[K]
-}
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> =
+  NatsReceivedMsg & {
+    subjectParams: NatsOperationParams[K]
+  }
 
 export type NatsSubscribeOptions = {
   /**
@@ -162,9 +175,7 @@ export class NovaNatsClient {
       }
     }
 
-    const dispatch = (
-      messages: AsyncIterable<Pick<NatsSubscribeMsg<K>, "subject" | "json">>,
-    ) => {
+    const dispatch = (messages: AsyncIterable<NatsReceivedMsg>) => {
       ;(async () => {
         for await (const msg of messages) {
           // Handled per-message: a bad payload or a throwing/rejecting
@@ -180,7 +191,7 @@ export class NovaNatsClient {
             ) as NatsOperationParams[K]
             await handler(
               msg.json<NatsSubscribePayloads[K]>(),
-              Object.assign(msg, { subjectParams }) as NatsSubscribeMsg<K>,
+              Object.assign(msg, { subjectParams }),
             )
           } catch (err) {
             console.error(
