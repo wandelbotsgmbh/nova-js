@@ -21,6 +21,8 @@ export type {
 export type * from "../../lib/experimental/nats/generated/types.ts"
 export { NovaNatsClient } from "../../lib/experimental/nats/NovaNatsClient.ts"
 export type {
+  NatsReceivedMsg,
   NatsSubscribeMsg,
+  NatsSubscribeOptions,
   NovaNatsClientConfig,
 } from "../../lib/experimental/nats/NovaNatsClient.ts"

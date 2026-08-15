@@ -17,6 +17,9 @@ importers:
       '@auth0/auth0-spa-js':
         specifier: ^2.24.1
         version: 2.24.1
+      '@nats-io/jetstream':
+        specifier: ^3.4.0
+        version: 3.4.0
       '@nats-io/nats-core':
         specifier: ^3.4.0
         version: 3.4.0
@@ -765,6 +768,9 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.3
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.3
+
+  '@nats-io/jetstream@3.4.0':
+    resolution: {integrity: sha512-GzHQodNJ942+R5LRb8PuZ5ugVWVWMRiufxUYLLVWkXKfwDXYN+Owo0d7L/b9O7BPyrbYD7jQWAC6+ZVuXa9Gyw==}
 
   '@nats-io/nats-core@3.4.0':
     resolution: {integrity: sha512-QMDM86EUNm+wudlKC67HLar/KHHQUvJGLfb4jbahje3pUk3K9afeck9fwsxBZF0eUFox6T/TA6m/t+lQqf+QsQ==}
@@ -5016,6 +5022,10 @@ snapshots:
       '@emnapi/runtime': 1.11.2
       '@tybys/wasm-util': 0.10.3
     optional: true
+
+  '@nats-io/jetstream@3.4.0':
+    dependencies:
+      '@nats-io/nats-core': 3.4.0
 
   '@nats-io/nats-core@3.4.0':
     dependencies:

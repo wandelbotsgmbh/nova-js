@@ -412,6 +412,13 @@ export interface NatsPublishPayloads {
   "nova.v2.events.cells.{cell}.controllers.{controller}.updated": RobotControllerUpdatedEvent;
   "nova.v2.events.cells.{cell}.controllers.{controller}.deleted": RobotControllerDeletedEvent;
 }
+export interface NatsReceivedMsg {
+  subject: string;
+  data: Uint8Array;
+  headers?: MsgHdrs;
+  json<T>(): T;
+  string(): string;
+}
 export interface NatsReplyPayloads {
   "nova.v2.cells.{cell}.bus-ios.ios.set": NatsErrorPayload;
   "nova.v2.cells.{cell}.controllers.{controller}.ios.select": NatsErrorPayload;
@@ -711,8 +718,11 @@ export type MotionGroupModel = string;
 export type MotionGroupState1 = MotionGroupState[];
 export type NatsPublishSubject = keyof NatsPublishPayloads;
 export type NatsRequestSubject = keyof NatsRequestPayloads;
-export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = Msg & {
+export type NatsSubscribeMsg<K extends NatsSubscribeSubject> = NatsReceivedMsg & {
   subjectParams: NatsOperationParams[K];
+};
+export type NatsSubscribeOptions = {
+  lastMessage?: boolean;
 };
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
 export type NovaNatsClientConfig = ConnectionOptions;
