@@ -126,31 +126,6 @@ export class Nova {
 }
 export class NovaAPIClient {
   opts
-  application
-  busIOs
-  cell
-  controller
-  controllerIOs
-  jogging
-  kinematics
-  license
-  motionGroup
-  motionGroupModels
-  novaCloud
-  program
-  robotConfigurations
-  session
-  storeCollisionComponents
-  storeCollisionSetups
-  storeObject
-  system
-  trajectoryCaching
-  trajectoryExecution
-  trajectoryPlanning
-  version
-  virtualController
-  virtualControllerBehavior
-  virtualControllerIOs
   constructor(_) {}
 }
 export class NOVACloudApi extends BaseAPI {

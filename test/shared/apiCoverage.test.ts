@@ -2,6 +2,8 @@
 import * as novaApiV2 from "@wandelbots/nova-js/v2"
 import { Nova, NovaAPIClient } from "@wandelbots/nova-js/v2"
 import { expect, test } from "vitest"
+// biome-ignore lint/style/noRestrictedImports: internal unit testing
+import { API_NAME_OVERRIDES } from "../../src/lib/NovaAPIClient.ts"
 
 /**
  * This test ensures that every generated API class exported from nova-js/v2 is
@@ -76,4 +78,36 @@ test("NovaAPIClient uses camelCase property names", () => {
   nova.api.busIOs satisfies object
   nova.api.virtualControllerIOs satisfies object
   nova.api.novaCloud satisfies object
+})
+
+/**
+ * The default apiName -> propertyName conversion (strip "Api", lowercase the
+ * first letter) can produce an ugly result for names with a leading acronym,
+ * e.g. "PLCApi" -> "pLC". Since renaming a property later is a breaking
+ * change, any such case must be caught here and given an explicit entry in
+ * API_NAME_OVERRIDES before release rather than shipped as-is.
+ */
+test("generated API property names look like clean camelCase", () => {
+  const niceCamelCase = /^[a-z][a-zA-Z0-9]*$/
+  const consecutiveUppercase = /[A-Z]{2,}/
+  const reviewedNames = new Set<string>(Object.values(API_NAME_OVERRIDES))
+
+  const client = new NovaAPIClient({
+    basePath: "https://mock.example.com",
+    isJsonMime: (mime: string) => mime === "application/json",
+  })
+
+  const propertyNames = Object.keys(client).filter((key) => key !== "opts")
+  expect(propertyNames.length).toBeGreaterThan(10)
+
+  const uglyNames = propertyNames.filter(
+    (name) =>
+      !reviewedNames.has(name) &&
+      (!niceCamelCase.test(name) || consecutiveUppercase.test(name)),
+  )
+
+  expect(
+    uglyNames,
+    `These generated API property names don't look like clean camelCase: ${uglyNames.join(", ")}. Add an explicit entry to API_NAME_OVERRIDES in NovaAPIClient.ts before release.`,
+  ).toEqual([])
 })

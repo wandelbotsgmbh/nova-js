@@ -2195,31 +2195,6 @@ export declare class Nova {
 }
 export declare class NovaAPIClient {
   readonly opts: NovaAPIClientOpts;
-  readonly application: WithUnwrappedAxiosResponse<ApplicationApi>;
-  readonly busIOs: WithUnwrappedAxiosResponse<BUSInputsOutputsApi>;
-  readonly cell: WithUnwrappedAxiosResponse<CellApi>;
-  readonly controller: WithUnwrappedAxiosResponse<ControllerApi>;
-  readonly controllerIOs: WithUnwrappedAxiosResponse<ControllerInputsOutputsApi>;
-  readonly jogging: WithUnwrappedAxiosResponse<JoggingApi>;
-  readonly kinematics: WithUnwrappedAxiosResponse<KinematicsApi>;
-  readonly license: WithUnwrappedAxiosResponse<LicenseApi>;
-  readonly motionGroup: WithUnwrappedAxiosResponse<MotionGroupApi>;
-  readonly motionGroupModels: WithUnwrappedAxiosResponse<MotionGroupModelsApi>;
-  readonly novaCloud: WithUnwrappedAxiosResponse<NOVACloudApi>;
-  readonly program: WithUnwrappedAxiosResponse<ProgramApi>;
-  readonly robotConfigurations: WithUnwrappedAxiosResponse<RobotConfigurationsApi>;
-  readonly session: WithUnwrappedAxiosResponse<SessionApi>;
-  readonly storeCollisionComponents: WithUnwrappedAxiosResponse<StoreCollisionComponentsApi>;
-  readonly storeCollisionSetups: WithUnwrappedAxiosResponse<StoreCollisionSetupsApi>;
-  readonly storeObject: WithUnwrappedAxiosResponse<StoreObjectApi>;
-  readonly system: WithUnwrappedAxiosResponse<SystemApi>;
-  readonly trajectoryCaching: WithUnwrappedAxiosResponse<TrajectoryCachingApi>;
-  readonly trajectoryExecution: WithUnwrappedAxiosResponse<TrajectoryExecutionApi>;
-  readonly trajectoryPlanning: WithUnwrappedAxiosResponse<TrajectoryPlanningApi>;
-  readonly version: WithUnwrappedAxiosResponse<VersionApi>;
-  readonly virtualController: WithUnwrappedAxiosResponse<VirtualControllerApi>;
-  readonly virtualControllerBehavior: WithUnwrappedAxiosResponse<VirtualControllerBehaviorApi>;
-  readonly virtualControllerIOs: WithUnwrappedAxiosResponse<VirtualControllerInputsOutputsApi>;
   constructor(_: NovaAPIClientOpts);
 }
 export declare class NOVACloudApi extends BaseAPI {
