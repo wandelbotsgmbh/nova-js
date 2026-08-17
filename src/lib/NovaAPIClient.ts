@@ -102,7 +102,7 @@ type NovaApiV2Exports = typeof novaApiV2
 type GeneratedApiClassName = Extract<keyof NovaApiV2Exports, `${string}Api`>
 
 type GeneratedApiProperties = {
-  [K in GeneratedApiClassName as ApiPropertyName<
+  readonly [K in GeneratedApiClassName as ApiPropertyName<
     K & string
   >]: NovaApiV2Exports[K] extends new (
     // biome-ignore lint/suspicious/noExplicitAny: constructor signature varies per generated API class
