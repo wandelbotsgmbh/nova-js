@@ -2,33 +2,8 @@ import type {
   BaseAPI,
   Configuration as BaseConfiguration,
 } from "@wandelbots/nova-api/v2"
-import {
-  ApplicationApi,
-  BUSInputsOutputsApi,
-  CellApi,
-  ControllerApi,
-  ControllerInputsOutputsApi,
-  JoggingApi,
-  KinematicsApi,
-  LicenseApi,
-  MotionGroupApi,
-  MotionGroupModelsApi,
-  NOVACloudApi,
-  ProgramApi,
-  RobotConfigurationsApi,
-  SessionApi,
-  StoreCollisionComponentsApi,
-  StoreCollisionSetupsApi,
-  StoreObjectApi,
-  SystemApi,
-  TrajectoryCachingApi,
-  TrajectoryExecutionApi,
-  TrajectoryPlanningApi,
-  VersionApi,
-  VirtualControllerApi,
-  VirtualControllerBehaviorApi,
-  VirtualControllerInputsOutputsApi,
-} from "@wandelbots/nova-api/v2"
+// Value import used to enumerate the generated API classes at runtime (see constructor below)
+import * as novaApiV2 from "@wandelbots/nova-api/v2"
 import type { AxiosInstance } from "axios"
 import axios from "axios"
 
@@ -46,6 +21,46 @@ type WithUnwrappedAxiosResponse<T> = {
 type NovaAPIClientOpts = BaseConfiguration & {
   axiosInstance?: AxiosInstance
   mock?: boolean
+}
+
+type ApiConstructor = new (
+  config: BaseConfiguration,
+  basePath: string,
+  axios: AxiosInstance,
+) => BaseAPI
+
+// Generated exports we care about are classes, unlike the Fp/Factory helpers nova-api also exports
+function isApiConstructor(value: unknown): value is ApiConstructor {
+  return typeof value === "function"
+}
+
+// Generated names whose default (Uncapitalize) conversion reads oddly, kept for
+// backwards compatibility. Anything not listed here (e.g. a newly added
+// "DatasetsApi") falls back to the default rule below and needs no update.
+// Exported so apiCoverage.test.ts can verify every other name still looks like
+// clean camelCase, since anything ugly here would be a breaking rename later.
+export const API_NAME_OVERRIDES = {
+  BUSInputsOutputsApi: "busIOs",
+  ControllerInputsOutputsApi: "controllerIOs",
+  NOVACloudApi: "novaCloud",
+  VirtualControllerInputsOutputsApi: "virtualControllerIOs",
+} as const satisfies Record<string, string>
+
+// Single source of truth for the "ApplicationApi" -> "application" naming
+// convention, shared by the runtime constructor loop and the type below
+type ApiPropertyName<Name extends string> =
+  Name extends keyof typeof API_NAME_OVERRIDES
+    ? (typeof API_NAME_OVERRIDES)[Name]
+    : Name extends `${infer Base}Api`
+      ? Uncapitalize<Base>
+      : never
+
+function toPropertyName(apiName: string): string {
+  if (apiName in API_NAME_OVERRIDES) {
+    return API_NAME_OVERRIDES[apiName as keyof typeof API_NAME_OVERRIDES]
+  }
+  const base = apiName.slice(0, -"Api".length)
+  return base.charAt(0).toLowerCase() + base.slice(1)
 }
 
 function unwrap<T extends BaseAPI>(
@@ -80,66 +95,62 @@ function unwrap<T extends BaseAPI>(
   return apiClient as WithUnwrappedAxiosResponse<T>
 }
 
+// The set of generated API classes, derived from whatever @wandelbots/nova-api
+// currently exports, so new sections (e.g. a future DatasetsApi) get typed
+// properties here automatically without editing this file
+type NovaApiV2Exports = typeof novaApiV2
+type GeneratedApiClassName = Extract<keyof NovaApiV2Exports, `${string}Api`>
+
+type GeneratedApiProperties = {
+  readonly [K in GeneratedApiClassName as ApiPropertyName<
+    K & string
+  >]: NovaApiV2Exports[K] extends new (
+    // biome-ignore lint/suspicious/noExplicitAny: constructor signature varies per generated API class
+    ...args: any[]
+  ) => infer Instance
+    ? Instance extends BaseAPI
+      ? WithUnwrappedAxiosResponse<Instance>
+      : never
+    : never
+}
+
 /**
  * API client providing type-safe access to all the endpoints of a NOVA
  * instance.
+ *
+ * The endpoints available here (`nova.api.controller`, `nova.api.cell`, etc.)
+ * are not listed explicitly in this file: they mirror every `*Api` class
+ * exported from `@wandelbots/nova-api/v2`. To see the full list without a
+ * TypeScript compiler, check that package's exports directly, or at runtime
+ * via `Object.keys(nova.api)`; the property name is that class name with the
+ * trailing "Api" removed and the first letter lowercased, except for the
+ * overrides listed in API_NAME_OVERRIDES above.
  */
+// The generated API properties (application, controller, etc.) are declared
+// via this interface merge rather than as class fields, since they're derived
+// from a type and assigned dynamically in the constructor below
+export interface NovaAPIClient extends GeneratedApiProperties {}
+
+// biome-ignore lint/suspicious/noUnsafeDeclarationMerging: properties are assigned dynamically in the constructor, not declared as class fields
 export class NovaAPIClient {
   readonly opts: NovaAPIClientOpts
-
-  readonly application: WithUnwrappedAxiosResponse<ApplicationApi>
-  readonly busIOs: WithUnwrappedAxiosResponse<BUSInputsOutputsApi>
-  readonly cell: WithUnwrappedAxiosResponse<CellApi>
-  readonly controller: WithUnwrappedAxiosResponse<ControllerApi>
-  readonly controllerIOs: WithUnwrappedAxiosResponse<ControllerInputsOutputsApi>
-  readonly jogging: WithUnwrappedAxiosResponse<JoggingApi>
-  readonly kinematics: WithUnwrappedAxiosResponse<KinematicsApi>
-  readonly license: WithUnwrappedAxiosResponse<LicenseApi>
-  readonly motionGroup: WithUnwrappedAxiosResponse<MotionGroupApi>
-  readonly motionGroupModels: WithUnwrappedAxiosResponse<MotionGroupModelsApi>
-  readonly novaCloud: WithUnwrappedAxiosResponse<NOVACloudApi>
-  readonly program: WithUnwrappedAxiosResponse<ProgramApi>
-  readonly robotConfigurations: WithUnwrappedAxiosResponse<RobotConfigurationsApi>
-  readonly session: WithUnwrappedAxiosResponse<SessionApi>
-  readonly storeCollisionComponents: WithUnwrappedAxiosResponse<StoreCollisionComponentsApi>
-  readonly storeCollisionSetups: WithUnwrappedAxiosResponse<StoreCollisionSetupsApi>
-  readonly storeObject: WithUnwrappedAxiosResponse<StoreObjectApi>
-  readonly system: WithUnwrappedAxiosResponse<SystemApi>
-  readonly trajectoryCaching: WithUnwrappedAxiosResponse<TrajectoryCachingApi>
-  readonly trajectoryExecution: WithUnwrappedAxiosResponse<TrajectoryExecutionApi>
-  readonly trajectoryPlanning: WithUnwrappedAxiosResponse<TrajectoryPlanningApi>
-  readonly version: WithUnwrappedAxiosResponse<VersionApi>
-  readonly virtualController: WithUnwrappedAxiosResponse<VirtualControllerApi>
-  readonly virtualControllerBehavior: WithUnwrappedAxiosResponse<VirtualControllerBehaviorApi>
-  readonly virtualControllerIOs: WithUnwrappedAxiosResponse<VirtualControllerInputsOutputsApi>
 
   constructor(opts: NovaAPIClientOpts) {
     this.opts = opts
 
-    this.application = unwrap(ApplicationApi, opts)
-    this.busIOs = unwrap(BUSInputsOutputsApi, opts)
-    this.cell = unwrap(CellApi, opts)
-    this.controller = unwrap(ControllerApi, opts)
-    this.controllerIOs = unwrap(ControllerInputsOutputsApi, opts)
-    this.jogging = unwrap(JoggingApi, opts)
-    this.kinematics = unwrap(KinematicsApi, opts)
-    this.license = unwrap(LicenseApi, opts)
-    this.motionGroup = unwrap(MotionGroupApi, opts)
-    this.motionGroupModels = unwrap(MotionGroupModelsApi, opts)
-    this.novaCloud = unwrap(NOVACloudApi, opts)
-    this.program = unwrap(ProgramApi, opts)
-    this.robotConfigurations = unwrap(RobotConfigurationsApi, opts)
-    this.session = unwrap(SessionApi, opts)
-    this.storeCollisionComponents = unwrap(StoreCollisionComponentsApi, opts)
-    this.storeCollisionSetups = unwrap(StoreCollisionSetupsApi, opts)
-    this.storeObject = unwrap(StoreObjectApi, opts)
-    this.system = unwrap(SystemApi, opts)
-    this.trajectoryCaching = unwrap(TrajectoryCachingApi, opts)
-    this.trajectoryExecution = unwrap(TrajectoryExecutionApi, opts)
-    this.trajectoryPlanning = unwrap(TrajectoryPlanningApi, opts)
-    this.version = unwrap(VersionApi, opts)
-    this.virtualController = unwrap(VirtualControllerApi, opts)
-    this.virtualControllerBehavior = unwrap(VirtualControllerBehaviorApi, opts)
-    this.virtualControllerIOs = unwrap(VirtualControllerInputsOutputsApi, opts)
+    // Discover API classes at runtime instead of hardcoding them, so newly
+    // generated sections show up automatically when testing against a dev
+    // build of nova-api without needing a NovaAPIClient update first
+    for (const [apiName, ApiConstructor] of Object.entries(novaApiV2)) {
+      if (!apiName.endsWith("Api") || !isApiConstructor(ApiConstructor)) {
+        continue
+      }
+
+      const propertyName = toPropertyName(apiName)
+      ;(this as Record<string, unknown>)[propertyName] = unwrap(
+        ApiConstructor,
+        opts,
+      )
+    }
   }
 }
