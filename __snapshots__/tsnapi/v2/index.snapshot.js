@@ -468,6 +468,7 @@ export var ServiceGroup /* const */
 export var ServiceStatusPhase /* const */
 export var ServiceStatusSeverity /* const */
 export var SettableRobotSystemMode /* const */
+export var SingularityHandling /* const */
 export var SingularityTypeEnum /* const */
 export var Snap7IOArea /* const */
 export var Snap7IODirection /* const */

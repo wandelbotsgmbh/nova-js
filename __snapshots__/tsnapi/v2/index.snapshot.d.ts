@@ -1243,6 +1243,7 @@ export interface PlanTrajectoryRequest {
   'motion_group_setup': MotionGroupSetup;
   'start_joint_position': Array<number>;
   'motion_commands': Array<MotionCommand>;
+  'singularity_handling'?: SingularityHandling;
 }
 export interface PlanTrajectoryResponse {
   'response': PlanTrajectoryResponseResponse;
@@ -2010,6 +2011,7 @@ export type ServiceGroup = typeof ServiceGroup[keyof typeof ServiceGroup];
 export type ServiceStatusPhase = typeof ServiceStatusPhase[keyof typeof ServiceStatusPhase];
 export type ServiceStatusSeverity = typeof ServiceStatusSeverity[keyof typeof ServiceStatusSeverity];
 export type SettableRobotSystemMode = typeof SettableRobotSystemMode[keyof typeof SettableRobotSystemMode];
+export type SingularityHandling = typeof SingularityHandling[keyof typeof SingularityHandling];
 export type SingularityTypeEnum = typeof SingularityTypeEnum[keyof typeof SingularityTypeEnum];
 export type Snap7IOArea = typeof Snap7IOArea[keyof typeof Snap7IOArea];
 export type Snap7IODirection = typeof Snap7IODirection[keyof typeof Snap7IODirection];
