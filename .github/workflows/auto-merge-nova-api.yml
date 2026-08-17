@@ -7,6 +7,35 @@ permissions:
   pull-requests: write
 
 jobs:
+  update-api-snapshot:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      contains(github.event.pull_request.title, '@wandelbots/nova-api')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node
+      # Additions to the nova-api surface are expected here, so regenerate
+      # the tsnapi snapshot instead of letting CI fail on the diff.
+      - name: Regenerate tsnapi API snapshot
+        run: pnpm run build
+        env:
+          CI: ""
+      - name: Commit snapshot if it changed
+        run: |
+          if ! git diff --quiet -- __snapshots__; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add __snapshots__
+            git commit -m "chore: update tsnapi API snapshot for nova-api bump"
+            gh auth setup-git
+            git push origin HEAD:"${{ github.event.pull_request.head.ref }}"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.MERGE_TOKEN }}
   auto-merge:
     runs-on: ubuntu-latest
     if: >-
