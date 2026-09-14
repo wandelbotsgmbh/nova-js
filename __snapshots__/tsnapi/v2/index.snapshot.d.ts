@@ -15,6 +15,7 @@ export interface AbbConfiguredPose {
 export interface AbbController {
   'kind': AbbControllerKindEnum;
   'controller_ip': string;
+  'network_interface'?: ControllerNetworkInterface;
   'controller_port': number;
   'egm_server': AbbControllerEgmServer;
 }
@@ -30,6 +31,14 @@ export interface AbbPose {
   'q2': number;
   'q3': number;
   'q4': number;
+}
+export interface ActionChunkRequest {
+  'message_type': ActionChunkRequestMessageTypeEnum;
+  'waypoints': Array<Waypoint>;
+}
+export interface ActionChunkResponse {
+  'message'?: string;
+  'kind': ActionChunkResponseKindEnum;
 }
 export interface ActivateLicenseRequest {
   'owner_refresh_token': string;
@@ -83,6 +92,16 @@ export interface BlendingPosition {
 export interface BooleanValue {
   'value': boolean;
   'value_type': BooleanValueValueTypeEnum;
+}
+export interface BostondynamicsController {
+  'kind': BostondynamicsControllerKindEnum;
+  'controller_ip': string;
+  'robot_type'?: BostondynamicsControllerRobotTypeEnum;
+  'password': string;
+  'username'?: string;
+  'network_interface'?: string;
+  'stream_quality'?: number;
+  'stream_fps'?: number;
 }
 export interface Box {
   'shape_type': BoxShapeTypeEnum;
@@ -182,6 +201,10 @@ export interface CartesianLimits {
   'orientation_acceleration'?: number;
   'orientation_jerk'?: number;
 }
+export interface CartesianVelocity {
+  'translation': Array<number>;
+  'rotation': Array<number>;
+}
 export interface Cell {
   [key: string]: any;
   'name': string;
@@ -253,7 +276,7 @@ export interface CloudConnectionErrorUnexpectedResponseDetails {
 export interface CloudConnectionErrorUnexpectedResponseDetailsCloudResponse {
   'status': number;
   'headers': {
-    [key: string]: any;
+    [key: string]: any | null;
   };
   'body': string;
 }
@@ -274,6 +297,24 @@ export interface CloudDisconnectionStatusDisconnecting {
 }
 export interface CloudRegistrationSuccessResponse {
   'instance': number;
+}
+export interface CloudStatus {
+  'ready': boolean;
+  'checks': CloudStatusChecks;
+  'errors': CloudStatusErrors;
+  'checked_at': string;
+}
+export interface CloudStatusChecks {
+  'is_configured'?: boolean;
+  'can_connect_nats'?: boolean;
+  'can_ping_nats'?: boolean;
+  'can_reach_openfga'?: boolean;
+}
+export interface CloudStatusErrors {
+  'is_configured'?: string;
+  'can_connect_nats'?: string;
+  'can_ping_nats'?: string;
+  'can_reach_openfga'?: string;
 }
 export interface Collider {
   'shape': ColliderShape;
@@ -359,7 +400,8 @@ export interface ConfigurationResource {
 }
 export interface ConfiguredPose {
   'pose': Pose;
-  'kinematic_configuration': KinematicConfiguration;
+  'kinematic_configuration'?: KinematicConfiguration;
+  'coordinate_system_id'?: string;
 }
 export interface ConfiguredPoseInverse422Response {
   'detail'?: Array<ValidationError>;
@@ -410,6 +452,10 @@ export interface ControllerDescription {
   'supports_freedrive': boolean;
   'supports_control': boolean;
   'supports_safety_zones': boolean;
+}
+export interface ControllerNetworkInterface {
+  'interface': string;
+  'addresses': Array<string>;
 }
 export interface ConvertVendorConfiguredPose422Response {
   'detail'?: Array<ValidationError>;
@@ -520,6 +566,8 @@ export interface ExternalJointStreamRequest {
 export interface FanucController {
   'kind': FanucControllerKindEnum;
   'controller_ip': string;
+  'network_interface'?: ControllerNetworkInterface;
+  'stream_motion'?: boolean;
 }
 export interface FeedbackAxisRangeExceeded {
   'joint_index'?: number;
@@ -625,13 +673,32 @@ export interface ForwardKinematicsResponse {
   'tcp_poses': Array<Pose>;
 }
 export interface ForwardKinematicsValidationError {
-  'loc': Array<ValidationErrorLocInner>;
+  'loc': Array<Location1Inner>;
   'msg': string;
   'type': string;
   'input': {
     [key: string]: any;
   };
   'data'?: ErrorInvalidJointCount;
+}
+export interface GetKinematicConfiguration422Response {
+  'detail'?: Array<GetKinematicConfigurationValidationError>;
+}
+export interface GetKinematicConfigurationRequest {
+  'motion_group_model': string;
+  'joint_positions': Array<Array<number>>;
+}
+export interface GetKinematicConfigurationResponse {
+  'kinematic_configurations': Array<KinematicConfiguration>;
+}
+export interface GetKinematicConfigurationValidationError {
+  'loc': Array<Location1Inner>;
+  'msg': string;
+  'type': string;
+  'input': {
+    [key: string]: any;
+  };
+  'data'?: GetKinematicConfigurationValidationErrorAllOfData;
 }
 export interface GetTrajectoryResponse {
   'motion_group': string;
@@ -662,6 +729,15 @@ export interface InertiaTensor {
   'xy': number;
   'xz': number;
   'yz': number;
+}
+export interface InitializeActionChunksRequest {
+  'message_type': InitializeActionChunksRequestMessageTypeEnum;
+  'motion_group': string;
+  'tcp'?: string;
+}
+export interface InitializeActionChunksResponse {
+  'message'?: string;
+  'kind': InitializeActionChunksResponseKindEnum;
 }
 export interface InitializeJoggingRequest {
   'message_type': InitializeJoggingRequestMessageTypeEnum;
@@ -718,7 +794,7 @@ export interface InverseKinematicsResponse {
   'joints': Array<Array<Array<number>>>;
 }
 export interface InverseKinematicsValidationError {
-  'loc': Array<ValidationErrorLocInner>;
+  'loc': Array<Location1Inner>;
   'msg': string;
   'type': string;
   'input': {
@@ -807,16 +883,8 @@ export interface JointVelocityResponse {
   'kind': JointVelocityResponseKindEnum;
 }
 export interface JointWaypoint {
-  'timestamp': number;
+  'kind': JointWaypointKindEnum;
   'joints': Array<number>;
-}
-export interface JointWaypointsRequest {
-  'message_type': JointWaypointsRequestMessageTypeEnum;
-  'waypoints': Array<JointWaypoint>;
-}
-export interface JointWaypointsResponse {
-  'message'?: string;
-  'kind': JointWaypointsResponseKindEnum;
 }
 export interface KinematicBranch {
   'wrist_branch': KinematicBranchWrist;
@@ -840,6 +908,7 @@ export interface KukaConfiguredPose {
 export interface KukaController {
   'kind': KukaControllerKindEnum;
   'controller_ip': string;
+  'network_interface'?: ControllerNetworkInterface;
   'controller_port': number;
   'rsi_server': KukaControllerRsiServer;
   'slow_cycle_rate'?: boolean;
@@ -933,7 +1002,7 @@ export interface MergeTrajectoriesSegment {
   };
 }
 export interface MergeTrajectoriesValidationError {
-  'loc': Array<ValidationErrorLocInner>;
+  'loc': Array<Location1Inner>;
   'msg': string;
   'type': string;
   'input': {
@@ -968,6 +1037,12 @@ export interface MotionCommand {
   'blending'?: MotionCommandBlending;
   'limits_override'?: LimitsOverride;
   'path': MotionCommandPath;
+}
+export interface MotionGroupConfiguration {
+  'robot_configuration': string;
+  'motion_group_model': string;
+  'motion_group_uid': number;
+  'content': string;
 }
 export interface MotionGroupDescription {
   'motion_group_model': string;
@@ -1019,6 +1094,10 @@ export interface MotionGroupJoints {
   'accelerations'?: Array<number>;
   'torques'?: Array<number>;
 }
+export interface MotionGroupModelCatalog {
+  'motion_group_name': string;
+  'readable_name': string;
+}
 export interface MotionGroupModelDescription {
   'name': string;
   'manufacturer': Manufacturer;
@@ -1046,8 +1125,10 @@ export interface MotionGroupState {
   'joint_torque'?: Array<number>;
   'joint_current'?: Array<number>;
   'flange_pose'?: Pose;
+  'flange_velocity'?: CartesianVelocity;
   'tcp'?: string;
   'tcp_pose'?: Pose;
+  'tcp_velocity'?: CartesianVelocity;
   'coordinate_system'?: string;
   'payload'?: string;
   'standstill': boolean;
@@ -1111,7 +1192,7 @@ export interface MultiSearchCollisionFreeResponse {
   'response'?: MultiSearchCollisionFreeResponseResponse;
 }
 export interface MultiSearchCollisionFreeValidationError {
-  'loc': Array<ValidationErrorLocInner>;
+  'loc': Array<Location1Inner>;
   'msg': string;
   'type': string;
   'input': {
@@ -1133,15 +1214,14 @@ export interface NetworkDevice {
 }
 export interface NetworkInterface {
   'name': string;
-  'ip': string;
-  'mac': string;
-  'cidr': string;
+  'interface': string;
+  'node': string;
+  'backend': NetworkBackend;
+  'link': NetworkLinkState;
+  'addresses'?: Array<string>;
 }
 export interface NetworkState {
   'internet_connected': boolean;
-  'connection_type'?: NetworkStateConnectionTypeEnum;
-  'signal_strength'?: number;
-  'link_quality'?: number;
   'latency_ms'?: number;
   'bandwidth_mbps'?: number;
 }
@@ -1187,6 +1267,13 @@ export interface PathLine {
   'target_pose': Pose;
   'path_definition_name': PathLinePathDefinitionNameEnum;
 }
+export interface PauseActionChunksRequest {
+  'message_type': PauseActionChunksRequestMessageTypeEnum;
+}
+export interface PauseActionChunksResponse {
+  'message'?: string;
+  'kind': PauseActionChunksResponseKindEnum;
+}
 export interface PauseJoggingRequest {
   'message_type': PauseJoggingRequestMessageTypeEnum;
 }
@@ -1230,6 +1317,7 @@ export interface PlanCollisionFreeRequest {
 }
 export interface PlanCollisionFreeResponse {
   'response': PlanCollisionFreeResponseResponse;
+  'motion_commands'?: Array<MotionCommand>;
 }
 export interface Plane {
   'shape_type': PlaneShapeTypeEnum;
@@ -1249,7 +1337,7 @@ export interface PlanTrajectoryResponse {
   'response': PlanTrajectoryResponseResponse;
 }
 export interface PlanValidationError {
-  'loc': Array<ValidationErrorLocInner>;
+  'loc': Array<Location1Inner>;
   'msg': string;
   'type': string;
   'input': {
@@ -1270,16 +1358,8 @@ export interface Pose {
   'orientation'?: Array<number>;
 }
 export interface PoseWaypoint {
-  'timestamp': number;
+  'kind': PoseWaypointKindEnum;
   'pose': Pose;
-}
-export interface PoseWaypointsRequest {
-  'message_type': PoseWaypointsRequestMessageTypeEnum;
-  'waypoints': Array<PoseWaypoint>;
-}
-export interface PoseWaypointsResponse {
-  'message'?: string;
-  'kind': PoseWaypointsResponseKindEnum;
 }
 export interface ProfinetDescription {
   'vendor_id': string;
@@ -1290,8 +1370,9 @@ export interface ProfinetDescription {
 }
 export interface ProfinetInputOutputConfig {
   'config': string;
-  'input_offset': number;
-  'output_offset': number;
+  'offsets'?: Array<ProfinetSlotOffset>;
+  'input_offset'?: number;
+  'output_offset'?: number;
 }
 export interface ProfinetIO {
   'description': string;
@@ -1312,6 +1393,11 @@ export interface ProfinetSlotDescription {
   'number': number;
   'api': number;
   'subslots': Array<ProfinetSubSlotDescription>;
+}
+export interface ProfinetSlotOffset {
+  'slot': number;
+  'input_offset': number;
+  'output_offset': number;
 }
 export interface ProfinetSubSlotDescription {
   'number': number;
@@ -1358,10 +1444,10 @@ export interface ProjectJointPositionDirectionConstraintRequest {
   };
 }
 export interface ProjectJointPositionDirectionConstraintResponse {
-  'projected_joint_positions': Array<Array<number> | null>;
+  'projected_joint_positions': Array<Array | null>;
 }
 export interface ProjectJointPositionDirectionConstraintValidationError {
-  'loc': Array<ValidationErrorLocInner>;
+  'loc': Array<Location1Inner>;
   'msg': string;
   'type': string;
   'input': {
@@ -1556,6 +1642,25 @@ export interface StartOnIO {
   'comparator': Comparator;
   'io_origin': IOOrigin;
 }
+export interface StaubliController {
+  'kind': StaubliControllerKindEnum;
+  'controller_ip': string;
+  'network_interface'?: ControllerNetworkInterface;
+  'controller_port': number;
+  'command_port': number;
+  'rti_server': StaubliControllerRtiServer;
+}
+export interface StaubliControllerRtiServer {
+  'ip': string;
+  'port': number;
+}
+export interface StopActionChunksRequest {
+  'message_type': StopActionChunksRequestMessageTypeEnum;
+}
+export interface StopActionChunksResponse {
+  'message'?: string;
+  'kind': StopActionChunksResponseKindEnum;
+}
 export interface StorageKey {
   'source': StorageKeySourceEnum;
   'key': string;
@@ -1582,6 +1687,19 @@ export interface TcpVelocityRequest {
 export interface TcpVelocityResponse {
   'message'?: string;
   'kind': TcpVelocityResponseKindEnum;
+}
+export interface TechmanController {
+  'kind': TechmanControllerKindEnum;
+  'controller_ip': string;
+  'network_interface'?: ControllerNetworkInterface;
+  'tmsvr_port'?: number;
+  'tmsct_port'?: number;
+  'rtrs': TechmanControllerRtrs;
+}
+export interface TechmanControllerRtrs {
+  'ip': string;
+  'tmrts_port'?: number;
+  'tmrtc_port'?: number;
 }
 export interface ToolValue {
   'source': ToolValueSourceEnum;
@@ -1633,9 +1751,25 @@ export interface TrajectorySection {
 export interface TrajectoryWaitForIO {
   'kind': TrajectoryWaitForIOKindEnum;
 }
+export interface UnitreeController {
+  'kind': UnitreeControllerKindEnum;
+  'controller_ip': string;
+  'robot_type': UnitreeControllerRobotTypeEnum;
+  'network_interface'?: string;
+  'dds_unicast_mode'?: boolean;
+  'enable_lease'?: boolean;
+}
 export interface UniversalrobotsController {
   'kind': UniversalrobotsControllerKindEnum;
   'controller_ip': string;
+  'network_interface'?: ControllerNetworkInterface;
+}
+export interface UnpauseActionChunksRequest {
+  'message_type': UnpauseActionChunksRequestMessageTypeEnum;
+}
+export interface UnpauseActionChunksResponse {
+  'message'?: string;
+  'kind': UnpauseActionChunksResponseKindEnum;
 }
 export interface UpdateCellVersionRequest {
   'channel': ReleaseChannel;
@@ -1650,7 +1784,7 @@ export interface User {
   'email': string;
 }
 export interface ValidationError {
-  'loc': Array<ValidationErrorLocInner>;
+  'loc': Array<Location1Inner>;
   'msg': string;
   'type': string;
   'input': {
@@ -1668,6 +1802,7 @@ export interface VirtualController {
   'type'?: string;
   'json'?: string;
   'initial_joint_position'?: string;
+  'motion_groups'?: Array<AddVirtualControllerMotionGroupRequest>;
 }
 export interface VirtualRobotConfiguration {
   'name': string;
@@ -1677,9 +1812,14 @@ export interface WaitForIOEventRequest {
   'io': IOValue;
   'comparator': Comparator;
 }
+export interface Waypoint {
+  'timestamp': number;
+  'waypoint': WaypointCoordinates;
+}
 export interface YaskawaController {
   'kind': YaskawaControllerKindEnum;
   'controller_ip': string;
+  'network_interface'?: ControllerNetworkInterface;
 }
 export interface ZodValidationError {
   'error': ZodValidationErrorError;
@@ -1698,6 +1838,8 @@ export interface ZodValidationErrorErrorDetailsInner {
 
 // #region Types
 export type AbbControllerKindEnum = typeof AbbControllerKindEnum[keyof typeof AbbControllerKindEnum];
+export type ActionChunkRequestMessageTypeEnum = typeof ActionChunkRequestMessageTypeEnum[keyof typeof ActionChunkRequestMessageTypeEnum];
+export type ActionChunkResponseKindEnum = typeof ActionChunkResponseKindEnum[keyof typeof ActionChunkResponseKindEnum];
 export type AddTrajectoryErrorData = {
   kind: 'CollisionError';
 } & CollisionError | {
@@ -1719,6 +1861,8 @@ export type BlendingAutoBlendingNameEnum = typeof BlendingAutoBlendingNameEnum[k
 export type BlendingPositionBlendingNameEnum = typeof BlendingPositionBlendingNameEnum[keyof typeof BlendingPositionBlendingNameEnum];
 export type BlendingSpace = typeof BlendingSpace[keyof typeof BlendingSpace];
 export type BooleanValueValueTypeEnum = typeof BooleanValueValueTypeEnum[keyof typeof BooleanValueValueTypeEnum];
+export type BostondynamicsControllerKindEnum = typeof BostondynamicsControllerKindEnum[keyof typeof BostondynamicsControllerKindEnum];
+export type BostondynamicsControllerRobotTypeEnum = typeof BostondynamicsControllerRobotTypeEnum[keyof typeof BostondynamicsControllerRobotTypeEnum];
 export type BoxBoxTypeEnum = typeof BoxBoxTypeEnum[keyof typeof BoxBoxTypeEnum];
 export type BoxShapeTypeEnum = typeof BoxShapeTypeEnum[keyof typeof BoxShapeTypeEnum];
 export type BusIOModbusClientBusTypeEnum = typeof BusIOModbusClientBusTypeEnum[keyof typeof BusIOModbusClientBusTypeEnum];
@@ -1827,6 +1971,20 @@ export type ErrorJointLimitExceededErrorFeedbackNameEnum = typeof ErrorJointLimi
 export type ErrorJointPositionCollisionErrorFeedbackNameEnum = typeof ErrorJointPositionCollisionErrorFeedbackNameEnum[keyof typeof ErrorJointPositionCollisionErrorFeedbackNameEnum];
 export type ErrorMaxIterationsExceededErrorFeedbackNameEnum = typeof ErrorMaxIterationsExceededErrorFeedbackNameEnum[keyof typeof ErrorMaxIterationsExceededErrorFeedbackNameEnum];
 export type ErrorUnsupportedOperationErrorFeedbackNameEnum = typeof ErrorUnsupportedOperationErrorFeedbackNameEnum[keyof typeof ErrorUnsupportedOperationErrorFeedbackNameEnum];
+export type ExecuteActionChunksRequest = ActionChunkRequest | InitializeActionChunksRequest | PauseActionChunksRequest | StopActionChunksRequest | UnpauseActionChunksRequest;
+export type ExecuteActionChunksResponse = {
+  kind: 'ACTION_CHUNK_RECEIVED';
+} & ActionChunkResponse | {
+  kind: 'INITIALIZE_RECEIVED';
+} & InitializeActionChunksResponse | {
+  kind: 'MOTION_ERROR';
+} & MovementErrorResponse | {
+  kind: 'PAUSE_RECEIVED';
+} & PauseActionChunksResponse | {
+  kind: 'STOP_RECEIVED';
+} & StopActionChunksResponse | {
+  kind: 'UNPAUSE_RECEIVED';
+} & UnpauseActionChunksResponse;
 export type ExecuteDetails = {
   kind: 'JOGGING';
 } & JoggingDetails | {
@@ -1856,18 +2014,6 @@ export type ExecuteTrajectoryResponse = {
 } & PlaybackSpeedResponse | {
   kind: 'START_RECEIVED';
 } & StartMovementResponse;
-export type ExecuteWaypointJoggingRequest = InitializeJoggingRequest | JointWaypointsRequest | PauseJoggingRequest | PoseWaypointsRequest;
-export type ExecuteWaypointJoggingResponse = {
-  kind: 'INITIALIZE_RECEIVED';
-} & InitializeJoggingResponse | {
-  kind: 'JOINT_WAYPOINTS_RECEIVED';
-} & JointWaypointsResponse | {
-  kind: 'MOTION_ERROR';
-} & MovementErrorResponse | {
-  kind: 'PAUSE_RECEIVED';
-} & PauseJoggingResponse | {
-  kind: 'POSE_WAYPOINTS_RECEIVED';
-} & PoseWaypointsResponse;
 export type FanucControllerKindEnum = typeof FanucControllerKindEnum[keyof typeof FanucControllerKindEnum];
 export type FeedbackAxisRangeExceededErrorFeedbackNameEnum = typeof FeedbackAxisRangeExceededErrorFeedbackNameEnum[keyof typeof FeedbackAxisRangeExceededErrorFeedbackNameEnum];
 export type FeedbackCollisionErrorFeedbackNameEnum = typeof FeedbackCollisionErrorFeedbackNameEnum[keyof typeof FeedbackCollisionErrorFeedbackNameEnum];
@@ -1887,7 +2033,10 @@ export type FeedbackSingularityErrorFeedbackNameEnum = typeof FeedbackSingularit
 export type FeedbackStartJointsMissingErrorFeedbackNameEnum = typeof FeedbackStartJointsMissingErrorFeedbackNameEnum[keyof typeof FeedbackStartJointsMissingErrorFeedbackNameEnum];
 export type FeedbackTorqueExceededErrorFeedbackNameEnum = typeof FeedbackTorqueExceededErrorFeedbackNameEnum[keyof typeof FeedbackTorqueExceededErrorFeedbackNameEnum];
 export type FloatValueValueTypeEnum = typeof FloatValueValueTypeEnum[keyof typeof FloatValueValueTypeEnum];
+export type GetKinematicConfigurationValidationErrorAllOfData = ErrorInvalidJointCount | ErrorUnsupportedOperation;
 export type InconsistentTrajectorySizeErrorKindEnum = typeof InconsistentTrajectorySizeErrorKindEnum[keyof typeof InconsistentTrajectorySizeErrorKindEnum];
+export type InitializeActionChunksRequestMessageTypeEnum = typeof InitializeActionChunksRequestMessageTypeEnum[keyof typeof InitializeActionChunksRequestMessageTypeEnum];
+export type InitializeActionChunksResponseKindEnum = typeof InitializeActionChunksResponseKindEnum[keyof typeof InitializeActionChunksResponseKindEnum];
 export type InitializeJoggingRequestMessageTypeEnum = typeof InitializeJoggingRequestMessageTypeEnum[keyof typeof InitializeJoggingRequestMessageTypeEnum];
 export type InitializeJoggingResponseKindEnum = typeof InitializeJoggingResponseKindEnum[keyof typeof InitializeJoggingResponseKindEnum];
 export type InitializeMovementRequestMessageTypeEnum = typeof InitializeMovementRequestMessageTypeEnum[keyof typeof InitializeMovementRequestMessageTypeEnum];
@@ -1941,8 +2090,7 @@ export type JointLimitExceededErrorKindEnum = typeof JointLimitExceededErrorKind
 export type JointTypeEnum = typeof JointTypeEnum[keyof typeof JointTypeEnum];
 export type JointVelocityRequestMessageTypeEnum = typeof JointVelocityRequestMessageTypeEnum[keyof typeof JointVelocityRequestMessageTypeEnum];
 export type JointVelocityResponseKindEnum = typeof JointVelocityResponseKindEnum[keyof typeof JointVelocityResponseKindEnum];
-export type JointWaypointsRequestMessageTypeEnum = typeof JointWaypointsRequestMessageTypeEnum[keyof typeof JointWaypointsRequestMessageTypeEnum];
-export type JointWaypointsResponseKindEnum = typeof JointWaypointsResponseKindEnum[keyof typeof JointWaypointsResponseKindEnum];
+export type JointWaypointKindEnum = typeof JointWaypointKindEnum[keyof typeof JointWaypointKindEnum];
 export type KinematicBranchElbow = typeof KinematicBranchElbow[keyof typeof KinematicBranchElbow];
 export type KinematicBranchShoulder = typeof KinematicBranchShoulder[keyof typeof KinematicBranchShoulder];
 export type KinematicBranchWrist = typeof KinematicBranchWrist[keyof typeof KinematicBranchWrist];
@@ -1954,6 +2102,7 @@ export type LinkChainValueOrKey = {
   source: 'value';
 } & LinkChainValue;
 export type LinkChainValueSourceEnum = typeof LinkChainValueSourceEnum[keyof typeof LinkChainValueSourceEnum];
+export type Location1Inner = number | string;
 export type Manufacturer = typeof Manufacturer[keyof typeof Manufacturer];
 export type MergeTrajectoriesErrorErrorFeedback = FeedbackCollision | FeedbackJointLimitExceeded | FeedbackOutOfWorkspace | FeedbackSingularity;
 export type MergeTrajectoriesResponseFeedbackInner = MergeTrajectoriesError | TrajectorySection;
@@ -1967,7 +2116,8 @@ export type MovementErrorResponseKindEnum = typeof MovementErrorResponseKindEnum
 export type MultiSearchCollisionFreeResponseResponse = MultiJointTrajectory | PlanCollisionFreeFailedResponse;
 export type MultiSearchCollisionFreeValidationErrorAllOfData = ErrorMotionGroupKeyMismatch | MultiErrorInvalidJointCount | MultiErrorJointLimitExceeded | MultiErrorJointPositionCollision;
 export type NanValueErrorKindEnum = typeof NanValueErrorKindEnum[keyof typeof NanValueErrorKindEnum];
-export type NetworkStateConnectionTypeEnum = typeof NetworkStateConnectionTypeEnum[keyof typeof NetworkStateConnectionTypeEnum];
+export type NetworkBackend = typeof NetworkBackend[keyof typeof NetworkBackend];
+export type NetworkLinkState = typeof NetworkLinkState[keyof typeof NetworkLinkState];
 export type NovaConfig = {
   instanceUrl: string;
   accessToken?: string;
@@ -1982,6 +2132,8 @@ export type PathDirectionConstrainedCartesianPTPPathDefinitionNameEnum = typeof 
 export type PathDirectionConstrainedJointPTPPathDefinitionNameEnum = typeof PathDirectionConstrainedJointPTPPathDefinitionNameEnum[keyof typeof PathDirectionConstrainedJointPTPPathDefinitionNameEnum];
 export type PathJointPTPPathDefinitionNameEnum = typeof PathJointPTPPathDefinitionNameEnum[keyof typeof PathJointPTPPathDefinitionNameEnum];
 export type PathLinePathDefinitionNameEnum = typeof PathLinePathDefinitionNameEnum[keyof typeof PathLinePathDefinitionNameEnum];
+export type PauseActionChunksRequestMessageTypeEnum = typeof PauseActionChunksRequestMessageTypeEnum[keyof typeof PauseActionChunksRequestMessageTypeEnum];
+export type PauseActionChunksResponseKindEnum = typeof PauseActionChunksResponseKindEnum[keyof typeof PauseActionChunksResponseKindEnum];
 export type PauseJoggingRequestMessageTypeEnum = typeof PauseJoggingRequestMessageTypeEnum[keyof typeof PauseJoggingRequestMessageTypeEnum];
 export type PauseJoggingResponseKindEnum = typeof PauseJoggingResponseKindEnum[keyof typeof PauseJoggingResponseKindEnum];
 export type PauseMovementRequestMessageTypeEnum = typeof PauseMovementRequestMessageTypeEnum[keyof typeof PauseMovementRequestMessageTypeEnum];
@@ -1993,8 +2145,7 @@ export type PlanTrajectoryResponseResponse = JointTrajectory | PlanTrajectoryFai
 export type PlanValidationErrorAllOfData = ErrorDirectionConstraintNotMet | ErrorDirectionConstraintNotNormalized | ErrorInvalidJointCount | ErrorJointLimitExceeded | ErrorJointPositionCollision | ErrorUnsupportedOperation;
 export type PlaybackSpeedRequestMessageTypeEnum = typeof PlaybackSpeedRequestMessageTypeEnum[keyof typeof PlaybackSpeedRequestMessageTypeEnum];
 export type PlaybackSpeedResponseKindEnum = typeof PlaybackSpeedResponseKindEnum[keyof typeof PlaybackSpeedResponseKindEnum];
-export type PoseWaypointsRequestMessageTypeEnum = typeof PoseWaypointsRequestMessageTypeEnum[keyof typeof PoseWaypointsRequestMessageTypeEnum];
-export type PoseWaypointsResponseKindEnum = typeof PoseWaypointsResponseKindEnum[keyof typeof PoseWaypointsResponseKindEnum];
+export type PoseWaypointKindEnum = typeof PoseWaypointKindEnum[keyof typeof PoseWaypointKindEnum];
 export type ProfinetIODirection = typeof ProfinetIODirection[keyof typeof ProfinetIODirection];
 export type ProfinetIOTypeEnum = typeof ProfinetIOTypeEnum[keyof typeof ProfinetIOTypeEnum];
 export type ProgramRunState = typeof ProgramRunState[keyof typeof ProgramRunState];
@@ -2002,7 +2153,7 @@ export type ProjectJointPositionDirectionConstraintValidationErrorAllOfData = Er
 export type RectangleShapeTypeEnum = typeof RectangleShapeTypeEnum[keyof typeof RectangleShapeTypeEnum];
 export type RectangularCapsuleShapeTypeEnum = typeof RectangularCapsuleShapeTypeEnum[keyof typeof RectangularCapsuleShapeTypeEnum];
 export type ReleaseChannel = typeof ReleaseChannel[keyof typeof ReleaseChannel];
-export type RobotControllerConfiguration = AbbController | FanucController | KukaController | UniversalrobotsController | VirtualController | YaskawaController;
+export type RobotControllerConfiguration = AbbController | BostondynamicsController | FanucController | KukaController | StaubliController | TechmanController | UnitreeController | UniversalrobotsController | VirtualController | YaskawaController;
 export type RobotSystemMode = typeof RobotSystemMode[keyof typeof RobotSystemMode];
 export type RRTConnectAlgorithmAlgorithmNameEnum = typeof RRTConnectAlgorithmAlgorithmNameEnum[keyof typeof RRTConnectAlgorithmAlgorithmNameEnum];
 export type RRTConnectAlgorithmStepSize = Range | number;
@@ -2019,10 +2170,14 @@ export type Snap7IOTypeEnum = typeof Snap7IOTypeEnum[keyof typeof Snap7IOTypeEnu
 export type SphereShapeTypeEnum = typeof SphereShapeTypeEnum[keyof typeof SphereShapeTypeEnum];
 export type StartMovementRequestMessageTypeEnum = typeof StartMovementRequestMessageTypeEnum[keyof typeof StartMovementRequestMessageTypeEnum];
 export type StartMovementResponseKindEnum = typeof StartMovementResponseKindEnum[keyof typeof StartMovementResponseKindEnum];
+export type StaubliControllerKindEnum = typeof StaubliControllerKindEnum[keyof typeof StaubliControllerKindEnum];
+export type StopActionChunksRequestMessageTypeEnum = typeof StopActionChunksRequestMessageTypeEnum[keyof typeof StopActionChunksRequestMessageTypeEnum];
+export type StopActionChunksResponseKindEnum = typeof StopActionChunksResponseKindEnum[keyof typeof StopActionChunksResponseKindEnum];
 export type StorageKeySourceEnum = typeof StorageKeySourceEnum[keyof typeof StorageKeySourceEnum];
 export type TcpRequiredErrorKindEnum = typeof TcpRequiredErrorKindEnum[keyof typeof TcpRequiredErrorKindEnum];
 export type TcpVelocityRequestMessageTypeEnum = typeof TcpVelocityRequestMessageTypeEnum[keyof typeof TcpVelocityRequestMessageTypeEnum];
 export type TcpVelocityResponseKindEnum = typeof TcpVelocityResponseKindEnum[keyof typeof TcpVelocityResponseKindEnum];
+export type TechmanControllerKindEnum = typeof TechmanControllerKindEnum[keyof typeof TechmanControllerKindEnum];
 export type ToolValueOrKey = {
   source: 'key';
 } & StorageKey | {
@@ -2049,16 +2204,27 @@ export type TrajectoryPausedByUserKindEnum = typeof TrajectoryPausedByUserKindEn
 export type TrajectoryPausedOnIOKindEnum = typeof TrajectoryPausedOnIOKindEnum[keyof typeof TrajectoryPausedOnIOKindEnum];
 export type TrajectoryRunningKindEnum = typeof TrajectoryRunningKindEnum[keyof typeof TrajectoryRunningKindEnum];
 export type TrajectoryWaitForIOKindEnum = typeof TrajectoryWaitForIOKindEnum[keyof typeof TrajectoryWaitForIOKindEnum];
+export type UnitreeControllerKindEnum = typeof UnitreeControllerKindEnum[keyof typeof UnitreeControllerKindEnum];
+export type UnitreeControllerRobotTypeEnum = typeof UnitreeControllerRobotTypeEnum[keyof typeof UnitreeControllerRobotTypeEnum];
 export type UnitType = typeof UnitType[keyof typeof UnitType];
 export type UniversalrobotsControllerKindEnum = typeof UniversalrobotsControllerKindEnum[keyof typeof UniversalrobotsControllerKindEnum];
-export type ValidationErrorLocInner = number | string;
+export type UnpauseActionChunksRequestMessageTypeEnum = typeof UnpauseActionChunksRequestMessageTypeEnum[keyof typeof UnpauseActionChunksRequestMessageTypeEnum];
+export type UnpauseActionChunksResponseKindEnum = typeof UnpauseActionChunksResponseKindEnum[keyof typeof UnpauseActionChunksResponseKindEnum];
 export type VirtualControllerKindEnum = typeof VirtualControllerKindEnum[keyof typeof VirtualControllerKindEnum];
+export type WaypointCoordinates = {
+  kind: 'JOINTS';
+} & JointWaypoint | {
+  kind: 'POSE';
+} & PoseWaypoint;
 export type YaskawaControllerKindEnum = typeof YaskawaControllerKindEnum[keyof typeof YaskawaControllerKindEnum];
 export type ZodValidationErrorErrorCodeEnum = typeof ZodValidationErrorErrorCodeEnum[keyof typeof ZodValidationErrorErrorCodeEnum];
 export type ZodValidationErrorErrorDetailsInnerPathInner = number | string;
 // #endregion
 
 // #region Classes
+export declare class ActionChunkStreamingApi extends BaseAPI {
+  executeActionChunks(_: string, _: string, _: ExecuteActionChunksRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ExecuteActionChunksResponse, any, {}>>;
+}
 export declare class ApplicationApi extends BaseAPI {
   addApp(_: string, _: App, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
   clearApps(_: string, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
@@ -2090,7 +2256,7 @@ export declare class BUSInputsOutputsApi extends BaseAPI {
   getBusIOValues(_: string, _?: Array<string>, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<IOValue[], any, {}>>;
   getProfinetDescription(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ProfinetDescription, any, {}>>;
   getProfinetGSDML(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<string, any, {}>>;
-  getProfinetIOsFromFile(_: string, _?: number, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<string, any, {}>>;
+  getProfinetIOsFromFile(_: string, _?: Array<ProfinetSlotOffset>, _?: number, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<string, any, {}>>;
   listBusIODescriptions(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<BusIODescription[], any, {}>>;
   listModbusIOs(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ModbusIO[], any, {}>>;
   listProfinetIOs(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ProfinetIO[], any, {}>>;
@@ -2147,12 +2313,12 @@ export declare class ControllerInputsOutputsApi extends BaseAPI {
 }
 export declare class JoggingApi extends BaseAPI {
   executeJogging(_: string, _: string, _: ExecuteJoggingRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ExecuteJoggingResponse, any, {}>>;
-  executeWaypointJogging(_: string, _: string, _: ExecuteWaypointJoggingRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ExecuteWaypointJoggingResponse, any, {}>>;
 }
 export declare class KinematicsApi extends BaseAPI {
   configuredPoseInverse(_: string, _: ConfiguredPoseInverseRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ConfiguredPoseInverseResponse, any, {}>>;
   convertVendorConfiguredPose(_: string, _: ConvertVendorConfiguredPoseRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ConfiguredPose[], any, {}>>;
   forwardKinematics(_: string, _: ForwardKinematicsRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ForwardKinematicsResponse, any, {}>>;
+  getKinematicConfiguration(_: string, _: GetKinematicConfigurationRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<GetKinematicConfigurationResponse, any, {}>>;
   inverseKinematics(_: string, _: InverseKinematicsRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<InverseKinematicsResponse, any, {}>>;
   projectJointPositionDirectionConstraint(_: string, _: ProjectJointPositionDirectionConstraintRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ProjectJointPositionDirectionConstraintResponse, any, {}>>;
 }
@@ -2171,6 +2337,7 @@ export declare class MotionGroupModelsApi extends BaseAPI {
   copyMotionGroupModel(_: string, _: CopyMotionGroupModelRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupModelDescription, any, {}>>;
   deleteExperimentalMotionGroupModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
   exportMotionGroupModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<File, any, {}>>;
+  getConfigurationForMotionGroup(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupConfiguration, any, {}>>;
   getMotionGroupCollisionModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<{
     [key: string]: Collider;
   }[], any, {}>>;
@@ -2180,6 +2347,7 @@ export declare class MotionGroupModelsApi extends BaseAPI {
   getMotionGroupKinematicModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<KinematicModel, any, {}>>;
   getMotionGroupLimitModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<OperationLimits, any, {}>>;
   getMotionGroupModels(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<string[], any, {}>>;
+  getMotionGroupModelsCatalog(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupModelCatalog[], any, {}>>;
   getMotionGroupUsdModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<File, any, {}>>;
   importMotionGroupModel(_: File, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupModelDescription, any, {}>>;
 }
@@ -2202,6 +2370,7 @@ export declare class NovaAPIClient {
 export declare class NOVACloudApi extends BaseAPI {
   connectToNovaCloud(_?: number, _?: CloudConnectionRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<CloudRegistrationSuccessResponse, any, {}>>;
   disconnectFromNovaCloud(_?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<CloudDisconnectionStatusDisconnected, any, {}>>;
+  getCloudStatus(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<CloudStatus, any, {}>>;
   getNovaCloudConfig(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<CloudConfigStatus, any, {}>>;
 }
 export declare class ProgramApi extends BaseAPI {
@@ -2284,7 +2453,7 @@ export declare class SystemApi extends BaseAPI {
     [key: string]: string;
   }, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<File, any, {}>>;
   checkNovaVersionUpdate(_: ReleaseChannel, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<string, any, {}>>;
-  getArpScan(_?: string, _?: string, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<NetworkDevice[], any, {}>>;
+  getArpScan(_: string, _: string, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<NetworkDevice[], any, {}>>;
   getConfigurationBackupStatus(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ConfigurationArchiveStatus, any, {}>>;
   getDiagnosePackage(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<File, any, {}>>;
   getNetworkInterfaces(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<NetworkInterface[], any, {}>>;
@@ -2350,6 +2519,15 @@ export declare class VirtualControllerInputsOutputsApi extends BaseAPI {
 // #endregion
 
 // #region Variables
+export declare const ActionChunkStreamingApiAxiosParamCreator: (configuration?: Configuration) => {
+  executeActionChunks: (cell: string, controller: string, executeActionChunksRequest: ExecuteActionChunksRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+};
+export declare const ActionChunkStreamingApiFactory: (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) => {
+  executeActionChunks(cell: string, controller: string, executeActionChunksRequest: ExecuteActionChunksRequest, options?: RawAxiosRequestConfig): AxiosPromise<ExecuteActionChunksResponse>;
+};
+export declare const ActionChunkStreamingApiFp: (configuration?: Configuration) => {
+  executeActionChunks(cell: string, controller: string, executeActionChunksRequest: ExecuteActionChunksRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteActionChunksResponse>>;
+};
 export declare const ApplicationApiAxiosParamCreator: (configuration?: Configuration) => {
   addApp: (cell: string, app: App, completionTimeout?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   clearApps: (cell: string, completionTimeout?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
@@ -2392,7 +2570,7 @@ export declare const BUSInputsOutputsApiAxiosParamCreator: (configuration?: Conf
   getBusIOValues: (cell: string, ios?: Array<string>, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getProfinetDescription: (cell: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getProfinetGSDML: (cell: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
-  getProfinetIOsFromFile: (cell: string, inputOffset?: number, outputOffset?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getProfinetIOsFromFile: (cell: string, offsets?: Array<ProfinetSlotOffset>, inputOffset?: number, outputOffset?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   listBusIODescriptions: (cell: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   listModbusIOs: (cell: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   listProfinetIOs: (cell: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
@@ -2417,7 +2595,7 @@ export declare const BUSInputsOutputsApiFactory: (configuration?: Configuration,
   getBusIOValues(cell: string, ios?: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<Array<IOValue>>;
   getProfinetDescription(cell: string, options?: RawAxiosRequestConfig): AxiosPromise<ProfinetDescription>;
   getProfinetGSDML(cell: string, options?: RawAxiosRequestConfig): AxiosPromise<string>;
-  getProfinetIOsFromFile(cell: string, inputOffset?: number, outputOffset?: number, options?: RawAxiosRequestConfig): AxiosPromise<string>;
+  getProfinetIOsFromFile(cell: string, offsets?: Array<ProfinetSlotOffset>, inputOffset?: number, outputOffset?: number, options?: RawAxiosRequestConfig): AxiosPromise<string>;
   listBusIODescriptions(cell: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<BusIODescription>>;
   listModbusIOs(cell: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ModbusIO>>;
   listProfinetIOs(cell: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ProfinetIO>>;
@@ -2442,7 +2620,7 @@ export declare const BUSInputsOutputsApiFp: (configuration?: Configuration) => {
   getBusIOValues(cell: string, ios?: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<IOValue>>>;
   getProfinetDescription(cell: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProfinetDescription>>;
   getProfinetGSDML(cell: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>>;
-  getProfinetIOsFromFile(cell: string, inputOffset?: number, outputOffset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>>;
+  getProfinetIOsFromFile(cell: string, offsets?: Array<ProfinetSlotOffset>, inputOffset?: number, outputOffset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>>;
   listBusIODescriptions(cell: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<BusIODescription>>>;
   listModbusIOs(cell: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ModbusIO>>>;
   listProfinetIOs(cell: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ProfinetIO>>>;
@@ -2560,20 +2738,18 @@ export declare const ControllerInputsOutputsApiFp: (configuration?: Configuratio
 };
 export declare const JoggingApiAxiosParamCreator: (configuration?: Configuration) => {
   executeJogging: (cell: string, controller: string, executeJoggingRequest: ExecuteJoggingRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
-  executeWaypointJogging: (cell: string, controller: string, executeWaypointJoggingRequest: ExecuteWaypointJoggingRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
 };
 export declare const JoggingApiFactory: (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) => {
   executeJogging(cell: string, controller: string, executeJoggingRequest: ExecuteJoggingRequest, options?: RawAxiosRequestConfig): AxiosPromise<ExecuteJoggingResponse>;
-  executeWaypointJogging(cell: string, controller: string, executeWaypointJoggingRequest: ExecuteWaypointJoggingRequest, options?: RawAxiosRequestConfig): AxiosPromise<ExecuteWaypointJoggingResponse>;
 };
 export declare const JoggingApiFp: (configuration?: Configuration) => {
   executeJogging(cell: string, controller: string, executeJoggingRequest: ExecuteJoggingRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteJoggingResponse>>;
-  executeWaypointJogging(cell: string, controller: string, executeWaypointJoggingRequest: ExecuteWaypointJoggingRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteWaypointJoggingResponse>>;
 };
 export declare const KinematicsApiAxiosParamCreator: (configuration?: Configuration) => {
   configuredPoseInverse: (cell: string, configuredPoseInverseRequest: ConfiguredPoseInverseRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   convertVendorConfiguredPose: (cell: string, convertVendorConfiguredPoseRequest: ConvertVendorConfiguredPoseRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   forwardKinematics: (cell: string, forwardKinematicsRequest: ForwardKinematicsRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getKinematicConfiguration: (cell: string, getKinematicConfigurationRequest: GetKinematicConfigurationRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   inverseKinematics: (cell: string, inverseKinematicsRequest: InverseKinematicsRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   projectJointPositionDirectionConstraint: (cell: string, projectJointPositionDirectionConstraintRequest: ProjectJointPositionDirectionConstraintRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
 };
@@ -2581,6 +2757,7 @@ export declare const KinematicsApiFactory: (configuration?: Configuration, baseP
   configuredPoseInverse(cell: string, configuredPoseInverseRequest: ConfiguredPoseInverseRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConfiguredPoseInverseResponse>;
   convertVendorConfiguredPose(cell: string, convertVendorConfiguredPoseRequest: ConvertVendorConfiguredPoseRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<ConfiguredPose>>;
   forwardKinematics(cell: string, forwardKinematicsRequest: ForwardKinematicsRequest, options?: RawAxiosRequestConfig): AxiosPromise<ForwardKinematicsResponse>;
+  getKinematicConfiguration(cell: string, getKinematicConfigurationRequest: GetKinematicConfigurationRequest, options?: RawAxiosRequestConfig): AxiosPromise<GetKinematicConfigurationResponse>;
   inverseKinematics(cell: string, inverseKinematicsRequest: InverseKinematicsRequest, options?: RawAxiosRequestConfig): AxiosPromise<InverseKinematicsResponse>;
   projectJointPositionDirectionConstraint(cell: string, projectJointPositionDirectionConstraintRequest: ProjectJointPositionDirectionConstraintRequest, options?: RawAxiosRequestConfig): AxiosPromise<ProjectJointPositionDirectionConstraintResponse>;
 };
@@ -2588,6 +2765,7 @@ export declare const KinematicsApiFp: (configuration?: Configuration) => {
   configuredPoseInverse(cell: string, configuredPoseInverseRequest: ConfiguredPoseInverseRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConfiguredPoseInverseResponse>>;
   convertVendorConfiguredPose(cell: string, convertVendorConfiguredPoseRequest: ConvertVendorConfiguredPoseRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ConfiguredPose>>>;
   forwardKinematics(cell: string, forwardKinematicsRequest: ForwardKinematicsRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ForwardKinematicsResponse>>;
+  getKinematicConfiguration(cell: string, getKinematicConfigurationRequest: GetKinematicConfigurationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetKinematicConfigurationResponse>>;
   inverseKinematics(cell: string, inverseKinematicsRequest: InverseKinematicsRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InverseKinematicsResponse>>;
   projectJointPositionDirectionConstraint(cell: string, projectJointPositionDirectionConstraintRequest: ProjectJointPositionDirectionConstraintRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectJointPositionDirectionConstraintResponse>>;
 };
@@ -2628,6 +2806,7 @@ export declare const MotionGroupModelsApiAxiosParamCreator: (configuration?: Con
   copyMotionGroupModel: (motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   deleteExperimentalMotionGroupModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   exportMotionGroupModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getConfigurationForMotionGroup: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupCollisionModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupDynamicModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupGlbModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
@@ -2635,6 +2814,7 @@ export declare const MotionGroupModelsApiAxiosParamCreator: (configuration?: Con
   getMotionGroupKinematicModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupLimitModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupModels: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getMotionGroupModelsCatalog: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupUsdModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   importMotionGroupModel: (body: File, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
 };
@@ -2642,6 +2822,7 @@ export declare const MotionGroupModelsApiFactory: (configuration?: Configuration
   copyMotionGroupModel(motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, options?: RawAxiosRequestConfig): AxiosPromise<MotionGroupModelDescription>;
   deleteExperimentalMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
   exportMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<File>;
+  getConfigurationForMotionGroup(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<MotionGroupConfiguration>;
   getMotionGroupCollisionModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<{
     [key: string]: Collider;
   }>>;
@@ -2651,6 +2832,7 @@ export declare const MotionGroupModelsApiFactory: (configuration?: Configuration
   getMotionGroupKinematicModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<KinematicModel>;
   getMotionGroupLimitModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<OperationLimits>;
   getMotionGroupModels(options?: RawAxiosRequestConfig): AxiosPromise<Array<string>>;
+  getMotionGroupModelsCatalog(options?: RawAxiosRequestConfig): AxiosPromise<Array<MotionGroupModelCatalog>>;
   getMotionGroupUsdModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<File>;
   importMotionGroupModel(body: File, options?: RawAxiosRequestConfig): AxiosPromise<MotionGroupModelDescription>;
 };
@@ -2658,6 +2840,7 @@ export declare const MotionGroupModelsApiFp: (configuration?: Configuration) => 
   copyMotionGroupModel(motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MotionGroupModelDescription>>;
   deleteExperimentalMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>>;
   exportMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>>;
+  getConfigurationForMotionGroup(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MotionGroupConfiguration>>;
   getMotionGroupCollisionModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<{
     [key: string]: Collider;
   }>>>;
@@ -2667,22 +2850,26 @@ export declare const MotionGroupModelsApiFp: (configuration?: Configuration) => 
   getMotionGroupKinematicModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<KinematicModel>>;
   getMotionGroupLimitModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OperationLimits>>;
   getMotionGroupModels(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>>;
+  getMotionGroupModelsCatalog(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MotionGroupModelCatalog>>>;
   getMotionGroupUsdModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>>;
   importMotionGroupModel(body: File, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MotionGroupModelDescription>>;
 };
 export declare const NOVACloudApiAxiosParamCreator: (configuration?: Configuration) => {
   connectToNovaCloud: (completionTimeout?: number, cloudConnectionRequest?: CloudConnectionRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   disconnectFromNovaCloud: (completionTimeout?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getCloudStatus: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getNovaCloudConfig: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
 };
 export declare const NOVACloudApiFactory: (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) => {
   connectToNovaCloud(completionTimeout?: number, cloudConnectionRequest?: CloudConnectionRequest, options?: RawAxiosRequestConfig): AxiosPromise<CloudRegistrationSuccessResponse>;
   disconnectFromNovaCloud(completionTimeout?: number, options?: RawAxiosRequestConfig): AxiosPromise<CloudDisconnectionStatusDisconnected>;
+  getCloudStatus(options?: RawAxiosRequestConfig): AxiosPromise<CloudStatus>;
   getNovaCloudConfig(options?: RawAxiosRequestConfig): AxiosPromise<CloudConfigStatus>;
 };
 export declare const NOVACloudApiFp: (configuration?: Configuration) => {
   connectToNovaCloud(completionTimeout?: number, cloudConnectionRequest?: CloudConnectionRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudRegistrationSuccessResponse>>;
   disconnectFromNovaCloud(completionTimeout?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudDisconnectionStatusDisconnected>>;
+  getCloudStatus(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudStatus>>;
   getNovaCloudConfig(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudConfigStatus>>;
 };
 export declare const operationServerMap: ServerMap;
@@ -2884,7 +3071,7 @@ export declare const SystemApiAxiosParamCreator: (configuration?: Configuration)
     [key: string]: string;
   }, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   checkNovaVersionUpdate: (channel: ReleaseChannel, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
-  getArpScan: (_interface?: string, cidr?: string, timeout?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getArpScan: (_interface: string, cidr: string, timeout?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getConfigurationBackupStatus: (operationId: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getDiagnosePackage: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getNetworkInterfaces: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
@@ -2900,7 +3087,7 @@ export declare const SystemApiFactory: (configuration?: Configuration, basePath?
     [key: string]: string;
   }, options?: RawAxiosRequestConfig): AxiosPromise<File>;
   checkNovaVersionUpdate(channel: ReleaseChannel, options?: RawAxiosRequestConfig): AxiosPromise<string>;
-  getArpScan(_interface?: string, cidr?: string, timeout?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<NetworkDevice>>;
+  getArpScan(_interface: string, cidr: string, timeout?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<NetworkDevice>>;
   getConfigurationBackupStatus(operationId: string, options?: RawAxiosRequestConfig): AxiosPromise<ConfigurationArchiveStatus>;
   getDiagnosePackage(options?: RawAxiosRequestConfig): AxiosPromise<File>;
   getNetworkInterfaces(options?: RawAxiosRequestConfig): AxiosPromise<Array<NetworkInterface>>;
@@ -2916,7 +3103,7 @@ export declare const SystemApiFp: (configuration?: Configuration) => {
     [key: string]: string;
   }, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>>;
   checkNovaVersionUpdate(channel: ReleaseChannel, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>>;
-  getArpScan(_interface?: string, cidr?: string, timeout?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<NetworkDevice>>>;
+  getArpScan(_interface: string, cidr: string, timeout?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<NetworkDevice>>>;
   getConfigurationBackupStatus(operationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConfigurationArchiveStatus>>;
   getDiagnosePackage(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>>;
   getNetworkInterfaces(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<NetworkInterface>>>;
