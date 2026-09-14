@@ -31,7 +31,7 @@
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.5",
-    "knip": "^5.88.1",
+    "knip": "^6.31.0",
     "typescript": "5.9.3",
     "vite": "^8.2.0"
   }
