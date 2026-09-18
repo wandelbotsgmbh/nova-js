@@ -1,6 +1,9 @@
 name: auto-merge nova-api updates
 
-on: pull_request
+on:
+  pull_request:
+  pull_request_review:
+    types: [submitted]
 
 permissions:
   contents: write
@@ -10,6 +13,7 @@ jobs:
   update-api-snapshot:
     runs-on: ubuntu-latest
     if: >-
+      github.event_name == 'pull_request' &&
       github.event.pull_request.user.login == 'dependabot[bot]' &&
       contains(github.event.pull_request.title, '@wandelbots/nova-api')
     steps:
@@ -39,6 +43,7 @@ jobs:
   auto-merge:
     runs-on: ubuntu-latest
     if: >-
+      github.event_name == 'pull_request' &&
       github.event.pull_request.user.login == 'dependabot[bot]' &&
       contains(github.event.pull_request.title, '@wandelbots/nova-api')
     steps:
@@ -52,3 +57,47 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.MERGE_TOKEN }}
+  resolve-code-quality-comments:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request_review' &&
+      github.event.review.user.login == 'github-code-quality' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      contains(github.event.pull_request.title, '@wandelbots/nova-api')
+    steps:
+      # Code Quality flags __snapshots__ files as if they were real code (e.g. "BaseAPI
+      # used before declaration"), but they're generated, never-executed diff artifacts,
+      # so these findings are always false positives and would otherwise block automerge
+      # via the "require conversation resolution" branch protection rule.
+      - name: Resolve Code Quality comments on generated snapshot files
+        run: |
+          thread_ids=$(gh api graphql -f query='
+            query($owner: String!, $repo: String!, $pr: Int!) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $pr) {
+                  reviewThreads(first: 50) {
+                    nodes {
+                      id
+                      isResolved
+                      path
+                      comments(first: 1) { nodes { author { login } } }
+                    }
+                  }
+                }
+              }
+            }' -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
+            --jq '.data.repository.pullRequest.reviewThreads.nodes[]
+              | select(.isResolved == false
+                  and .comments.nodes[0].author.login == "github-code-quality"
+                  and (.path | startswith("__snapshots__/")))
+              | .id')
+
+          for id in $thread_ids; do
+            echo "Resolving thread $id"
+            gh api graphql -f query='mutation($id: ID!) { resolveReviewThread(input: {threadId: $id}) { thread { isResolved } } }' -f id="$id"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
