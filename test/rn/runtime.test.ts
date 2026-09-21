@@ -21,8 +21,10 @@ test("has a window that is not a DOM window", () => {
   expect(typeof sessionStorage).toBe("undefined")
 })
 
-test("identifies itself as React Native and has the network primitives", () => {
-  expect((navigator as { product?: string }).product).toBe("ReactNative")
+test("has the network primitives and no product marker", () => {
+  // React Native 0.87.1 under @react-native/jest-preset leaves
+  // `navigator.product` undefined, so nothing here may rely on that marker.
+  expect((navigator as { product?: string }).product).toBeUndefined()
   expect(typeof WebSocket).toBe("function")
   expect(typeof fetch).toBe("function")
 })
