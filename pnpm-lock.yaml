@@ -64,6 +64,9 @@ importers:
       knip:
         specifier: ^6.31.0
         version: 6.31.0
+      metro-resolver:
+        specifier: ^0.87.1
+        version: 0.87.1
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -2336,6 +2339,9 @@ packages:
   flatqueue@3.0.0:
     resolution: {integrity: sha512-y1deYaVt+lIc/d2uIcWDNd0CrdQTO5xoCjeFdhX0kSXvm2Acm0o+3bAOiYklTEoRyzwio3sv3/IiBZdusbAe2Q==}
 
+  flow-enums-runtime@0.0.6:
+    resolution: {integrity: sha512-3PYnM29RFXwvAN6Pc/scUfkI7RwhQ/xqyLUyPNlXUp9S40zI8nup9tUSrTLSVnWGBN38FNiGWbwZOB6uR4OGdw==}
+
   follow-redirects@1.16.0:
     resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
     engines: {node: '>=4.0'}
@@ -2962,6 +2968,10 @@ packages:
 
   merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
+
+  metro-resolver@0.87.1:
+    resolution: {integrity: sha512-FXH/brY69wT6sPxaSW8BhMmDGD/6irmBr/cL4rUi+VWwqR3pbvdcfUOfyjcHucgQ7pe5IW3xJY21eHKLVKNumQ==}
+    engines: {node: ^22.13.0 || ^24.3.0 || >= 26.0.0}
 
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
@@ -6347,6 +6357,8 @@ snapshots:
 
   flatqueue@3.0.0: {}
 
+  flow-enums-runtime@0.0.6: {}
+
   follow-redirects@1.16.0: {}
 
   for-each@0.3.5:
@@ -6956,6 +6968,10 @@ snapshots:
   meow@13.2.0: {}
 
   merge-stream@2.0.0: {}
+
+  metro-resolver@0.87.1:
+    dependencies:
+      flow-enums-runtime: 0.0.6
 
   micromatch@4.0.8:
     dependencies:
