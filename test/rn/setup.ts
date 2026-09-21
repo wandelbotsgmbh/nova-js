@@ -5,8 +5,12 @@
 //   - it defines `window` as an alias of `global`, so `typeof window` is
 //     "object"; but that object has no `location` and no web storage, and
 //     `document` does not exist at all
-//   - the platform identifies itself through `navigator.product`
 //   - `fetch` and `WebSocket` exist and behave like the browser ones
+//
+// The globals match what React Native 0.87.1 shows under
+// `@react-native/jest-preset` 0.87.1, the environment a native app's tests
+// run in. `navigator.product` is deliberately not emulated: that environment
+// leaves it undefined, and this library does not read it.
 
 const emulatedGlobals = globalThis as {
   location?: unknown
@@ -28,15 +32,3 @@ delete emulatedGlobals.location
 delete emulatedGlobals.document
 delete emulatedGlobals.localStorage
 delete emulatedGlobals.sessionStorage
-
-// React Native's Navigator: `product` is the platform marker libraries check.
-// Node defines `navigator` as a getter-only property, so it has to be
-// redefined rather than assigned.
-Object.defineProperty(globalThis, "navigator", {
-  value: {
-    product: "ReactNative",
-    userAgent: "ReactNative",
-  },
-  configurable: true,
-  writable: true,
-})
