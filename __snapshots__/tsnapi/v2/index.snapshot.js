@@ -79,6 +79,14 @@ export class ControllerInputsOutputsApi extends BaseAPI {
   streamIOValues(_, _, _, _) {}
   waitForIOEvent(_, _, _, _) {}
 }
+export class DatasetsApi extends BaseAPI {
+  createDataset(_, _, _) {}
+  deleteDataset(_, _, _, _) {}
+  getDataset(_, _, _, _) {}
+  getDatasets(_, _, _, _) {}
+  localizeDatasetFramePose(_, _, _, _, _, _) {}
+  resolveDatasetFramePose(_, _, _, _, _, _) {}
+}
 export class JoggingApi extends BaseAPI {
   executeJogging(_, _, _, _) {}
 }
@@ -212,7 +220,9 @@ export class TrajectoryExecutionApi extends BaseAPI {
   executeTrajectory(_, _, _, _) {}
 }
 export class TrajectoryPlanningApi extends BaseAPI {
+  configureRerunLogging(_, _, _) {}
   mergeTrajectories(_, _, _) {}
+  optimizeMotionCommands(_, _, _) {}
   planCollisionFree(_, _, _) {}
   planTrajectory(_, _, _) {}
   searchCollisionFreeMultiMotionGroup(_, _, _) {}
@@ -274,6 +284,9 @@ export function ControllerApiFp(_) {}
 export function ControllerInputsOutputsApiAxiosParamCreator(_) {}
 export function ControllerInputsOutputsApiFactory(_, _, _) {}
 export function ControllerInputsOutputsApiFp(_) {}
+export function DatasetsApiAxiosParamCreator(_) {}
+export function DatasetsApiFactory(_, _, _) {}
+export function DatasetsApiFp(_) {}
 export function JoggingApiAxiosParamCreator(_) {}
 export function JoggingApiFactory(_, _, _) {}
 export function JoggingApiFp(_) {}
@@ -340,6 +353,7 @@ export function VirtualControllerInputsOutputsApiFp(_) {}
 export var AbbControllerKindEnum /* const */
 export var ActionChunkRequestMessageTypeEnum /* const */
 export var ActionChunkResponseKindEnum /* const */
+export var AtReference /* const */
 export var BASE_PATH /* const */
 export var Behavior /* const */
 export var BlendingAutoBlendingNameEnum /* const */
@@ -380,8 +394,10 @@ export var ConfigurationArchiveStatusErrorStatusEnum /* const */
 export var ConfigurationArchiveStatusSuccessStatusEnum /* const */
 export var ConvexHullShapeTypeEnum /* const */
 export var CylinderShapeTypeEnum /* const */
+export var DatasetPoseReferenceTypeEnum /* const */
 export var Direction /* const */
 export var DirectionConstraintConstraintNameEnum /* const */
+export var DistanceTriggerTypeEnum /* const */
 export var ErrorDirectionConstraintNotMetErrorFeedbackNameEnum /* const */
 export var ErrorDirectionConstraintNotNormalizedErrorFeedbackNameEnum /* const */
 export var ErrorInvalidJointCountErrorFeedbackNameEnum /* const */
@@ -389,6 +405,7 @@ export var ErrorJointLimitExceededErrorFeedbackNameEnum /* const */
 export var ErrorJointPositionCollisionErrorFeedbackNameEnum /* const */
 export var ErrorMaxIterationsExceededErrorFeedbackNameEnum /* const */
 export var ErrorUnsupportedOperationErrorFeedbackNameEnum /* const */
+export var ExplicitPathMotionCommandTypeEnum /* const */
 export var FanucControllerKindEnum /* const */
 export var FeedbackAxisRangeExceededErrorFeedbackNameEnum /* const */
 export var FeedbackCollisionErrorFeedbackNameEnum /* const */
@@ -408,6 +425,7 @@ export var FeedbackSingularityErrorFeedbackNameEnum /* const */
 export var FeedbackStartJointsMissingErrorFeedbackNameEnum /* const */
 export var FeedbackTorqueExceededErrorFeedbackNameEnum /* const */
 export var FloatValueValueTypeEnum /* const */
+export var GeneratedPathMotionCommandTypeEnum /* const */
 export var InconsistentTrajectorySizeErrorKindEnum /* const */
 export var InitializeActionChunksRequestMessageTypeEnum /* const */
 export var InitializeActionChunksResponseKindEnum /* const */
@@ -415,12 +433,17 @@ export var InitializeJoggingRequestMessageTypeEnum /* const */
 export var InitializeJoggingResponseKindEnum /* const */
 export var InitializeMovementRequestMessageTypeEnum /* const */
 export var InitializeMovementResponseKindEnum /* const */
+export var InlinePoseReferenceTypeEnum /* const */
 export var IntegerValueValueTypeEnum /* const */
 export var InvalidDofErrorKindEnum /* const */
+export var IOAllOfExpressionTypeEnum /* const */
+export var IOAnyOfExpressionTypeEnum /* const */
 export var IOBooleanValueValueTypeEnum /* const */
+export var IOConditionExpressionTypeEnum /* const */
 export var IODirection /* const */
 export var IOFloatValueValueTypeEnum /* const */
 export var IOIntegerValueValueTypeEnum /* const */
+export var IONotExpressionTypeEnum /* const */
 export var IOOrigin /* const */
 export var IOValueType /* const */
 export var JoggingDetailsKindEnum /* const */
@@ -431,6 +454,7 @@ export var JoggingPausedNearSingularityKindEnum /* const */
 export var JoggingPausedOnIOKindEnum /* const */
 export var JoggingRunningKindEnum /* const */
 export var JointLimitExceededErrorKindEnum /* const */
+export var JointPositionReferenceTypeEnum /* const */
 export var JointTypeEnum /* const */
 export var JointVelocityRequestMessageTypeEnum /* const */
 export var JointVelocityResponseKindEnum /* const */
@@ -441,11 +465,14 @@ export var KinematicBranchWrist /* const */
 export var KukaControllerKindEnum /* const */
 export var LicenseStatusEnum /* const */
 export var LinkChainValueSourceEnum /* const */
+export var LocalPoseReferenceTypeEnum /* const */
 export var Manufacturer /* const */
+export var MarkerCommandTypeEnum /* const */
 export var MidpointInsertionAlgorithmAlgorithmNameEnum /* const */
 export var ModbusIOArea /* const */
 export var ModbusIOByteOrder /* const */
 export var ModbusIOTypeEnum /* const */
+export var MotionGroupReferenceTypeEnum /* const */
 export var MovementErrorResponseKindEnum /* const */
 export var NanValueErrorKindEnum /* const */
 export var NetworkBackend /* const */
@@ -453,20 +480,30 @@ export var NetworkLinkState /* const */
 export var OperatingState /* const */
 export var OperationMode /* const */
 export var operationServerMap /* const */
+export var OptimizeMotionCommandsStatisticsTerminationReasonEnum /* const */
 export var OrientationType /* const */
 export var PathCartesianPTPPathDefinitionNameEnum /* const */
 export var PathCirclePathDefinitionNameEnum /* const */
 export var PathCubicSplinePathDefinitionNameEnum /* const */
 export var PathDirectionConstrainedCartesianPTPPathDefinitionNameEnum /* const */
 export var PathDirectionConstrainedJointPTPPathDefinitionNameEnum /* const */
+export var PathFractionTriggerTypeEnum /* const */
 export var PathJointPTPPathDefinitionNameEnum /* const */
 export var PathLinePathDefinitionNameEnum /* const */
+export var PathTypeCartesianPTPPathDefinitionNameEnum /* const */
+export var PathTypeCirclePathDefinitionNameEnum /* const */
+export var PathTypeCubicSplinePathDefinitionNameEnum /* const */
+export var PathTypeDirectionConstrainedCartesianPTPPathDefinitionNameEnum /* const */
+export var PathTypeDirectionConstrainedJointPTPPathDefinitionNameEnum /* const */
+export var PathTypeJointPTPPathDefinitionNameEnum /* const */
+export var PathTypeLinePathDefinitionNameEnum /* const */
 export var PauseActionChunksRequestMessageTypeEnum /* const */
 export var PauseActionChunksResponseKindEnum /* const */
 export var PauseJoggingRequestMessageTypeEnum /* const */
 export var PauseJoggingResponseKindEnum /* const */
 export var PauseMovementRequestMessageTypeEnum /* const */
 export var PauseMovementResponseKindEnum /* const */
+export var PauseOnIOCommandTypeEnum /* const */
 export var PlaneShapeTypeEnum /* const */
 export var PlaybackSpeedRequestMessageTypeEnum /* const */
 export var PlaybackSpeedResponseKindEnum /* const */
@@ -483,6 +520,7 @@ export var SafetyStateType /* const */
 export var ServiceGroup /* const */
 export var ServiceStatusPhase /* const */
 export var ServiceStatusSeverity /* const */
+export var SetIOCommandTypeEnum /* const */
 export var SettableRobotSystemMode /* const */
 export var SingularityHandling /* const */
 export var SingularityTypeEnum /* const */
@@ -500,6 +538,7 @@ export var TcpRequiredErrorKindEnum /* const */
 export var TcpVelocityRequestMessageTypeEnum /* const */
 export var TcpVelocityResponseKindEnum /* const */
 export var TechmanControllerKindEnum /* const */
+export var TimeTriggerTypeEnum /* const */
 export var ToolValueSourceEnum /* const */
 export var TorqueExceededErrorKindEnum /* const */
 export var TrajectoryDataMessageTypeEnum /* const */
@@ -517,6 +556,8 @@ export var UniversalrobotsControllerKindEnum /* const */
 export var UnpauseActionChunksRequestMessageTypeEnum /* const */
 export var UnpauseActionChunksResponseKindEnum /* const */
 export var VirtualControllerKindEnum /* const */
+export var WaitForIOCommandTypeEnum /* const */
+export var WaitForTimeCommandTypeEnum /* const */
 export var YaskawaControllerKindEnum /* const */
 export var ZodValidationErrorErrorCodeEnum /* const */
 // #endregion

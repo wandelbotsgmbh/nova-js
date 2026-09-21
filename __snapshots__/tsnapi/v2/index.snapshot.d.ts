@@ -122,6 +122,7 @@ export interface BusIODescription {
 export interface BusIOModbusClient {
   'bus_type': BusIOModbusClientBusTypeEnum;
   'network': BusIOModbusTCPClient;
+  'network_interface'?: BusIOsNetworkInterfaceWithAddresses;
 }
 export interface BusIOModbusServer {
   'bus_type': BusIOModbusServerBusTypeEnum;
@@ -131,6 +132,7 @@ export interface BusIOModbusServer {
   'discrete_inputs_size': number;
   'holding_registers_size': number;
   'input_registers_size': number;
+  'network_interface'?: BusIOsNetworkInterfaceWithAddresses;
 }
 export interface BusIOModbusTCPClient {
   'network_type'?: BusIOModbusTCPClientNetworkTypeEnum;
@@ -151,6 +153,7 @@ export interface BusIOProfinet {
   'mac': string;
   'slots'?: Array<BusIOProfinetSlot>;
   'default_route'?: BusIOProfinetDefaultRoute;
+  'network_interface'?: BusIOsNetworkInterface;
 }
 export interface BusIOProfinetDefaultRoute {
   'gateway': string;
@@ -179,6 +182,14 @@ export interface BusIOSnap7 {
   'address': string;
   'rack'?: number;
   'slot'?: number;
+}
+export interface BusIOsNetworkInterface {
+  'interface': string;
+  'addresses'?: Array<string>;
+}
+export interface BusIOsNetworkInterfaceWithAddresses {
+  'interface': string;
+  'addresses'?: Array<string>;
 }
 export interface BusIOsState {
   'state': BusIOsStateEnum;
@@ -371,6 +382,23 @@ export interface CollisionSetupValue {
   'tool'?: ToolValueOrKey;
   'self_collision_detection'?: boolean;
 }
+export interface CommandRoutine {
+  'command_routine': string;
+  'dataset'?: string;
+  'name'?: string;
+  'description'?: string;
+  'motion_group'?: MotionGroupReference;
+  'motion_group_setup': MotionGroupSetup | null;
+  'tcp'?: string;
+  'start_joint_position'?: Array<number>;
+  'default_motion_settings'?: MotionSettings;
+  'commands': Array<Command>;
+  'metadata'?: {
+    [key: string]: string;
+  };
+  'created_at'?: string;
+  'updated_at'?: string;
+}
 export interface ConfigurationArchiveStatusCreating {
   'status': ConfigurationArchiveStatusCreatingStatusEnum;
   'progress': number;
@@ -401,7 +429,7 @@ export interface ConfigurationResource {
 export interface ConfiguredPose {
   'pose': Pose;
   'kinematic_configuration'?: KinematicConfiguration;
-  'coordinate_system_id'?: string;
+  'frame'?: string;
 }
 export interface ConfiguredPoseInverse422Response {
   'detail'?: Array<ValidationError>;
@@ -485,8 +513,20 @@ export interface CoordinateSystemData {
 export interface CopyMotionGroupModelRequest {
   'name': string;
 }
+export interface CreateDatasetRequest {
+  'dataset': string;
+  'name'?: string;
+  'description'?: string;
+  'poses'?: Array<DatasetPose>;
+  'frames'?: Array<DatasetFrame>;
+  'command_routines'?: Array<CommandRoutine>;
+}
 export interface CubicSplineParameter {
   'pose': Pose;
+  'path_parameter': number;
+}
+export interface CubicSplineViaPoint {
+  'pose': PoseRef;
   'path_parameter': number;
 }
 export interface CycleTime {
@@ -496,6 +536,50 @@ export interface Cylinder {
   'shape_type': CylinderShapeTypeEnum;
   'radius': number;
   'height': number;
+}
+export interface Dataset {
+  'dataset': string;
+  'name'?: string;
+  'revision': number;
+  'description'?: string;
+  'created_at': string;
+  'updated_at': string;
+}
+export interface DatasetFrame {
+  'frame': string;
+  'name'?: string;
+  'reference_frame'?: string;
+  'pose': Pose;
+  'dataset': string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
+export interface DatasetPose {
+  'pose': Pose;
+  'kinematic_configuration'?: KinematicConfiguration;
+  'frame'?: string;
+  'dataset_pose': string;
+  'dataset': string;
+  'name'?: string;
+  'description'?: string;
+  'created_at'?: string;
+  'updated_at'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
+export interface DatasetPoseReference {
+  'type': DatasetPoseReferenceTypeEnum;
+  'cell': string;
+  'dataset': string;
+  'dataset_pose': string;
+  'resolved_pose'?: ConfiguredPose;
+  'resolved_at'?: string;
+  'source_revision'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
 }
 export interface DHParameter {
   'alpha'?: number;
@@ -510,6 +594,11 @@ export interface DirectionConstraint {
   'tcp': Array<number>;
   'tolerance': number;
   'constraint_name': DirectionConstraintConstraintNameEnum;
+}
+export interface DistanceTrigger {
+  'type': DistanceTriggerTypeEnum;
+  'millimeters': number;
+  'reference': AtReference;
 }
 export interface DynamicModel {
   'mass'?: number;
@@ -555,6 +644,16 @@ export interface ErrorUnsupportedOperation {
 export interface Execute {
   'joint_position': Array<number>;
   'details'?: ExecuteDetails;
+}
+export interface ExplicitPathMotionCommand {
+  'type': ExplicitPathMotionCommandTypeEnum;
+  'target': PoseRef;
+  'path_type': PathType;
+  'motion_settings'?: MotionSettings;
+  'intent'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
 }
 export interface ExternalJointStreamDatapoint {
   'motion_group': string;
@@ -681,6 +780,33 @@ export interface ForwardKinematicsValidationError {
   };
   'data'?: ErrorInvalidJointCount;
 }
+export interface Frame {
+  'frame': string;
+  'name'?: string;
+  'reference_frame'?: string;
+  'pose': Pose;
+}
+export interface GeneratedPathMotionCommand {
+  'type': GeneratedPathMotionCommandTypeEnum;
+  'target': PoseRef;
+  'generator': MotionGenerator;
+  'motion_settings'?: MotionSettings;
+  'intent'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
+export interface GetDatasetResponse {
+  'dataset': string;
+  'name'?: string;
+  'revision': number;
+  'description'?: string;
+  'created_at': string;
+  'updated_at': string;
+  'poses': Array<DatasetPose>;
+  'frames': Array<DatasetFrame>;
+  'command_routines': Array<CommandRoutine>;
+}
 export interface GetKinematicConfiguration422Response {
   'detail'?: Array<GetKinematicConfigurationValidationError>;
 }
@@ -760,6 +886,16 @@ export interface InitializeMovementResponse {
   'add_trajectory_error'?: AddTrajectoryError;
   'kind': InitializeMovementResponseKindEnum;
 }
+export interface InlinePoseReference {
+  'pose': Pose;
+  'kinematic_configuration'?: KinematicConfiguration;
+  'frame'?: string;
+  'type': InlinePoseReferenceTypeEnum;
+  'tcp'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
 export interface IntegerValue {
   'value': string;
   'value_type': IntegerValueValueTypeEnum;
@@ -802,10 +938,25 @@ export interface InverseKinematicsValidationError {
   };
   'data'?: InverseKinematicsValidationErrorAllOfData;
 }
+export interface IOAllOfExpression {
+  'type': IOAllOfExpressionTypeEnum;
+  'operands': Array<IOExpression>;
+}
+export interface IOAnyOfExpression {
+  'type': IOAnyOfExpressionTypeEnum;
+  'operands': Array<IOExpression>;
+}
 export interface IOBooleanValue {
   'io': string;
   'value': boolean;
   'value_type': IOBooleanValueValueTypeEnum;
+}
+export interface IOConditionExpression {
+  'type': IOConditionExpressionTypeEnum;
+  'io': IOValue;
+  'comparator': Comparator;
+  'negate'?: boolean;
+  'io_origin'?: IOOrigin;
 }
 export interface IODescription {
   'io': string;
@@ -826,6 +977,10 @@ export interface IOIntegerValue {
   'io': string;
   'value': string;
   'value_type': IOIntegerValueValueTypeEnum;
+}
+export interface IONotExpression {
+  'type': IONotExpressionTypeEnum;
+  'operand': IOExpression;
 }
 export interface JoggingDetails {
   'state': JoggingDetailsState;
@@ -863,6 +1018,13 @@ export interface JointLimits {
   'acceleration'?: number;
   'jerk'?: number;
   'torque'?: number;
+}
+export interface JointPositionReference {
+  'type': JointPositionReferenceTypeEnum;
+  'joints': Array<number>;
+  'metadata'?: {
+    [key: string]: string;
+  };
 }
 export interface JointPTPMotion {
   'start_joint_position': Array<number>;
@@ -978,6 +1140,25 @@ export interface LinkChainValue {
 export interface ListTrajectoriesResponse {
   'trajectories'?: Array<string>;
 }
+export interface LocalPoseReference {
+  'type': LocalPoseReferenceTypeEnum;
+  'pose_id': string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
+export interface MarkerCommand {
+  'type': MarkerCommandTypeEnum;
+  'name': string;
+  'payload'?: {
+    [key: string]: any;
+  };
+  'at'?: AtTrigger;
+  'intent'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
 export interface MergeTrajectories422Response {
   'detail'?: Array<MergeTrajectoriesValidationError>;
 }
@@ -1037,6 +1218,10 @@ export interface MotionCommand {
   'blending'?: MotionCommandBlending;
   'limits_override'?: LimitsOverride;
   'path': MotionCommandPath;
+}
+export interface MotionGenerator {
+  'algorithm': CollisionFreeAlgorithm;
+  'constraint'?: DirectionConstraint;
 }
 export interface MotionGroupConfiguration {
   'robot_configuration': string;
@@ -1104,6 +1289,10 @@ export interface MotionGroupModelDescription {
   'readable_name'?: string;
   'is_custom': boolean;
 }
+export interface MotionGroupReference {
+  'type': MotionGroupReferenceTypeEnum;
+  'id': string;
+}
 export interface MotionGroupSetup {
   'motion_group_model': string;
   'cycle_time': number;
@@ -1137,6 +1326,10 @@ export interface MotionGroupState {
 }
 export interface MotionGroupStateJointLimitReached {
   'limit_reached': Array<boolean>;
+}
+export interface MotionSettings {
+  'blending'?: Blending | null;
+  'limits_override'?: LimitsOverride | null;
 }
 export interface MovementErrorResponse {
   'message': string;
@@ -1235,6 +1428,34 @@ export interface OperationLimits {
 export interface OpMode {
   'mode': OperationMode;
 }
+export interface OptimizeMotionCommandsParameter {
+  'max_iterations'?: number;
+  'step_size'?: number;
+  'seed'?: number | null;
+  'frozen_command_indices'?: Array<number>;
+  'ftol'?: number;
+  'time_budget'?: number | null;
+}
+export interface OptimizeMotionCommandsRequest {
+  'motion_group_setup': MotionGroupSetup;
+  'start_joint_position': Array<number>;
+  'motion_commands': Array<MotionCommand>;
+  'optimization_parameters'?: OptimizeMotionCommandsParameter;
+}
+export interface OptimizeMotionCommandsResponse {
+  'response': PlanTrajectoryResponseResponse;
+  'motion_commands'?: Array<MotionCommand>;
+  'statistics': OptimizeMotionCommandsStatistics;
+}
+export interface OptimizeMotionCommandsStatistics {
+  'baseline_duration': number;
+  'optimized_duration': number;
+  'improvement': number;
+  'iterations': number;
+  'computation_time': number;
+  'termination_reason': OptimizeMotionCommandsStatisticsTerminationReasonEnum;
+  'termination_detail': string;
+}
 export interface PathCartesianPTP {
   'target_pose': Pose;
   'kinematic_configuration'?: KinematicConfiguration;
@@ -1259,6 +1480,10 @@ export interface PathDirectionConstrainedJointPTP {
   'constraint': DirectionConstraint;
   'path_definition_name': PathDirectionConstrainedJointPTPPathDefinitionNameEnum;
 }
+export interface PathFractionTrigger {
+  'type': PathFractionTriggerTypeEnum;
+  'value': number;
+}
 export interface PathJointPTP {
   'target_joint_position': Array<number>;
   'path_definition_name': PathJointPTPPathDefinitionNameEnum;
@@ -1266,6 +1491,31 @@ export interface PathJointPTP {
 export interface PathLine {
   'target_pose': Pose;
   'path_definition_name': PathLinePathDefinitionNameEnum;
+}
+export interface PathTypeCartesianPTP {
+  'path_definition_name': PathTypeCartesianPTPPathDefinitionNameEnum;
+}
+export interface PathTypeCircle {
+  'path_definition_name': PathTypeCirclePathDefinitionNameEnum;
+  'via_pose': PoseRef;
+}
+export interface PathTypeCubicSpline {
+  'path_definition_name': PathTypeCubicSplinePathDefinitionNameEnum;
+  'via_points': Array<CubicSplineViaPoint>;
+}
+export interface PathTypeDirectionConstrainedCartesianPTP {
+  'path_definition_name': PathTypeDirectionConstrainedCartesianPTPPathDefinitionNameEnum;
+  'constraint': DirectionConstraint;
+}
+export interface PathTypeDirectionConstrainedJointPTP {
+  'path_definition_name': PathTypeDirectionConstrainedJointPTPPathDefinitionNameEnum;
+  'constraint': DirectionConstraint;
+}
+export interface PathTypeJointPTP {
+  'path_definition_name': PathTypeJointPTPPathDefinitionNameEnum;
+}
+export interface PathTypeLine {
+  'path_definition_name': PathTypeLinePathDefinitionNameEnum;
 }
 export interface PauseActionChunksRequest {
   'message_type': PauseActionChunksRequestMessageTypeEnum;
@@ -1292,6 +1542,15 @@ export interface PauseOnIO {
   'io': IOValue;
   'comparator': Comparator;
   'io_origin': IOOrigin;
+}
+export interface PauseOnIOCommand {
+  'type': PauseOnIOCommandTypeEnum;
+  'condition': IOExpression;
+  'at'?: AtTrigger;
+  'intent'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
 }
 export interface Payload {
   'name': string;
@@ -1474,6 +1733,15 @@ export interface RequestArgs {
   url: string;
   options: RawAxiosRequestConfig;
 }
+export interface RerunLoggingConfigurationRequest {
+  'enabled': boolean;
+  'rerun_url'?: string | null;
+}
+export interface RerunLoggingConfigurationResponse {
+  'enabled': boolean;
+  'rerun'?: string | null;
+  'rerun_url'?: string | null;
+}
 export interface RobotController {
   'name': string;
   'configuration': RobotControllerConfiguration;
@@ -1602,6 +1870,16 @@ export interface SetIO {
   'location': number;
   'io_origin': IOOrigin;
 }
+export interface SetIOCommand {
+  'type': SetIOCommandTypeEnum;
+  'io_value': IOValue;
+  'io_origin': IOOrigin;
+  'at'?: AtTrigger;
+  'intent'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
 export interface Snap7IO {
   'description': string;
   'area': Snap7IOArea;
@@ -1700,6 +1978,11 @@ export interface TechmanControllerRtrs {
   'ip': string;
   'tmrts_port'?: number;
   'tmrtc_port'?: number;
+}
+export interface TimeTrigger {
+  'type': TimeTriggerTypeEnum;
+  'seconds': number;
+  'reference': AtReference;
 }
 export interface ToolValue {
   'source': ToolValueSourceEnum;
@@ -1808,9 +2091,28 @@ export interface VirtualRobotConfiguration {
   'name': string;
   'content': string;
 }
+export interface WaitForIOCommand {
+  'type': WaitForIOCommandTypeEnum;
+  'condition': IOExpression;
+  'timeout_ms'?: number;
+  'at'?: AtTrigger;
+  'intent'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
+}
 export interface WaitForIOEventRequest {
   'io': IOValue;
   'comparator': Comparator;
+}
+export interface WaitForTimeCommand {
+  'type': WaitForTimeCommandTypeEnum;
+  'duration_ms': number;
+  'at'?: AtTrigger;
+  'intent'?: string;
+  'metadata'?: {
+    [key: string]: string;
+  };
 }
 export interface Waypoint {
   'timestamp': number;
@@ -1856,7 +2158,20 @@ export type AddTrajectoryErrorData = {
   kind: 'TorqueExceededError';
 } & TorqueExceededError;
 export type AddVirtualControllerMotionGroupRequest = MotionGroupFromJson | MotionGroupFromType;
+export type AtReference = typeof AtReference[keyof typeof AtReference];
+export type AtTrigger = {
+  type: 'distance';
+} & DistanceTrigger | {
+  type: 'path_fraction';
+} & PathFractionTrigger | {
+  type: 'time';
+} & TimeTrigger;
 export type Behavior = typeof Behavior[keyof typeof Behavior];
+export type Blending = {
+  blending_name: 'BlendingAuto';
+} & BlendingAuto | {
+  blending_name: 'BlendingPosition';
+} & BlendingPosition;
 export type BlendingAutoBlendingNameEnum = typeof BlendingAutoBlendingNameEnum[keyof typeof BlendingAutoBlendingNameEnum];
 export type BlendingPositionBlendingNameEnum = typeof BlendingPositionBlendingNameEnum[keyof typeof BlendingPositionBlendingNameEnum];
 export type BlendingSpace = typeof BlendingSpace[keyof typeof BlendingSpace];
@@ -1947,6 +2262,7 @@ export type CollisionSetupValueOrKey = {
   source: 'value';
 } & CollisionSetupValue;
 export type CollisionSetupValueSourceEnum = typeof CollisionSetupValueSourceEnum[keyof typeof CollisionSetupValueSourceEnum];
+export type Command = ExplicitPathMotionCommand | GeneratedPathMotionCommand | MarkerCommand | PauseOnIOCommand | SetIOCommand | WaitForIOCommand | WaitForTimeCommand;
 export type Comparator = typeof Comparator[keyof typeof Comparator];
 export type ConfigurationArchiveStatus = {
   status: 'creating';
@@ -1962,8 +2278,10 @@ export type ConfiguredPoseInverseResponseResponse = Array<Array<number>> | Confi
 export type ConvertVendorConfiguredPoseRequestVendorConfiguredPoses = Array<AbbConfiguredPose> | Array<KukaConfiguredPose>;
 export type ConvexHullShapeTypeEnum = typeof ConvexHullShapeTypeEnum[keyof typeof ConvexHullShapeTypeEnum];
 export type CylinderShapeTypeEnum = typeof CylinderShapeTypeEnum[keyof typeof CylinderShapeTypeEnum];
+export type DatasetPoseReferenceTypeEnum = typeof DatasetPoseReferenceTypeEnum[keyof typeof DatasetPoseReferenceTypeEnum];
 export type Direction = typeof Direction[keyof typeof Direction];
 export type DirectionConstraintConstraintNameEnum = typeof DirectionConstraintConstraintNameEnum[keyof typeof DirectionConstraintConstraintNameEnum];
+export type DistanceTriggerTypeEnum = typeof DistanceTriggerTypeEnum[keyof typeof DistanceTriggerTypeEnum];
 export type ErrorDirectionConstraintNotMetErrorFeedbackNameEnum = typeof ErrorDirectionConstraintNotMetErrorFeedbackNameEnum[keyof typeof ErrorDirectionConstraintNotMetErrorFeedbackNameEnum];
 export type ErrorDirectionConstraintNotNormalizedErrorFeedbackNameEnum = typeof ErrorDirectionConstraintNotNormalizedErrorFeedbackNameEnum[keyof typeof ErrorDirectionConstraintNotNormalizedErrorFeedbackNameEnum];
 export type ErrorInvalidJointCountErrorFeedbackNameEnum = typeof ErrorInvalidJointCountErrorFeedbackNameEnum[keyof typeof ErrorInvalidJointCountErrorFeedbackNameEnum];
@@ -2014,6 +2332,7 @@ export type ExecuteTrajectoryResponse = {
 } & PlaybackSpeedResponse | {
   kind: 'START_RECEIVED';
 } & StartMovementResponse;
+export type ExplicitPathMotionCommandTypeEnum = typeof ExplicitPathMotionCommandTypeEnum[keyof typeof ExplicitPathMotionCommandTypeEnum];
 export type FanucControllerKindEnum = typeof FanucControllerKindEnum[keyof typeof FanucControllerKindEnum];
 export type FeedbackAxisRangeExceededErrorFeedbackNameEnum = typeof FeedbackAxisRangeExceededErrorFeedbackNameEnum[keyof typeof FeedbackAxisRangeExceededErrorFeedbackNameEnum];
 export type FeedbackCollisionErrorFeedbackNameEnum = typeof FeedbackCollisionErrorFeedbackNameEnum[keyof typeof FeedbackCollisionErrorFeedbackNameEnum];
@@ -2033,6 +2352,7 @@ export type FeedbackSingularityErrorFeedbackNameEnum = typeof FeedbackSingularit
 export type FeedbackStartJointsMissingErrorFeedbackNameEnum = typeof FeedbackStartJointsMissingErrorFeedbackNameEnum[keyof typeof FeedbackStartJointsMissingErrorFeedbackNameEnum];
 export type FeedbackTorqueExceededErrorFeedbackNameEnum = typeof FeedbackTorqueExceededErrorFeedbackNameEnum[keyof typeof FeedbackTorqueExceededErrorFeedbackNameEnum];
 export type FloatValueValueTypeEnum = typeof FloatValueValueTypeEnum[keyof typeof FloatValueValueTypeEnum];
+export type GeneratedPathMotionCommandTypeEnum = typeof GeneratedPathMotionCommandTypeEnum[keyof typeof GeneratedPathMotionCommandTypeEnum];
 export type GetKinematicConfigurationValidationErrorAllOfData = ErrorInvalidJointCount | ErrorUnsupportedOperation;
 export type InconsistentTrajectorySizeErrorKindEnum = typeof InconsistentTrajectorySizeErrorKindEnum[keyof typeof InconsistentTrajectorySizeErrorKindEnum];
 export type InitializeActionChunksRequestMessageTypeEnum = typeof InitializeActionChunksRequestMessageTypeEnum[keyof typeof InitializeActionChunksRequestMessageTypeEnum];
@@ -2042,10 +2362,13 @@ export type InitializeJoggingResponseKindEnum = typeof InitializeJoggingResponse
 export type InitializeMovementRequestMessageTypeEnum = typeof InitializeMovementRequestMessageTypeEnum[keyof typeof InitializeMovementRequestMessageTypeEnum];
 export type InitializeMovementRequestTrajectory = TrajectoryData | TrajectoryId;
 export type InitializeMovementResponseKindEnum = typeof InitializeMovementResponseKindEnum[keyof typeof InitializeMovementResponseKindEnum];
+export type InlinePoseReferenceTypeEnum = typeof InlinePoseReferenceTypeEnum[keyof typeof InlinePoseReferenceTypeEnum];
 export type IntegerValueValueTypeEnum = typeof IntegerValueValueTypeEnum[keyof typeof IntegerValueValueTypeEnum];
 export type InvalidDofErrorKindEnum = typeof InvalidDofErrorKindEnum[keyof typeof InvalidDofErrorKindEnum];
 export type InverseFeedbackAtIndexErrorFeedback = FeedbackAxisRangeExceeded | FeedbackCollision | FeedbackJointLimitExceeded | FeedbackOutOfWorkspace | FeedbackSingularity;
 export type InverseKinematicsValidationErrorAllOfData = ErrorInvalidJointCount | ErrorJointLimitExceeded;
+export type IOAllOfExpressionTypeEnum = typeof IOAllOfExpressionTypeEnum[keyof typeof IOAllOfExpressionTypeEnum];
+export type IOAnyOfExpressionTypeEnum = typeof IOAnyOfExpressionTypeEnum[keyof typeof IOAnyOfExpressionTypeEnum];
 export type IOBooleanValueValueTypeEnum = typeof IOBooleanValueValueTypeEnum[keyof typeof IOBooleanValueValueTypeEnum];
 export type IOBoundary = {
   value_type: 'boolean';
@@ -2054,9 +2377,20 @@ export type IOBoundary = {
 } & FloatValue | {
   value_type: 'integer';
 } & IntegerValue;
+export type IOConditionExpressionTypeEnum = typeof IOConditionExpressionTypeEnum[keyof typeof IOConditionExpressionTypeEnum];
 export type IODirection = typeof IODirection[keyof typeof IODirection];
+export type IOExpression = {
+  type: 'all_of';
+} & IOAllOfExpression | {
+  type: 'any_of';
+} & IOAnyOfExpression | {
+  type: 'condition';
+} & IOConditionExpression | {
+  type: 'not';
+} & IONotExpression;
 export type IOFloatValueValueTypeEnum = typeof IOFloatValueValueTypeEnum[keyof typeof IOFloatValueValueTypeEnum];
 export type IOIntegerValueValueTypeEnum = typeof IOIntegerValueValueTypeEnum[keyof typeof IOIntegerValueValueTypeEnum];
+export type IONotExpressionTypeEnum = typeof IONotExpressionTypeEnum[keyof typeof IONotExpressionTypeEnum];
 export type IOOrigin = typeof IOOrigin[keyof typeof IOOrigin];
 export type IOValue = {
   value_type: 'boolean';
@@ -2087,6 +2421,7 @@ export type JoggingPausedNearSingularityKindEnum = typeof JoggingPausedNearSingu
 export type JoggingPausedOnIOKindEnum = typeof JoggingPausedOnIOKindEnum[keyof typeof JoggingPausedOnIOKindEnum];
 export type JoggingRunningKindEnum = typeof JoggingRunningKindEnum[keyof typeof JoggingRunningKindEnum];
 export type JointLimitExceededErrorKindEnum = typeof JointLimitExceededErrorKindEnum[keyof typeof JointLimitExceededErrorKindEnum];
+export type JointPositionReferenceTypeEnum = typeof JointPositionReferenceTypeEnum[keyof typeof JointPositionReferenceTypeEnum];
 export type JointTypeEnum = typeof JointTypeEnum[keyof typeof JointTypeEnum];
 export type JointVelocityRequestMessageTypeEnum = typeof JointVelocityRequestMessageTypeEnum[keyof typeof JointVelocityRequestMessageTypeEnum];
 export type JointVelocityResponseKindEnum = typeof JointVelocityResponseKindEnum[keyof typeof JointVelocityResponseKindEnum];
@@ -2102,8 +2437,10 @@ export type LinkChainValueOrKey = {
   source: 'value';
 } & LinkChainValue;
 export type LinkChainValueSourceEnum = typeof LinkChainValueSourceEnum[keyof typeof LinkChainValueSourceEnum];
+export type LocalPoseReferenceTypeEnum = typeof LocalPoseReferenceTypeEnum[keyof typeof LocalPoseReferenceTypeEnum];
 export type Location1Inner = number | string;
 export type Manufacturer = typeof Manufacturer[keyof typeof Manufacturer];
+export type MarkerCommandTypeEnum = typeof MarkerCommandTypeEnum[keyof typeof MarkerCommandTypeEnum];
 export type MergeTrajectoriesErrorErrorFeedback = FeedbackCollision | FeedbackJointLimitExceeded | FeedbackOutOfWorkspace | FeedbackSingularity;
 export type MergeTrajectoriesResponseFeedbackInner = MergeTrajectoriesError | TrajectorySection;
 export type MidpointInsertionAlgorithmAlgorithmNameEnum = typeof MidpointInsertionAlgorithmAlgorithmNameEnum[keyof typeof MidpointInsertionAlgorithmAlgorithmNameEnum];
@@ -2112,6 +2449,7 @@ export type ModbusIOByteOrder = typeof ModbusIOByteOrder[keyof typeof ModbusIOBy
 export type ModbusIOTypeEnum = typeof ModbusIOTypeEnum[keyof typeof ModbusIOTypeEnum];
 export type MotionCommandBlending = BlendingAuto | BlendingPosition;
 export type MotionCommandPath = PathCartesianPTP | PathCircle | PathCubicSpline | PathDirectionConstrainedCartesianPTP | PathDirectionConstrainedJointPTP | PathJointPTP | PathLine;
+export type MotionGroupReferenceTypeEnum = typeof MotionGroupReferenceTypeEnum[keyof typeof MotionGroupReferenceTypeEnum];
 export type MovementErrorResponseKindEnum = typeof MovementErrorResponseKindEnum[keyof typeof MovementErrorResponseKindEnum];
 export type MultiSearchCollisionFreeResponseResponse = MultiJointTrajectory | PlanCollisionFreeFailedResponse;
 export type MultiSearchCollisionFreeValidationErrorAllOfData = ErrorMotionGroupKeyMismatch | MultiErrorInvalidJointCount | MultiErrorJointLimitExceeded | MultiErrorJointPositionCollision;
@@ -2124,20 +2462,45 @@ export type NovaConfig = {
 } & Omit<Configuration, "isJsonMime" | "basePath">;
 export type OperatingState = typeof OperatingState[keyof typeof OperatingState];
 export type OperationMode = typeof OperationMode[keyof typeof OperationMode];
+export type OptimizeMotionCommandsStatisticsTerminationReasonEnum = typeof OptimizeMotionCommandsStatisticsTerminationReasonEnum[keyof typeof OptimizeMotionCommandsStatisticsTerminationReasonEnum];
 export type OrientationType = typeof OrientationType[keyof typeof OrientationType];
 export type PathCartesianPTPPathDefinitionNameEnum = typeof PathCartesianPTPPathDefinitionNameEnum[keyof typeof PathCartesianPTPPathDefinitionNameEnum];
 export type PathCirclePathDefinitionNameEnum = typeof PathCirclePathDefinitionNameEnum[keyof typeof PathCirclePathDefinitionNameEnum];
 export type PathCubicSplinePathDefinitionNameEnum = typeof PathCubicSplinePathDefinitionNameEnum[keyof typeof PathCubicSplinePathDefinitionNameEnum];
 export type PathDirectionConstrainedCartesianPTPPathDefinitionNameEnum = typeof PathDirectionConstrainedCartesianPTPPathDefinitionNameEnum[keyof typeof PathDirectionConstrainedCartesianPTPPathDefinitionNameEnum];
 export type PathDirectionConstrainedJointPTPPathDefinitionNameEnum = typeof PathDirectionConstrainedJointPTPPathDefinitionNameEnum[keyof typeof PathDirectionConstrainedJointPTPPathDefinitionNameEnum];
+export type PathFractionTriggerTypeEnum = typeof PathFractionTriggerTypeEnum[keyof typeof PathFractionTriggerTypeEnum];
 export type PathJointPTPPathDefinitionNameEnum = typeof PathJointPTPPathDefinitionNameEnum[keyof typeof PathJointPTPPathDefinitionNameEnum];
 export type PathLinePathDefinitionNameEnum = typeof PathLinePathDefinitionNameEnum[keyof typeof PathLinePathDefinitionNameEnum];
+export type PathType = {
+  path_definition_name: 'PathCartesianPTP';
+} & PathTypeCartesianPTP | {
+  path_definition_name: 'PathCircle';
+} & PathTypeCircle | {
+  path_definition_name: 'PathCubicSpline';
+} & PathTypeCubicSpline | {
+  path_definition_name: 'PathDirectionConstrainedCartesianPTP';
+} & PathTypeDirectionConstrainedCartesianPTP | {
+  path_definition_name: 'PathDirectionConstrainedJointPTP';
+} & PathTypeDirectionConstrainedJointPTP | {
+  path_definition_name: 'PathJointPTP';
+} & PathTypeJointPTP | {
+  path_definition_name: 'PathLine';
+} & PathTypeLine;
+export type PathTypeCartesianPTPPathDefinitionNameEnum = typeof PathTypeCartesianPTPPathDefinitionNameEnum[keyof typeof PathTypeCartesianPTPPathDefinitionNameEnum];
+export type PathTypeCirclePathDefinitionNameEnum = typeof PathTypeCirclePathDefinitionNameEnum[keyof typeof PathTypeCirclePathDefinitionNameEnum];
+export type PathTypeCubicSplinePathDefinitionNameEnum = typeof PathTypeCubicSplinePathDefinitionNameEnum[keyof typeof PathTypeCubicSplinePathDefinitionNameEnum];
+export type PathTypeDirectionConstrainedCartesianPTPPathDefinitionNameEnum = typeof PathTypeDirectionConstrainedCartesianPTPPathDefinitionNameEnum[keyof typeof PathTypeDirectionConstrainedCartesianPTPPathDefinitionNameEnum];
+export type PathTypeDirectionConstrainedJointPTPPathDefinitionNameEnum = typeof PathTypeDirectionConstrainedJointPTPPathDefinitionNameEnum[keyof typeof PathTypeDirectionConstrainedJointPTPPathDefinitionNameEnum];
+export type PathTypeJointPTPPathDefinitionNameEnum = typeof PathTypeJointPTPPathDefinitionNameEnum[keyof typeof PathTypeJointPTPPathDefinitionNameEnum];
+export type PathTypeLinePathDefinitionNameEnum = typeof PathTypeLinePathDefinitionNameEnum[keyof typeof PathTypeLinePathDefinitionNameEnum];
 export type PauseActionChunksRequestMessageTypeEnum = typeof PauseActionChunksRequestMessageTypeEnum[keyof typeof PauseActionChunksRequestMessageTypeEnum];
 export type PauseActionChunksResponseKindEnum = typeof PauseActionChunksResponseKindEnum[keyof typeof PauseActionChunksResponseKindEnum];
 export type PauseJoggingRequestMessageTypeEnum = typeof PauseJoggingRequestMessageTypeEnum[keyof typeof PauseJoggingRequestMessageTypeEnum];
 export type PauseJoggingResponseKindEnum = typeof PauseJoggingResponseKindEnum[keyof typeof PauseJoggingResponseKindEnum];
 export type PauseMovementRequestMessageTypeEnum = typeof PauseMovementRequestMessageTypeEnum[keyof typeof PauseMovementRequestMessageTypeEnum];
 export type PauseMovementResponseKindEnum = typeof PauseMovementResponseKindEnum[keyof typeof PauseMovementResponseKindEnum];
+export type PauseOnIOCommandTypeEnum = typeof PauseOnIOCommandTypeEnum[keyof typeof PauseOnIOCommandTypeEnum];
 export type PlanCollisionFreeResponseResponse = JointTrajectory | PlanCollisionFreeFailedResponse;
 export type PlaneShapeTypeEnum = typeof PlaneShapeTypeEnum[keyof typeof PlaneShapeTypeEnum];
 export type PlanTrajectoryFailedResponseErrorFeedback = FeedbackCollision | FeedbackCommandsMissing | FeedbackCubicSplineIsNotIncreasing | FeedbackCubicSplineNotAtStartPose | FeedbackDirectionConstraintNoSolutionExists | FeedbackDirectionConstraintNotMet | FeedbackDirectionConstraintNotNormalized | FeedbackInvalidDof | FeedbackInvalidNanValue | FeedbackInvalidSamplingTime | FeedbackJointLimitExceeded | FeedbackNoSolutionInCurrentConfiguration | FeedbackOutOfWorkspace | FeedbackSingularity | FeedbackStartJointsMissing | FeedbackTorqueExceeded;
@@ -2145,6 +2508,15 @@ export type PlanTrajectoryResponseResponse = JointTrajectory | PlanTrajectoryFai
 export type PlanValidationErrorAllOfData = ErrorDirectionConstraintNotMet | ErrorDirectionConstraintNotNormalized | ErrorInvalidJointCount | ErrorJointLimitExceeded | ErrorJointPositionCollision | ErrorUnsupportedOperation;
 export type PlaybackSpeedRequestMessageTypeEnum = typeof PlaybackSpeedRequestMessageTypeEnum[keyof typeof PlaybackSpeedRequestMessageTypeEnum];
 export type PlaybackSpeedResponseKindEnum = typeof PlaybackSpeedResponseKindEnum[keyof typeof PlaybackSpeedResponseKindEnum];
+export type PoseRef = {
+  type: 'dataset_pose';
+} & DatasetPoseReference | {
+  type: 'inline_pose';
+} & InlinePoseReference | {
+  type: 'joint_position';
+} & JointPositionReference | {
+  type: 'local_pose';
+} & LocalPoseReference;
 export type PoseWaypointKindEnum = typeof PoseWaypointKindEnum[keyof typeof PoseWaypointKindEnum];
 export type ProfinetIODirection = typeof ProfinetIODirection[keyof typeof ProfinetIODirection];
 export type ProfinetIOTypeEnum = typeof ProfinetIOTypeEnum[keyof typeof ProfinetIOTypeEnum];
@@ -2161,6 +2533,7 @@ export type SafetyStateType = typeof SafetyStateType[keyof typeof SafetyStateTyp
 export type ServiceGroup = typeof ServiceGroup[keyof typeof ServiceGroup];
 export type ServiceStatusPhase = typeof ServiceStatusPhase[keyof typeof ServiceStatusPhase];
 export type ServiceStatusSeverity = typeof ServiceStatusSeverity[keyof typeof ServiceStatusSeverity];
+export type SetIOCommandTypeEnum = typeof SetIOCommandTypeEnum[keyof typeof SetIOCommandTypeEnum];
 export type SettableRobotSystemMode = typeof SettableRobotSystemMode[keyof typeof SettableRobotSystemMode];
 export type SingularityHandling = typeof SingularityHandling[keyof typeof SingularityHandling];
 export type SingularityTypeEnum = typeof SingularityTypeEnum[keyof typeof SingularityTypeEnum];
@@ -2178,6 +2551,7 @@ export type TcpRequiredErrorKindEnum = typeof TcpRequiredErrorKindEnum[keyof typ
 export type TcpVelocityRequestMessageTypeEnum = typeof TcpVelocityRequestMessageTypeEnum[keyof typeof TcpVelocityRequestMessageTypeEnum];
 export type TcpVelocityResponseKindEnum = typeof TcpVelocityResponseKindEnum[keyof typeof TcpVelocityResponseKindEnum];
 export type TechmanControllerKindEnum = typeof TechmanControllerKindEnum[keyof typeof TechmanControllerKindEnum];
+export type TimeTriggerTypeEnum = typeof TimeTriggerTypeEnum[keyof typeof TimeTriggerTypeEnum];
 export type ToolValueOrKey = {
   source: 'key';
 } & StorageKey | {
@@ -2211,6 +2585,8 @@ export type UniversalrobotsControllerKindEnum = typeof UniversalrobotsController
 export type UnpauseActionChunksRequestMessageTypeEnum = typeof UnpauseActionChunksRequestMessageTypeEnum[keyof typeof UnpauseActionChunksRequestMessageTypeEnum];
 export type UnpauseActionChunksResponseKindEnum = typeof UnpauseActionChunksResponseKindEnum[keyof typeof UnpauseActionChunksResponseKindEnum];
 export type VirtualControllerKindEnum = typeof VirtualControllerKindEnum[keyof typeof VirtualControllerKindEnum];
+export type WaitForIOCommandTypeEnum = typeof WaitForIOCommandTypeEnum[keyof typeof WaitForIOCommandTypeEnum];
+export type WaitForTimeCommandTypeEnum = typeof WaitForTimeCommandTypeEnum[keyof typeof WaitForTimeCommandTypeEnum];
 export type WaypointCoordinates = {
   kind: 'JOINTS';
 } & JointWaypoint | {
@@ -2310,6 +2686,14 @@ export declare class ControllerInputsOutputsApi extends BaseAPI {
   setOutputValues(_: string, _: string, _: Array<IOValue>, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
   streamIOValues(_: string, _: string, _?: Array<string>, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<StreamIOValuesResponse, any, {}>>;
   waitForIOEvent(_: string, _: string, _: WaitForIOEventRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<boolean, any, {}>>;
+}
+export declare class DatasetsApi extends BaseAPI {
+  createDataset(_: string, _: CreateDatasetRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<GetDatasetResponse, any, {}>>;
+  deleteDataset(_: string, _: string, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
+  getDataset(_: string, _: string, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<GetDatasetResponse, any, {}>>;
+  getDatasets(_: string, _?: string, _?: boolean, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<Dataset[], any, {}>>;
+  localizeDatasetFramePose(_: string, _: string, _: string, _: Array<Pose>, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<Pose[], any, {}>>;
+  resolveDatasetFramePose(_: string, _: string, _: string, _: Array<Pose>, _?: number, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<Pose[], any, {}>>;
 }
 export declare class JoggingApi extends BaseAPI {
   executeJogging(_: string, _: string, _: ExecuteJoggingRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ExecuteJoggingResponse, any, {}>>;
@@ -2475,7 +2859,9 @@ export declare class TrajectoryExecutionApi extends BaseAPI {
   executeTrajectory(_: string, _: string, _: ExecuteTrajectoryRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ExecuteTrajectoryResponse, any, {}>>;
 }
 export declare class TrajectoryPlanningApi extends BaseAPI {
+  configureRerunLogging(_: string, _: RerunLoggingConfigurationRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<RerunLoggingConfigurationResponse, any, {}>>;
   mergeTrajectories(_: string, _: MergeTrajectoriesRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MergeTrajectoriesResponse, any, {}>>;
+  optimizeMotionCommands(_: string, _: OptimizeMotionCommandsRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<OptimizeMotionCommandsResponse, any, {}>>;
   planCollisionFree(_: string, _: PlanCollisionFreeRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<PlanCollisionFreeResponse, any, {}>>;
   planTrajectory(_: string, _: PlanTrajectoryRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<PlanTrajectoryResponse, any, {}>>;
   searchCollisionFreeMultiMotionGroup(_: string, _: MultiSearchCollisionFreeRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MultiSearchCollisionFreeResponse, any, {}>>;
@@ -2735,6 +3121,30 @@ export declare const ControllerInputsOutputsApiFp: (configuration?: Configuratio
   setOutputValues(cell: string, controller: string, iOValue: Array<IOValue>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>>;
   streamIOValues(cell: string, controller: string, ios?: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StreamIOValuesResponse>>;
   waitForIOEvent(cell: string, controller: string, waitForIOEventRequest: WaitForIOEventRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>>;
+};
+export declare const DatasetsApiAxiosParamCreator: (configuration?: Configuration) => {
+  createDataset: (cell: string, createDatasetRequest: CreateDatasetRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  deleteDataset: (cell: string, dataset: string, revision?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getDataset: (cell: string, dataset: string, revision?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getDatasets: (cell: string, dataset?: string, latestOnly?: boolean, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  localizeDatasetFramePose: (cell: string, dataset: string, frame: string, poses: Array<Pose>, revision?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  resolveDatasetFramePose: (cell: string, dataset: string, frame: string, poses: Array<Pose>, revision?: number, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+};
+export declare const DatasetsApiFactory: (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) => {
+  createDataset(cell: string, createDatasetRequest: CreateDatasetRequest, options?: RawAxiosRequestConfig): AxiosPromise<GetDatasetResponse>;
+  deleteDataset(cell: string, dataset: string, revision?: number, options?: RawAxiosRequestConfig): AxiosPromise<void>;
+  getDataset(cell: string, dataset: string, revision?: number, options?: RawAxiosRequestConfig): AxiosPromise<GetDatasetResponse>;
+  getDatasets(cell: string, dataset?: string, latestOnly?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Dataset>>;
+  localizeDatasetFramePose(cell: string, dataset: string, frame: string, poses: Array<Pose>, revision?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<Pose>>;
+  resolveDatasetFramePose(cell: string, dataset: string, frame: string, poses: Array<Pose>, revision?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<Pose>>;
+};
+export declare const DatasetsApiFp: (configuration?: Configuration) => {
+  createDataset(cell: string, createDatasetRequest: CreateDatasetRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetDatasetResponse>>;
+  deleteDataset(cell: string, dataset: string, revision?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>>;
+  getDataset(cell: string, dataset: string, revision?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetDatasetResponse>>;
+  getDatasets(cell: string, dataset?: string, latestOnly?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Dataset>>>;
+  localizeDatasetFramePose(cell: string, dataset: string, frame: string, poses: Array<Pose>, revision?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Pose>>>;
+  resolveDatasetFramePose(cell: string, dataset: string, frame: string, poses: Array<Pose>, revision?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Pose>>>;
 };
 export declare const JoggingApiAxiosParamCreator: (configuration?: Configuration) => {
   executeJogging: (cell: string, controller: string, executeJoggingRequest: ExecuteJoggingRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
@@ -3145,19 +3555,25 @@ export declare const TrajectoryExecutionApiFp: (configuration?: Configuration) =
   executeTrajectory(cell: string, controller: string, executeTrajectoryRequest: ExecuteTrajectoryRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteTrajectoryResponse>>;
 };
 export declare const TrajectoryPlanningApiAxiosParamCreator: (configuration?: Configuration) => {
+  configureRerunLogging: (cell: string, rerunLoggingConfigurationRequest: RerunLoggingConfigurationRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   mergeTrajectories: (cell: string, mergeTrajectoriesRequest: MergeTrajectoriesRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  optimizeMotionCommands: (cell: string, optimizeMotionCommandsRequest: OptimizeMotionCommandsRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   planCollisionFree: (cell: string, planCollisionFreeRequest: PlanCollisionFreeRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   planTrajectory: (cell: string, planTrajectoryRequest: PlanTrajectoryRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   searchCollisionFreeMultiMotionGroup: (cell: string, multiSearchCollisionFreeRequest: MultiSearchCollisionFreeRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
 };
 export declare const TrajectoryPlanningApiFactory: (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) => {
+  configureRerunLogging(cell: string, rerunLoggingConfigurationRequest: RerunLoggingConfigurationRequest, options?: RawAxiosRequestConfig): AxiosPromise<RerunLoggingConfigurationResponse>;
   mergeTrajectories(cell: string, mergeTrajectoriesRequest: MergeTrajectoriesRequest, options?: RawAxiosRequestConfig): AxiosPromise<MergeTrajectoriesResponse>;
+  optimizeMotionCommands(cell: string, optimizeMotionCommandsRequest: OptimizeMotionCommandsRequest, options?: RawAxiosRequestConfig): AxiosPromise<OptimizeMotionCommandsResponse>;
   planCollisionFree(cell: string, planCollisionFreeRequest: PlanCollisionFreeRequest, options?: RawAxiosRequestConfig): AxiosPromise<PlanCollisionFreeResponse>;
   planTrajectory(cell: string, planTrajectoryRequest: PlanTrajectoryRequest, options?: RawAxiosRequestConfig): AxiosPromise<PlanTrajectoryResponse>;
   searchCollisionFreeMultiMotionGroup(cell: string, multiSearchCollisionFreeRequest: MultiSearchCollisionFreeRequest, options?: RawAxiosRequestConfig): AxiosPromise<MultiSearchCollisionFreeResponse>;
 };
 export declare const TrajectoryPlanningApiFp: (configuration?: Configuration) => {
+  configureRerunLogging(cell: string, rerunLoggingConfigurationRequest: RerunLoggingConfigurationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RerunLoggingConfigurationResponse>>;
   mergeTrajectories(cell: string, mergeTrajectoriesRequest: MergeTrajectoriesRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MergeTrajectoriesResponse>>;
+  optimizeMotionCommands(cell: string, optimizeMotionCommandsRequest: OptimizeMotionCommandsRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OptimizeMotionCommandsResponse>>;
   planCollisionFree(cell: string, planCollisionFreeRequest: PlanCollisionFreeRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PlanCollisionFreeResponse>>;
   planTrajectory(cell: string, planTrajectoryRequest: PlanTrajectoryRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PlanTrajectoryResponse>>;
   searchCollisionFreeMultiMotionGroup(cell: string, multiSearchCollisionFreeRequest: MultiSearchCollisionFreeRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MultiSearchCollisionFreeResponse>>;
