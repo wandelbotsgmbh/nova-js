@@ -3,7 +3,7 @@ import type { AxiosRequestConfig } from "axios"
 import axios, { isAxiosError } from "axios"
 import { AutoReconnectingWebsocket } from "./AutoReconnectingWebsocket.ts"
 import { availableStorage } from "./availableStorage.ts"
-import { isLocalhostDev } from "./context.ts"
+import { hasBrowserLocation, isLocalhostDev } from "./context.ts"
 import { parseNovaInstanceUrl } from "./converters.ts"
 import { guardedPageReload } from "./errorHandling.ts"
 import { loginWithAuth0 } from "./LoginWithAuth0.ts"
@@ -70,7 +70,10 @@ export class Nova {
       return request
     })
 
-    if (typeof window !== "undefined") {
+    // The handler below redirects the page on a 401/403/503, which only works
+    // where a location exists. React Native has a `window` without one, and
+    // there the errors bubble up to the caller as they do in node.
+    if (hasBrowserLocation) {
       axiosInstance.interceptors.response.use(
         (r) => r,
         async (error) => {

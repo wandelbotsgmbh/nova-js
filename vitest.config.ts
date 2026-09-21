@@ -15,7 +15,7 @@ export default defineConfig({
           name: "browser",
           environment: "jsdom",
           include: ["test/**/*.test.ts"],
-          exclude: ["test/server/**"],
+          exclude: ["test/server/**", "test/rn/**"],
         },
       },
       {
@@ -27,7 +27,21 @@ export default defineConfig({
           name: "server",
           environment: "node",
           include: ["test/**/*.test.ts"],
-          exclude: ["test/browser/**"],
+          exclude: ["test/browser/**", "test/rn/**"],
+        },
+      },
+      {
+        // React Native execution environment: `window` exists, but it is
+        // `global` and has no `location`, no `document` and no web storage.
+        // Runs the shared tests plus the React-Native-specific ones
+        // (test/rn/setup.ts installs the globals).
+        extends: true,
+        test: {
+          name: "rn",
+          environment: "node",
+          include: ["test/**/*.test.ts"],
+          exclude: ["test/browser/**", "test/server/**"],
+          setupFiles: ["./test/shared/setup.ts", "./test/rn/setup.ts"],
         },
       },
     ],
