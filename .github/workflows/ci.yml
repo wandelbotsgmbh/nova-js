@@ -39,9 +39,17 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: pnpm run test
+  metro-subpaths:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-node
+      # The check resolves against the built package, so build first.
+      - run: pnpm run build
+      - run: pnpm run check:metro
   ci:
     if: ${{ always() }}
-    needs: [typecheck, biome, knip, test]
+    needs: [typecheck, biome, knip, test, metro-subpaths]
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -49,3 +57,4 @@ jobs:
           test "${{ needs.biome.result }}" = success
           test "${{ needs.knip.result }}" = success
           test "${{ needs.test.result }}" = success
+          test "${{ needs.metro-subpaths.result }}" = success
