@@ -9,18 +9,26 @@ import type {
   AppCreatedEvent,
   AppDeletedEvent,
   AppUpdatedEvent,
+  ArpScanReply,
+  ArpScanRequest,
   BusIOsState,
+  CancelIOSubscription,
   Cell,
   CellCreatedEvent,
   CellCycleEvent,
   CellDeletedEvent,
   CellUpdatedEvent,
   CollisionSetup,
+  IOSubscriptionCreated,
+  IOSubscriptionLease,
   ListIOValuesResponse,
   MotionGroupDescription,
   NatsErrorPayload,
+  NetworkInterfacesReply,
+  NetworkInterfacesRequest,
   NetworkStatusChangedEvent,
   ProgramStatus,
+  RenewIOSubscription,
   RobotController,
   RobotControllerCreatedEvent,
   RobotControllerDeletedEvent,
@@ -29,8 +37,10 @@ import type {
   SelectIOs,
   ServiceStatusList,
   StreamIOValuesResponse,
+  SubscribeIOs,
   SystemUpdateCompletedEvent,
   SystemUpdateStartedEvent,
+  UpdateIOSubscription,
 } from "./types.ts"
 
 /** Subject parameters required by each NATS subject, e.g. "nova.v2.cells.{cell}". */
@@ -203,7 +213,12 @@ export interface NatsOperationParams {
   /**
    * Select Input/Output Values
    *
-   * Select input/output values published by the controller.
+   * Select input/output values published by the controller on the shared `...ios` subject.
+   *
+   * This is the reserved, never-expiring default stream, shared by all clients that use it. For
+   * independent per-client streams with their own update type and time to live use the `ios.subscribe`
+   * operations instead. Malformed requests (non-string or empty entries in `ios`, an invalid
+   * `update_type`) are rejected and leave the current selection unchanged.
    *
    * @operationId selectRobotControllerIOs
    */
@@ -233,6 +248,112 @@ export interface NatsOperationParams {
      * Unique identifier to address a controller in the cell.
      */
     controller: string
+  }
+  /**
+   * Subscribe to Input/Output Values
+   *
+   * Create a per-client subscription that streams the selected input/output values on a dedicated,
+   * subscription-specific subject.
+   *
+   * The server generates a subject-safe `subscription_id` and returns it in the reply; values are then
+   * published on `{instance}.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}`. The
+   * subscription expires after `ttl_seconds` unless it is renewed. A subscription that would push the
+   * union of all subscriptions' ports beyond the controller's realtime input/output capacity is rejected.
+   *
+   * @operationId subscribeRobotControllerIOs
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": {
+    /**
+     * Unique identifier addressing a cell in all API calls.
+     */
+    cell: string
+    /**
+     * Unique identifier to address a controller in a cell.
+     */
+    controller: string
+  }
+  /**
+   * Update an Input/Output Subscription
+   *
+   * Partially update an existing subscription by its server-issued `subscription_id`. Only the supplied
+   * fields (`ios`, `update_type`, `ttl_seconds`) are changed; omitted fields are kept unchanged, so the
+   * time to live or the update type can be changed without resending the port list. An update that would
+   * push the union of all subscriptions' ports beyond the controller's realtime input/output capacity is
+   * rejected and leaves the subscription unchanged.
+   *
+   * A successful update also renews the lease: `expires_at` is reset to the current time plus the
+   * subscription's time to live, even when `ttl_seconds` is omitted.
+   *
+   * @operationId updateRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": {
+    /**
+     * Unique identifier addressing a cell in all API calls.
+     */
+    cell: string
+    /**
+     * Unique identifier to address a controller in a cell.
+     */
+    controller: string
+  }
+  /**
+   * Renew an Input/Output Subscription
+   *
+   * Extend the lease of an existing subscription identified by its server-issued `subscription_id`.
+   * Clients should renew at roughly a third of the subscription's time to live. A subscription that has
+   * already expired is not found and must be created again.
+   *
+   * @operationId renewRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": {
+    /**
+     * Unique identifier addressing a cell in all API calls.
+     */
+    cell: string
+    /**
+     * Unique identifier to address a controller in a cell.
+     */
+    controller: string
+  }
+  /**
+   * Cancel an Input/Output Subscription
+   *
+   * Cancel an existing subscription identified by its server-issued `subscription_id`. Streaming on the
+   * subscription's subject stops and its ports are removed from the union read from the controller.
+   *
+   * @operationId cancelRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": {
+    /**
+     * Unique identifier addressing a cell in all API calls.
+     */
+    cell: string
+    /**
+     * Unique identifier to address a controller in a cell.
+     */
+    controller: string
+  }
+  /**
+   * Subscription Input/Output Values
+   *
+   * Publishes updates of input/output values for a single subscription on its dedicated
+   * `...ios.{subscription_id}` subject. Each subscription receives its own `full` or `changes` view.
+   *
+   * @operationId publishRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}": {
+    /**
+     * Unique identifier addressing a cell in all API calls.
+     */
+    cell: string
+    /**
+     * Unique identifier to address a controller in the cell.
+     */
+    controller: string
+    /**
+     * Server-issued identifier of the subscription this stream belongs to.
+     */
+    subscription_id: string
   }
   /**
    * State of Robot Controller
@@ -315,6 +436,22 @@ export interface NatsOperationParams {
    * @operationId eventSystemNetworkStatusChanged
    */
   "nova.v2.events.system.network.status.changed": Record<never, never>
+  /**
+   * List Network Interfaces
+   *
+   * Lists all managed network interfaces available for controller connections and ARP scanning.
+   *
+   * @operationId getNetworkInterfaces
+   */
+  "nova.v2.system.network.interfaces": Record<never, never>
+  /**
+   * Run ARP Scan
+   *
+   * Runs an ARP scan on the target interface and returns all discovered devices.
+   *
+   * @operationId arpScan
+   */
+  "nova.v2.system.network.arpscan": Record<never, never>
   /**
    * Cell Created
    *
@@ -580,6 +717,15 @@ export interface NatsSubscribePayloads {
    */
   "nova.v2.cells.{cell}.controllers.{controller}.ios": StreamIOValuesResponse
   /**
+   * Subscription Input/Output Values
+   *
+   * Publishes updates of input/output values for a single subscription on its dedicated
+   * `...ios.{subscription_id}` subject. Each subscription receives its own `full` or `changes` view.
+   *
+   * @operationId publishRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}": StreamIOValuesResponse
+  /**
    * State of Robot Controller
    *
    * Publishes the current state of a robot controller.
@@ -746,11 +892,80 @@ export interface NatsRequestPayloads {
   /**
    * Select Input/Output Values
    *
-   * Select input/output values published by the controller.
+   * Select input/output values published by the controller on the shared `...ios` subject.
+   *
+   * This is the reserved, never-expiring default stream, shared by all clients that use it. For
+   * independent per-client streams with their own update type and time to live use the `ios.subscribe`
+   * operations instead. Malformed requests (non-string or empty entries in `ios`, an invalid
+   * `update_type`) are rejected and leave the current selection unchanged.
    *
    * @operationId selectRobotControllerIOs
    */
   "nova.v2.cells.{cell}.controllers.{controller}.ios.select": SelectIOs
+  /**
+   * Subscribe to Input/Output Values
+   *
+   * Create a per-client subscription that streams the selected input/output values on a dedicated,
+   * subscription-specific subject.
+   *
+   * The server generates a subject-safe `subscription_id` and returns it in the reply; values are then
+   * published on `{instance}.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}`. The
+   * subscription expires after `ttl_seconds` unless it is renewed. A subscription that would push the
+   * union of all subscriptions' ports beyond the controller's realtime input/output capacity is rejected.
+   *
+   * @operationId subscribeRobotControllerIOs
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": SubscribeIOs
+  /**
+   * Update an Input/Output Subscription
+   *
+   * Partially update an existing subscription by its server-issued `subscription_id`. Only the supplied
+   * fields (`ios`, `update_type`, `ttl_seconds`) are changed; omitted fields are kept unchanged, so the
+   * time to live or the update type can be changed without resending the port list. An update that would
+   * push the union of all subscriptions' ports beyond the controller's realtime input/output capacity is
+   * rejected and leaves the subscription unchanged.
+   *
+   * A successful update also renews the lease: `expires_at` is reset to the current time plus the
+   * subscription's time to live, even when `ttl_seconds` is omitted.
+   *
+   * @operationId updateRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": UpdateIOSubscription
+  /**
+   * Renew an Input/Output Subscription
+   *
+   * Extend the lease of an existing subscription identified by its server-issued `subscription_id`.
+   * Clients should renew at roughly a third of the subscription's time to live. A subscription that has
+   * already expired is not found and must be created again.
+   *
+   * @operationId renewRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": RenewIOSubscription
+  /**
+   * Cancel an Input/Output Subscription
+   *
+   * Cancel an existing subscription identified by its server-issued `subscription_id`. Streaming on the
+   * subscription's subject stops and its ports are removed from the union read from the controller.
+   *
+   * @operationId cancelRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": CancelIOSubscription
+  /**
+   * List Network Interfaces
+   *
+   * Lists all managed network interfaces available for controller connections and ARP scanning.
+   *
+   * @operationId getNetworkInterfaces
+   */
+  "nova.v2.system.network.interfaces": NetworkInterfacesRequest
+  /**
+   * Run ARP Scan
+   *
+   * Runs an ARP scan on the target interface and returns all discovered devices.
+   *
+   * @operationId arpScan
+   */
+  "nova.v2.system.network.arpscan": ArpScanRequest
 }
 
 /** Reply payload types for request/reply subjects. */
@@ -767,11 +982,80 @@ export interface NatsReplyPayloads {
   /**
    * Select Input/Output Values
    *
-   * Select input/output values published by the controller.
+   * Select input/output values published by the controller on the shared `...ios` subject.
+   *
+   * This is the reserved, never-expiring default stream, shared by all clients that use it. For
+   * independent per-client streams with their own update type and time to live use the `ios.subscribe`
+   * operations instead. Malformed requests (non-string or empty entries in `ios`, an invalid
+   * `update_type`) are rejected and leave the current selection unchanged.
    *
    * @operationId selectRobotControllerIOs
    */
   "nova.v2.cells.{cell}.controllers.{controller}.ios.select": NatsErrorPayload
+  /**
+   * Subscribe to Input/Output Values
+   *
+   * Create a per-client subscription that streams the selected input/output values on a dedicated,
+   * subscription-specific subject.
+   *
+   * The server generates a subject-safe `subscription_id` and returns it in the reply; values are then
+   * published on `{instance}.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}`. The
+   * subscription expires after `ttl_seconds` unless it is renewed. A subscription that would push the
+   * union of all subscriptions' ports beyond the controller's realtime input/output capacity is rejected.
+   *
+   * @operationId subscribeRobotControllerIOs
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": IOSubscriptionCreated
+  /**
+   * Update an Input/Output Subscription
+   *
+   * Partially update an existing subscription by its server-issued `subscription_id`. Only the supplied
+   * fields (`ios`, `update_type`, `ttl_seconds`) are changed; omitted fields are kept unchanged, so the
+   * time to live or the update type can be changed without resending the port list. An update that would
+   * push the union of all subscriptions' ports beyond the controller's realtime input/output capacity is
+   * rejected and leaves the subscription unchanged.
+   *
+   * A successful update also renews the lease: `expires_at` is reset to the current time plus the
+   * subscription's time to live, even when `ttl_seconds` is omitted.
+   *
+   * @operationId updateRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": IOSubscriptionLease
+  /**
+   * Renew an Input/Output Subscription
+   *
+   * Extend the lease of an existing subscription identified by its server-issued `subscription_id`.
+   * Clients should renew at roughly a third of the subscription's time to live. A subscription that has
+   * already expired is not found and must be created again.
+   *
+   * @operationId renewRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": IOSubscriptionLease
+  /**
+   * Cancel an Input/Output Subscription
+   *
+   * Cancel an existing subscription identified by its server-issued `subscription_id`. Streaming on the
+   * subscription's subject stops and its ports are removed from the union read from the controller.
+   *
+   * @operationId cancelRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": NatsErrorPayload
+  /**
+   * List Network Interfaces
+   *
+   * Lists all managed network interfaces available for controller connections and ARP scanning.
+   *
+   * @operationId getNetworkInterfaces
+   */
+  "nova.v2.system.network.interfaces": NetworkInterfacesReply
+  /**
+   * Run ARP Scan
+   *
+   * Runs an ARP scan on the target interface and returns all discovered devices.
+   *
+   * @operationId arpScan
+   */
+  "nova.v2.system.network.arpscan": ArpScanReply
 }
 
 export type NatsRequestSubject = keyof NatsRequestPayloads
@@ -883,7 +1167,12 @@ export interface NatsPublishPayloads {
   /**
    * Select Input/Output Values
    *
-   * Select input/output values published by the controller.
+   * Select input/output values published by the controller on the shared `...ios` subject.
+   *
+   * This is the reserved, never-expiring default stream, shared by all clients that use it. For
+   * independent per-client streams with their own update type and time to live use the `ios.subscribe`
+   * operations instead. Malformed requests (non-string or empty entries in `ios`, an invalid
+   * `update_type`) are rejected and leave the current selection unchanged.
    *
    * @operationId selectRobotControllerIOs
    */
@@ -896,6 +1185,63 @@ export interface NatsPublishPayloads {
    * @operationId publishRobotControllerIOs
    */
   "nova.v2.cells.{cell}.controllers.{controller}.ios": StreamIOValuesResponse
+  /**
+   * Subscribe to Input/Output Values
+   *
+   * Create a per-client subscription that streams the selected input/output values on a dedicated,
+   * subscription-specific subject.
+   *
+   * The server generates a subject-safe `subscription_id` and returns it in the reply; values are then
+   * published on `{instance}.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}`. The
+   * subscription expires after `ttl_seconds` unless it is renewed. A subscription that would push the
+   * union of all subscriptions' ports beyond the controller's realtime input/output capacity is rejected.
+   *
+   * @operationId subscribeRobotControllerIOs
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": SubscribeIOs
+  /**
+   * Update an Input/Output Subscription
+   *
+   * Partially update an existing subscription by its server-issued `subscription_id`. Only the supplied
+   * fields (`ios`, `update_type`, `ttl_seconds`) are changed; omitted fields are kept unchanged, so the
+   * time to live or the update type can be changed without resending the port list. An update that would
+   * push the union of all subscriptions' ports beyond the controller's realtime input/output capacity is
+   * rejected and leaves the subscription unchanged.
+   *
+   * A successful update also renews the lease: `expires_at` is reset to the current time plus the
+   * subscription's time to live, even when `ttl_seconds` is omitted.
+   *
+   * @operationId updateRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": UpdateIOSubscription
+  /**
+   * Renew an Input/Output Subscription
+   *
+   * Extend the lease of an existing subscription identified by its server-issued `subscription_id`.
+   * Clients should renew at roughly a third of the subscription's time to live. A subscription that has
+   * already expired is not found and must be created again.
+   *
+   * @operationId renewRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": RenewIOSubscription
+  /**
+   * Cancel an Input/Output Subscription
+   *
+   * Cancel an existing subscription identified by its server-issued `subscription_id`. Streaming on the
+   * subscription's subject stops and its ports are removed from the union read from the controller.
+   *
+   * @operationId cancelRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": CancelIOSubscription
+  /**
+   * Subscription Input/Output Values
+   *
+   * Publishes updates of input/output values for a single subscription on its dedicated
+   * `...ios.{subscription_id}` subject. Each subscription receives its own `full` or `changes` view.
+   *
+   * @operationId publishRobotControllerIOSubscription
+   */
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}": StreamIOValuesResponse
   /**
    * State of Robot Controller
    *
@@ -955,6 +1301,22 @@ export interface NatsPublishPayloads {
    * @operationId eventSystemNetworkStatusChanged
    */
   "nova.v2.events.system.network.status.changed": NetworkStatusChangedEvent
+  /**
+   * List Network Interfaces
+   *
+   * Lists all managed network interfaces available for controller connections and ARP scanning.
+   *
+   * @operationId getNetworkInterfaces
+   */
+  "nova.v2.system.network.interfaces": NetworkInterfacesRequest
+  /**
+   * Run ARP Scan
+   *
+   * Runs an ARP scan on the target interface and returns all discovered devices.
+   *
+   * @operationId arpScan
+   */
+  "nova.v2.system.network.arpscan": ArpScanRequest
   /**
    * Cell Created
    *
