@@ -5,6 +5,7 @@
 export interface AbbController {
   kind: "AbbController";
   controller_ip: string;
+  network_interface?: ControllerNetworkInterface;
   controller_port: number;
   egm_server: {
     ip: string;
@@ -26,6 +27,28 @@ export interface AppEventData {
   image: string;
   operating_state: OperatingState;
 }
+export interface ArpScanRequest {
+  interface: string;
+  cidr: string;
+  timeout?: number;
+}
+export interface AsyncReplyHeaders {
+  Status: string;
+  Description?: string;
+}
+export interface AsyncRequestHeaders {
+  replyTo: string;
+}
+export interface BostondynamicsController {
+  kind: "BostondynamicsController";
+  controller_ip: string;
+  robot_type?: "spot";
+  password: string;
+  username?: string;
+  network_interface?: string;
+  stream_quality?: number;
+  stream_fps?: number;
+}
 export interface Box {
   shape_type: "box";
   size_x: number;
@@ -36,6 +59,9 @@ export interface Box {
 export interface BusIOsState {
   state: BusIOsStateEnum;
   message?: string;
+}
+export interface CancelIOSubscription {
+  subscription_id: string;
 }
 export interface Capsule {
   shape_type: "capsule";
@@ -49,6 +75,18 @@ export interface CartesianLimits {
   orientation_velocity?: number;
   orientation_acceleration?: number;
   orientation_jerk?: number;
+}
+export interface CartesianVelocity {
+  translation: Vector3D;
+  rotation: Vector3D;
+}
+export interface CartesianVelocity1 {
+  translation: Vector3D;
+  rotation: Vector3D;
+}
+export interface CartesianVelocity2 {
+  translation: Vector3D;
+  rotation: Vector3D;
 }
 export interface Cell {
   name: string;
@@ -132,8 +170,12 @@ export interface ContainerStorage {
   capacity: string;
 }
 export interface ControllerNetworkInterface {
-  address: string;
-  pf: string;
+  interface: string;
+  addresses: [string, ...string[]];
+}
+export interface ControllerNetworkInterface1 {
+  interface: string;
+  addresses: [string, ...string[]];
 }
 export interface ConvexHull {
   shape_type: "convex_hull";
@@ -143,6 +185,11 @@ export interface Cylinder {
   shape_type: "cylinder";
   radius: number;
   height: number;
+}
+export interface Device {
+  ip: string;
+  mac: string;
+  vendor?: string;
 }
 export interface DHParameter {
   alpha?: number;
@@ -164,6 +211,7 @@ export interface FanucController {
   kind: "FanucController";
   controller_ip: string;
   network_interface?: ControllerNetworkInterface;
+  stream_motion?: boolean;
 }
 export interface ImageCredentials {
   registry: string;
@@ -184,6 +232,13 @@ export interface IOIntegerValue {
   io: string;
   value: string;
   value_type: "integer";
+}
+export interface IOSubscriptionCreated {
+  subscription_id: string;
+  expires_at: string;
+}
+export interface IOSubscriptionLease {
+  expires_at: string;
 }
 export interface JoggingDetails {
   state: JoggingRunning | JoggingPausedByUser | JoggingPausedOnIO | JoggingPausedNearJointLimit | JoggingPausedNearCollision | JoggingPausedNearSingularity;
@@ -212,7 +267,7 @@ export interface JoggingRunning {
   kind: "RUNNING";
 }
 export interface JointLimits {
-  position?: LimitRange;
+  position?: LimitRange1;
   velocity?: number;
   acceleration?: number;
   jerk?: number;
@@ -221,6 +276,7 @@ export interface JointLimits {
 export interface KukaController {
   kind: "KukaController";
   controller_ip: string;
+  network_interface?: ControllerNetworkInterface1;
   controller_port: number;
   rsi_server: {
     ip: string;
@@ -229,6 +285,10 @@ export interface KukaController {
   slow_cycle_rate?: boolean;
 }
 export interface LimitRange {
+  lower_limit?: number;
+  upper_limit?: number;
+}
+export interface LimitRange1 {
   lower_limit?: number;
   upper_limit?: number;
 }
@@ -276,8 +336,10 @@ export interface MotionGroupState {
   joint_torque?: Joints2;
   joint_current?: Joints3;
   flange_pose?: Pose1;
+  flange_velocity?: CartesianVelocity1;
   tcp?: string;
   tcp_pose?: Pose2;
+  tcp_velocity?: CartesianVelocity2;
   coordinate_system?: string;
   payload?: string;
   standstill: boolean;
@@ -337,6 +399,27 @@ export interface NatsOperationParams {
     cell: string;
     controller: string;
   };
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": {
+    cell: string;
+    controller: string;
+  };
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": {
+    cell: string;
+    controller: string;
+  };
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": {
+    cell: string;
+    controller: string;
+  };
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": {
+    cell: string;
+    controller: string;
+  };
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}": {
+    cell: string;
+    controller: string;
+    subscription_id: string;
+  };
   "nova.v2.cells.{cell}.controllers.{controller}.state": {
     cell: string;
     controller: string;
@@ -349,6 +432,8 @@ export interface NatsOperationParams {
   "nova.v2.events.system.update.started": Record<never, never>;
   "nova.v2.events.system.update.completed": Record<never, never>;
   "nova.v2.events.system.network.status.changed": Record<never, never>;
+  "nova.v2.system.network.interfaces": Record<never, never>;
+  "nova.v2.system.network.arpscan": Record<never, never>;
   "nova.v2.events.cells.{cell}.created": {
     cell: string;
   };
@@ -397,11 +482,18 @@ export interface NatsPublishPayloads {
   "nova.v2.cells.{cell}.bus-ios.ios.set": ListIOValuesResponse;
   "nova.v2.cells.{cell}.controllers.{controller}.ios.select": SelectIOs;
   "nova.v2.cells.{cell}.controllers.{controller}.ios": StreamIOValuesResponse;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": SubscribeIOs;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": UpdateIOSubscription;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": RenewIOSubscription;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": CancelIOSubscription;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}": StreamIOValuesResponse;
   "nova.v2.cells.{cell}.controllers.{controller}.state": RobotControllerState;
   "nova.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description": MotionGroupDescription;
   "nova.v2.events.system.update.started": SystemUpdateStartedEvent;
   "nova.v2.events.system.update.completed": SystemUpdateCompletedEvent;
   "nova.v2.events.system.network.status.changed": NetworkStatusChangedEvent;
+  "nova.v2.system.network.interfaces": NetworkInterfacesRequest;
+  "nova.v2.system.network.arpscan": ArpScanRequest;
   "nova.v2.events.cells.{cell}.created": CellCreatedEvent;
   "nova.v2.events.cells.{cell}.updated": CellUpdatedEvent;
   "nova.v2.events.cells.{cell}.deleted": CellDeletedEvent;
@@ -422,10 +514,22 @@ export interface NatsReceivedMsg {
 export interface NatsReplyPayloads {
   "nova.v2.cells.{cell}.bus-ios.ios.set": NatsErrorPayload;
   "nova.v2.cells.{cell}.controllers.{controller}.ios.select": NatsErrorPayload;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": IOSubscriptionCreated;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": IOSubscriptionLease;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": IOSubscriptionLease;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": NatsErrorPayload;
+  "nova.v2.system.network.interfaces": NetworkInterfacesReply;
+  "nova.v2.system.network.arpscan": ArpScanReply;
 }
 export interface NatsRequestPayloads {
   "nova.v2.cells.{cell}.bus-ios.ios.set": ListIOValuesResponse;
   "nova.v2.cells.{cell}.controllers.{controller}.ios.select": SelectIOs;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe": SubscribeIOs;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.update": UpdateIOSubscription;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.renew": RenewIOSubscription;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.subscribe.cancel": CancelIOSubscription;
+  "nova.v2.system.network.interfaces": NetworkInterfacesRequest;
+  "nova.v2.system.network.arpscan": ArpScanRequest;
 }
 export interface NatsSubscribePayloads {
   "nova.v2.cells.{cell}": Cell;
@@ -439,6 +543,7 @@ export interface NatsSubscribePayloads {
   "nova.v2.cells.{cell}.bus-ios.status": BusIOsState;
   "nova.v2.cells.{cell}.bus-ios.ios": ListIOValuesResponse;
   "nova.v2.cells.{cell}.controllers.{controller}.ios": StreamIOValuesResponse;
+  "nova.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}": StreamIOValuesResponse;
   "nova.v2.cells.{cell}.controllers.{controller}.state": RobotControllerState;
   "nova.v2.cells.{cell}.controllers.{controller}.motion-groups.{motion-group}.description": MotionGroupDescription;
   "nova.v2.events.system.update.started": SystemUpdateStartedEvent;
@@ -454,11 +559,17 @@ export interface NatsSubscribePayloads {
   "nova.v2.events.cells.{cell}.controllers.{controller}.updated": RobotControllerUpdatedEvent;
   "nova.v2.events.cells.{cell}.controllers.{controller}.deleted": RobotControllerDeletedEvent;
 }
+export interface NetworkInterface {
+  name: string;
+  interface: string;
+  node: string;
+  backend: NetworkBackend;
+  link: NetworkLinkState;
+  addresses?: string[];
+}
+export interface NetworkInterfacesRequest {}
 export interface NetworkState {
   internet_connected: boolean;
-  connection_type?: "ethernet" | "wifi" | "cellular" | "vpn" | "unknown";
-  signal_strength?: number;
-  link_quality?: number;
   latency_ms?: number;
   bandwidth_mbps?: number;
 }
@@ -535,9 +646,12 @@ export interface RectangularCapsule {
   sphere_center_distance_x: number;
   sphere_center_distance_y: number;
 }
+export interface RenewIOSubscription {
+  subscription_id: string;
+}
 export interface RobotController {
   name: string;
-  configuration: AbbController | FanucController | KukaController | UniversalrobotsController | VirtualController | YaskawaController;
+  configuration: AbbController | FanucController | KukaController | StaubliController | TechmanController | UniversalrobotsController | VirtualController | YaskawaController | BostondynamicsController | UnitreeController;
 }
 export interface RobotControllerEventData {
   manufacturer: Manufacturer;
@@ -575,10 +689,26 @@ export interface Sphere {
   shape_type: "sphere";
   radius: number;
 }
+export interface StaubliController {
+  kind: "StaubliController";
+  controller_ip: string;
+  network_interface?: ControllerNetworkInterface;
+  controller_port: number;
+  command_port: number;
+  rti_server: {
+    ip: string;
+    port: number;
+  };
+}
 export interface StreamIOValuesResponse {
   io_values: IOValue[];
   timestamp: string;
   sequence_number: number;
+}
+export interface SubscribeIOs {
+  ios: [string, ...string[]];
+  update_type?: "changes" | "full";
+  ttl_seconds?: number;
 }
 export interface TcpOffset {
   name: string;
@@ -586,6 +716,18 @@ export interface TcpOffset {
 }
 export interface TcpOffsetDictionary {
   [k: string]: TcpOffset;
+}
+export interface TechmanController {
+  kind: "TechmanController";
+  controller_ip: string;
+  network_interface?: ControllerNetworkInterface;
+  tmsvr_port?: number;
+  tmsct_port?: number;
+  rtrs: {
+    ip: string;
+    tmrts_port?: number;
+    tmrtc_port?: number;
+  };
 }
 export interface TrajectoryDetails {
   trajectory: string;
@@ -609,9 +751,24 @@ export interface TrajectoryRunning {
 export interface TrajectoryWaitForIO {
   kind: "WAIT_FOR_IO";
 }
+export interface UnitreeController {
+  kind: "UnitreeController";
+  controller_ip: string;
+  robot_type: "go2" | "g1" | "b2" | "h1";
+  network_interface?: string;
+  dds_unicast_mode?: boolean;
+  enable_lease?: boolean;
+}
 export interface UniversalrobotsController {
   kind: "UniversalrobotsController";
   controller_ip: string;
+  network_interface?: ControllerNetworkInterface;
+}
+export interface UpdateIOSubscription {
+  subscription_id: string;
+  ios?: [string, ...string[]];
+  update_type?: IOUpdateType;
+  ttl_seconds?: number;
 }
 export interface VirtualController {
   kind: "VirtualController";
@@ -624,6 +781,7 @@ export interface VirtualController {
 export interface YaskawaController {
   kind: "YaskawaController";
   controller_ip: string;
+  network_interface?: ControllerNetworkInterface;
 }
 // #endregion
 
@@ -662,6 +820,7 @@ export type AppUpdatedEvent = {
   };
   data: AppEventData;
 } & CloudEvent;
+export type ArpScanReply = Device[];
 export type BusIOsStateEnum = "BUS_IOS_STATE_UNKNOWN" | "BUS_IOS_STATE_INITIALIZING" | "BUS_IOS_STATE_CONNECTED" | "BUS_IOS_STATE_DISCONNECTED";
 export type Capacity = string;
 export type CellCreatedEvent = {
@@ -703,6 +862,7 @@ export type ContainerEnvironment = {
   name: string;
   value: string;
 }[];
+export type IOUpdateType = "changes" | "full";
 export type IOValue = IOBooleanValue | IOIntegerValue | IOFloatValue;
 export type Joints = number[];
 export type Joints1 = number[];
@@ -713,7 +873,7 @@ export type LinkChain = CollisionMotionGroupLink[];
 export type LinkChain1 = CollisionMotionGroupLink[];
 export type ListIOValuesResponse = IOValue[];
 export type Location = number;
-export type Manufacturer = "abb" | "fanuc" | "kuka" | "staubli" | "universalrobots" | "yaskawa";
+export type Manufacturer = "abb" | "bostondynamics" | "fanuc" | "kuka" | "staubli" | "techman" | "unitree" | "universalrobots" | "yaskawa";
 export type MotionGroupModel = string;
 export type MotionGroupState1 = MotionGroupState[];
 export type NatsPublishSubject = keyof NatsPublishPayloads;
@@ -725,6 +885,9 @@ export type NatsSubscribeOptions = {
   lastMessage?: boolean;
 };
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
+export type NetworkBackend = "macvlan" | "sriov";
+export type NetworkInterfacesReply = NetworkInterface[];
+export type NetworkLinkState = "up" | "down";
 export type NovaNatsClientConfig = ConnectionOptions;
 export type OperatingState = "ACTIVE" | "INACTIVE";
 export type OperationMode = "OPERATION_MODE_UNKNOWN" | "OPERATION_MODE_NO_CONTROLLER" | "OPERATION_MODE_DISCONNECTED" | "OPERATION_MODE_POWER_ON" | "OPERATION_MODE_PENDING" | "OPERATION_MODE_MANUAL" | "OPERATION_MODE_MANUAL_T1" | "OPERATION_MODE_MANUAL_T2" | "OPERATION_MODE_AUTO" | "OPERATION_MODE_RECOVERY";

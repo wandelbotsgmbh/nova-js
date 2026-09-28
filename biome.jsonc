@@ -65,6 +65,17 @@
           }
         }
       }
+    },
+    {
+      // The generator turns an empty payload schema into an empty interface
+      "includes": ["src/lib/experimental/nats/generated/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noEmptyInterface": "off"
+          }
+        }
+      }
     }
   ]
 }

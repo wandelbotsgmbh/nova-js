@@ -27,9 +27,12 @@ export type CellDescription = string
  */
 export type Manufacturer =
   | "abb"
+  | "bostondynamics"
   | "fanuc"
   | "kuka"
   | "staubli"
+  | "techman"
+  | "unitree"
   | "universalrobots"
   | "yaskawa"
 /**
@@ -207,6 +210,16 @@ export type IOValue = IOBooleanValue | IOIntegerValue | IOFloatValue
  * via the `definition` "ListIOValuesResponse".
  */
 export type ListIOValuesResponse = IOValue[]
+/**
+ * Type of update for a stream of input/output values.
+ *   - changes: Only send updates when the value changes.
+ *   - full: Send the full list of values at the update rate.
+ *
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "IOUpdateType".
+ */
+export type IOUpdateType = "changes" | "full"
 /**
  * Defines the current system mode of the robot system, including NOVA communicating with the robot controller.
  *
@@ -443,6 +456,30 @@ export type SystemUpdateCompletedEvent = CloudEvent & {
   }
 }
 /**
+ * Network attachment method used to expose the interface to workloads.
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "NetworkBackend".
+ */
+export type NetworkBackend = "macvlan" | "sriov"
+/**
+ * Link state of the physical interface.
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "NetworkLinkState".
+ */
+export type NetworkLinkState = "up" | "down"
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "NetworkInterfacesReply".
+ */
+export type NetworkInterfacesReply = NetworkInterface[]
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "ArpScanReply".
+ */
+export type ArpScanReply = Device[]
+/**
  * The operating state.
  *
  * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
@@ -639,9 +676,37 @@ export type RobotControllerDeletedEvent = {
   data: RobotControllerEventData
 } & CloudEvent
 
+export interface ControllerNetworkInterface {
+  /**
+   * Network port identifier. Either a bare port name, e.g., `enp3s0` or a
+   * node-qualified identifier, e.g., `wandelbox-abc123-enp3s0`. Use the
+   * node-qualified form on multi-node clusters to pin the interface to a
+   * specific node.
+   *
+   * Cannot be changed in-place. Delete and add the controller again to another port.
+   *
+   */
+  interface: string
+  /**
+   * IPv4 addresses to assign to the interface, in address/prefix format, e.g., `192.168.1.10/24`.
+   *
+   * @minItems 1
+   */
+  addresses: [string, ...string[]]
+}
+/**
+ * The configuration of a physical ABB robot controller has to contain IP address.
+ * Additionally an EGM server configuration has to be specified in order to control the robot.
+ * Deploying the server is a functionality of this API.
+ *
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "AbbController".
+ */
 export interface AbbController {
   kind: "AbbController"
   controller_ip: string
+  network_interface?: ControllerNetworkInterface
   /**
    * Default values: 80, 443. If custom value is set, field is required.
    *
@@ -656,33 +721,6 @@ export interface AbbController {
   }
 }
 /**
- * Optional dedicated network interface for a physical robot controller.
- *
- * When set, the controller is given its own network interface on the selected
- * physical network port (`pf`) with the given `address`, so it can reach the
- * robot network directly.
- *
- *
- * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
- * via the `definition` "ControllerNetworkInterface".
- */
-export interface ControllerNetworkInterface {
-  /**
-   * IPv4 address in CIDR notation to assign to the controller's network
-   * interface, for example `192.168.1.10/24`. The value must be a valid IPv4
-   * address followed by a prefix length between 0 and 32.
-   *
-   */
-  address: string
-  /**
-   * Name of the node's physical network port that connects to the robot
-   * network, for example `enp10s0f0`. The controller's interface is provided
-   * from this port.
-   *
-   */
-  pf: string
-}
-/**
  * The configuration of a physical FANUC robot controller has to contain IP address of the controller.
  *
  * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
@@ -692,6 +730,12 @@ export interface FanucController {
   kind: "FanucController"
   controller_ip: string
   network_interface?: ControllerNetworkInterface
+  /**
+   * Enable the FANUC Stream Motion interface. When enabled, the GCI server
+   * communicates with the controller via the Stream Motion interface.
+   *
+   */
+  stream_motion?: boolean
 }
 /**
  * The configuration of a physical KUKA robot controller has to contain an IP address.
@@ -705,6 +749,7 @@ export interface FanucController {
 export interface KukaController {
   kind: "KukaController"
   controller_ip: string
+  network_interface?: ControllerNetworkInterface1
   controller_port: number
   /**
    * The RSI server runs inside of the cell.
@@ -720,6 +765,88 @@ export interface KukaController {
   slow_cycle_rate?: boolean
 }
 /**
+ * Direct network interface for the robot controller. When set, the controller
+ * gets its own interface on the specified port with the given addresses to
+ * reach the controller's network.
+ *
+ */
+export interface ControllerNetworkInterface1 {
+  /**
+   * Network port identifier. Either a bare port name, e.g., `enp3s0` or a
+   * node-qualified identifier, e.g., `wandelbox-abc123-enp3s0`. Use the
+   * node-qualified form on multi-node clusters to pin the interface to a
+   * specific node.
+   *
+   * Cannot be changed in-place. Delete and add the controller again to another port.
+   *
+   */
+  interface: string
+  /**
+   * IPv4 addresses to assign to the interface, in address/prefix format, e.g., `192.168.1.10/24`.
+   *
+   * @minItems 1
+   */
+  addresses: [string, ...string[]]
+}
+/**
+ * The configuration of a physical STÄUBLI robot controller has to contain an IP address.
+ * Additionally, an RTI server configuration has to be specified in order to control the robot.
+ * Deploying the server is a functionality of this API.
+ *
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "StaubliController".
+ */
+export interface StaubliController {
+  kind: "StaubliController"
+  controller_ip: string
+  network_interface?: ControllerNetworkInterface
+  controller_port: number
+  command_port: number
+  /**
+   * The RTI server runs inside of the cell.
+   */
+  rti_server: {
+    ip: string
+    port: number
+  }
+}
+/**
+ * The configuration of a physical Techman robot controller has to contain an IP address.
+ * Additionally an RTRS server configuration has to be specified to obtain state from the robot.
+ *
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "TechmanController".
+ */
+export interface TechmanController {
+  kind: "TechmanController"
+  controller_ip: string
+  network_interface?: ControllerNetworkInterface
+  /**
+   * TCP port for the TMSVR channel on the robot controller.
+   */
+  tmsvr_port?: number
+  /**
+   * TCP port for the TMSCT channel on the robot controller.
+   */
+  tmsct_port?: number
+  /**
+   * RTRS server configuration for real-time communication.
+   */
+  rtrs: {
+    ip: string
+    /**
+     * TCP port for the TMRTS state reporting channel.
+     */
+    tmrts_port?: number
+    /**
+     * TCP port for the TMRTC real-time control channel.
+     */
+    tmrtc_port?: number
+  }
+}
+/**
  * The configuration of a physical Universal Robots controller has to contain IP address of the controller.
  *
  * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
@@ -728,6 +855,7 @@ export interface KukaController {
 export interface UniversalrobotsController {
   kind: "UniversalrobotsController"
   controller_ip: string
+  network_interface?: ControllerNetworkInterface
 }
 /**
  * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
@@ -914,6 +1042,78 @@ export interface VirtualController {
 export interface YaskawaController {
   kind: "YaskawaController"
   controller_ip: string
+  network_interface?: ControllerNetworkInterface
+}
+/**
+ * The configuration of a Boston Dynamics robot controller.
+ * Requires the hostname or IP address of the robot and authentication credentials.
+ *
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "BostondynamicsController".
+ */
+export interface BostondynamicsController {
+  kind: "BostondynamicsController"
+  /**
+   * The hostname or IP address of the robot.
+   */
+  controller_ip: string
+  /**
+   * The Boston Dynamics robot model type.
+   */
+  robot_type?: "spot"
+  /**
+   * The authentication password for the robot.
+   */
+  password: string
+  /**
+   * The authentication username for the robot.
+   */
+  username?: string
+  /**
+   * The network interface used to communicate with the robot.
+   */
+  network_interface?: string
+  /**
+   * JPEG quality for camera streams (1-100).
+   */
+  stream_quality?: number
+  /**
+   * Frames per second for camera streams.
+   */
+  stream_fps?: number
+}
+/**
+ * The configuration of a Unitree robot controller.
+ * Supports Go2, G1, B2, and H1 robot models.
+ * Requires the IP address of the robot and the robot model type.
+ *
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "UnitreeController".
+ */
+export interface UnitreeController {
+  kind: "UnitreeController"
+  /**
+   * The IP address of the Unitree robot.
+   */
+  controller_ip: string
+  /**
+   * The Unitree robot model type.
+   */
+  robot_type: "go2" | "g1" | "b2" | "h1"
+  /**
+   * The network interface used for DDS discovery.
+   */
+  network_interface?: string
+  /**
+   * Enable DDS unicast mode for environments where multicast is unavailable.
+   */
+  dds_unicast_mode?: boolean
+  /**
+   * Enable exclusive lease-based control of the robot.
+   */
+  enable_lease?: boolean
 }
 /**
  * The configuration of a physical or virtual robot controller.
@@ -932,9 +1132,13 @@ export interface RobotController {
     | AbbController
     | FanucController
     | KukaController
+    | StaubliController
+    | TechmanController
     | UniversalrobotsController
     | VirtualController
     | YaskawaController
+    | BostondynamicsController
+    | UnitreeController
 }
 /**
  * User provided credentials for creating a secret to pull an image from a registry.
@@ -1533,6 +1737,116 @@ export interface StreamIOValuesResponse {
   sequence_number: number
 }
 /**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "AsyncRequestHeaders".
+ */
+export interface AsyncRequestHeaders {
+  /**
+   * Unique inbox subject the caller is subscribed to. The server publishes the response to this address. Use a per-request unique subject, e.g., NATS inbox _INBOX.*.
+   *
+   */
+  replyTo: string
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "SubscribeIOs".
+ */
+export interface SubscribeIOs {
+  /**
+   * Array of input/output identifiers to stream the values for.
+   *
+   * @minItems 1
+   */
+  ios: [string, ...string[]]
+  /**
+   * Type of update for a stream of input/output values.
+   *   - changes: Only send updates when the value changes.
+   *   - full: Send the full list of values at the update rate.
+   *
+   */
+  update_type?: "changes" | "full"
+  /**
+   * The subscription's time to live (TTL), in seconds: once it elapses the subscription expires and
+   * streaming stops. Fractional values are allowed. Any non-negative value is accepted and clamped server-side to
+   * the range 5..300 seconds. Clients should renew the subscription at roughly a third of this interval.
+   *
+   */
+  ttl_seconds?: number
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "IOSubscriptionCreated".
+ */
+export interface IOSubscriptionCreated {
+  /**
+   * Server-issued, subject-safe identifier of the created subscription.
+   * Values for this subscription are published on the
+   * `{instance}.v2.cells.{cell}.controllers.{controller}.ios.{subscription_id}` subject.
+   *
+   */
+  subscription_id: string
+  /**
+   * Timestamp at which the subscription expires, unless it is renewed.
+   */
+  expires_at: string
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "UpdateIOSubscription".
+ */
+export interface UpdateIOSubscription {
+  /**
+   * Server-issued identifier of the subscription to update.
+   */
+  subscription_id: string
+  /**
+   * Array of input/output identifiers to stream the values for.
+   * When omitted the current selection is kept unchanged. An empty array is rejected.
+   *
+   *
+   * @minItems 1
+   */
+  ios?: [string, ...string[]]
+  update_type?: IOUpdateType
+  /**
+   * The subscription's time to live (TTL), in seconds. When omitted the current value is kept unchanged.
+   * Fractional values are allowed. Any non-negative value is accepted and clamped server-side to
+   * the range 5..300 seconds.
+   *
+   */
+  ttl_seconds?: number
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "IOSubscriptionLease".
+ */
+export interface IOSubscriptionLease {
+  /**
+   * Timestamp at which the subscription expires, unless it is renewed again.
+   */
+  expires_at: string
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "RenewIOSubscription".
+ */
+export interface RenewIOSubscription {
+  /**
+   * Server-issued identifier of the subscription to renew.
+   */
+  subscription_id: string
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "CancelIOSubscription".
+ */
+export interface CancelIOSubscription {
+  /**
+   * Server-issued identifier of the subscription to cancel.
+   */
+  subscription_id: string
+}
+/**
  * Indicates which joint of the motion group is in a limit.
  * If a joint is in its limit, only this joint can be moved. Movements that affect any other joints are not executed.
  *
@@ -1545,6 +1859,18 @@ export interface MotionGroupState_JointLimitReached {
    * If true, operational (soft) jointLimit is reached for specific joint.
    */
   limit_reached: boolean[]
+}
+/**
+ * Defines a cartesian velocity in 3D space.
+ * The unit of the translation velocity is mm/s and the unit of the rotation velocity is rad/s.
+ *
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "CartesianVelocity".
+ */
+export interface CartesianVelocity {
+  translation: Vector3D
+  rotation: Vector3D
 }
 /**
  * Jogging is active.
@@ -1737,7 +2063,7 @@ export interface TrajectoryDetails {
 }
 /**
  * Details about the state of the motion execution.
- * The details are either for a jogging or a trajectory.
+ * The details are either for a jogging, a trajectory, or an action chunk.
  * If NOVA is not controlling this motion group at the moment, this field is omitted.
  *
  *
@@ -1783,6 +2109,7 @@ export interface MotionGroupState {
   joint_torque?: Joints2
   joint_current?: Joints3
   flange_pose?: Pose1
+  flange_velocity?: CartesianVelocity1
   /**
    * Unique identifier addressing the active TCP.
    * Might not be returned for positioners as some do not support TCPs, depending on the model.
@@ -1790,6 +2117,7 @@ export interface MotionGroupState {
    */
   tcp?: string
   tcp_pose?: Pose2
+  tcp_velocity?: CartesianVelocity2
   /**
    * Unique identifier addressing the reference coordinate system of the cartesian data.
    * Might not be returned for positioners as some do not support TCPs, depending on the model.
@@ -1840,6 +2168,15 @@ export interface Pose1 {
   orientation?: RotationVector
 }
 /**
+ * Cartesian velocity of the flange.
+ * The velocity is relative to the response coordinate system specified in the request.
+ *
+ */
+export interface CartesianVelocity1 {
+  translation: Vector3D
+  rotation: Vector3D
+}
+/**
  * Defines a pose in 3D space.
  * A pose is a combination of a position and an orientation.
  * The position is applied before the orientation.
@@ -1848,6 +2185,15 @@ export interface Pose1 {
 export interface Pose2 {
   position?: Vector3D
   orientation?: RotationVector
+}
+/**
+ * Cartesian velocity of the TCP selected on the robot control panel.
+ * The velocity is relative to the response coordinate system specified in the request.
+ *
+ */
+export interface CartesianVelocity2 {
+  translation: Vector3D
+  rotation: Vector3D
 }
 /**
  * Data that was commanded to the motion group. Includes additional data on NOVA's execution components for executing trajectories and jogging.
@@ -1934,7 +2280,13 @@ export interface TcpOffset {
  * via the `definition` "LimitRange".
  */
 export interface LimitRange {
+  /**
+   * Lower position limit in rad.
+   */
   lower_limit?: number
+  /**
+   * Upper position limit in rad.
+   */
   upper_limit?: number
 }
 /**
@@ -1942,35 +2294,75 @@ export interface LimitRange {
  * via the `definition` "JointLimits".
  */
 export interface JointLimits {
-  position?: LimitRange
+  position?: LimitRange1
+  /**
+   * Joint velocity limit in rad/s.
+   */
   velocity?: number
+  /**
+   * Joint acceleration limit in rad/s².
+   */
   acceleration?: number
   /**
+   * Joint jerk limit in rad/s³.
+   *
    * > **NOTE**
    * >
    * > This limit type is experimental and its behavior may change in future releases.
    *
    */
   jerk?: number
+  /**
+   * Joint torque limit in Nm.
+   */
   torque?: number
+}
+/**
+ * Joint position limits in rad.
+ */
+export interface LimitRange1 {
+  /**
+   * Lower position limit in rad.
+   */
+  lower_limit?: number
+  /**
+   * Upper position limit in rad.
+   */
+  upper_limit?: number
 }
 /**
  * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
  * via the `definition` "CartesianLimits".
  */
 export interface CartesianLimits {
+  /**
+   * Cartesian velocity limit in mm/s.
+   */
   velocity?: number
+  /**
+   * Cartesian acceleration limit in mm/s².
+   */
   acceleration?: number
   /**
+   * Cartesian jerk limit in mm/s³.
+   *
    * > **NOTE**
    * >
    * > This limit type is experimental and its behavior may change in future releases.
    *
    */
   jerk?: number
+  /**
+   * Orientation velocity limit in rad/s.
+   */
   orientation_velocity?: number
+  /**
+   * Orientation acceleration limit in rad/s².
+   */
   orientation_acceleration?: number
   /**
+   * Orientation jerk limit in rad/s³.
+   *
    * > **NOTE**
    * >
    * > This limit type is experimental and its behavior may change in future releases.
@@ -2215,21 +2607,6 @@ export interface NetworkState {
    */
   internet_connected: boolean
   /**
-   * Type of the active network link (e.g., ethernet, wifi, cellular, vpn, unknown).
-   *
-   */
-  connection_type?: "ethernet" | "wifi" | "cellular" | "vpn" | "unknown"
-  /**
-   * Received signal strength in dBm for wireless interfaces; negative values indicate weaker signals.
-   *
-   */
-  signal_strength?: number
-  /**
-   * Normalized link quality metric from 0 (poor) to 1 (excellent) when provided by the interface.
-   *
-   */
-  link_quality?: number
-  /**
    * Round-trip latency to the probe endpoint measured in milliseconds.
    *
    */
@@ -2274,6 +2651,88 @@ export interface NetworkStatusChangedEvent {
    */
   datacontenttype?: string
   data: NetworkState
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "AsyncReplyHeaders".
+ */
+export interface AsyncReplyHeaders {
+  /**
+   * HTTP status code indicating the result of the operation, e.g., "200" for success, "400" for bad request, "404" for not found, "500" for server error.
+   *
+   */
+  Status: string
+  /**
+   * Human-readable error message. Only present when Status is not 2xx.
+   */
+  Description?: string
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "NetworkInterface".
+ */
+export interface NetworkInterface {
+  /**
+   * Host network interface name, e.g., enp0s31f6.
+   */
+  name: string
+  /**
+   * Stable identifier for this interface. Pass it as the `interface` field in ARP scan request, e.g., wandelbox-abc123-enp3s0.
+   */
+  interface: string
+  /**
+   * Hostname that exposes this interface.
+   */
+  node: string
+  backend: NetworkBackend
+  link: NetworkLinkState
+  /**
+   * IP/CIDR addresses currently assigned to the interface. Omitted when not available.
+   */
+  addresses?: string[]
+}
+/**
+ * Empty request. No parameters needed.
+ *
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "NetworkInterfacesRequest".
+ */
+export interface NetworkInterfacesRequest {}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "ArpScanRequest".
+ */
+export interface ArpScanRequest {
+  /**
+   * Interface to scan. Use the `interface` value from the network interfaces list, e.g., wandelbox-abc123-enp3s0.
+   */
+  interface: string
+  /**
+   * IP range to scan in CIDR notation, e.g., 192.168.1.0/24.
+   */
+  cidr: string
+  /**
+   * Scan timeout in milliseconds. Defaults to 5000 if omitted or zero.
+   */
+  timeout?: number
+}
+/**
+ * This interface was referenced by `GeneratedNatsPayloadsRoot`'s JSON-Schema
+ * via the `definition` "Device".
+ */
+export interface Device {
+  /**
+   * IPv4 address of the discovered device.
+   */
+  ip: string
+  /**
+   * MAC address of the discovered device.
+   */
+  mac: string
+  /**
+   * Hardware manufacturer name derived from the MAC address, omitted when unknown.
+   */
+  vendor?: string
 }
 /**
  * Payload for a cell lifecycle event.
