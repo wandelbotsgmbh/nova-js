@@ -47,11 +47,11 @@ function make403Adapter(
   }
 }
 
-function stubBrowserWindow(origin = "https://example.com") {
+function stubBrowserWindow(origin = "https://example.com", pathname = "/app") {
   const location = {
-    href: `${origin}/app`,
+    href: `${origin}${pathname}`,
     origin,
-    pathname: "/app",
+    pathname,
     search: "",
     assign: vi.fn(),
     reload: vi.fn(),
@@ -193,3 +193,39 @@ test("bubbles a 403 without redirecting when the session has capabilities", asyn
 
   expect(location.href).toBe("https://example.com/app")
 })
+
+test.each([
+  ["no capabilities", { session_id: "user-session-123", capabilities: [] }],
+  ["the session endpoint itself returning a 403", "403"],
+])(
+  "bubbles the 403 instead of redirecting when already on the instance url, with %s",
+  async (_name, sessionResponse) => {
+    // The instance url is where the access denied screen is rendered, so
+    // redirecting there again would reload the page forever
+    const location = stubBrowserWindow("https://example.com", "/")
+
+    const nova = new Nova({
+      instanceUrl: "https://example.com",
+      accessToken: "authenticated-but-unauthorized-token",
+      baseOptions: {
+        adapter: make403Adapter(
+          typeof sessionResponse === "string"
+            ? sessionResponse
+            : {
+                user: {},
+                issued_at: "2026-01-01T00:00:00Z",
+                expires_at: "2026-01-01T01:00:00Z",
+                ...sessionResponse,
+              },
+        ),
+      },
+    })
+
+    // The page has to be able to render its own access denied state
+    await expect(
+      nova.api.controller.listRobotControllers("cell"),
+    ).rejects.toMatchObject({ response: { status: 403 } })
+
+    expect(location.href).toBe("https://example.com/")
+  },
+)
