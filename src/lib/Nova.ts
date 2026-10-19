@@ -25,6 +25,14 @@ export type NovaConfig = {
   accessToken?: string
 } & Omit<BaseConfiguration, "isJsonMime" | "basePath">
 
+/** Whether the page is already showing the given url, ignoring query and hash */
+function isOnUrl(url: URL): boolean {
+  const trimSlashes = (path: string) => path.replace(/\/+$/, "")
+  return (
+    window.location.origin === url.origin &&
+    trimSlashes(window.location.pathname) === trimSlashes(url.pathname)
+  )
+}
 /**
  *
  * Client for connecting to a NOVA instance and controlling robots.
@@ -125,7 +133,7 @@ export class Nova {
                 // the original 403 error below.
               }
 
-              if (redirectToAccessDenied) {
+              if (redirectToAccessDenied && !isOnUrl(this.instanceUrl)) {
                 // Send them to the instance url, which renders the access
                 // denied screen. Return a promise that never settles so the
                 // caller doesn't flash an error state before the navigation
@@ -133,6 +141,9 @@ export class Nova {
                 window.location.href = this.instanceUrl.href
                 return new Promise(() => {})
               }
+              // Already on the instance url: redirecting again would reload
+              // the page forever, so the 403 bubbles for the page to render
+              // its own access denied state.
             } else if (error.response?.status === 503) {
               // Check if the server as a whole is down
               const res = await fetch(window.location.href)

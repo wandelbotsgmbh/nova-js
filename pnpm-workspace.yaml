@@ -18,9 +18,20 @@ packages:
   - "."
   - "example"
 
+auditConfig:
+  ignoreGhsas:
+    # braces stack exhaustion: the advisory's patched version 3.0.4 is not
+    # published on npm, and braces is only reached through dev tooling
+    # (nodemon, semantic-release). Remove once a fixed release exists.
+    - GHSA-vfj7-8cjw-p6xm
+
 overrides:
-  brace-expansion: "^5.0.7"
+  brace-expansion: "^5.0.11"
   fast-uri: "^3.1.6"
+  handlebars: "^4.7.10"
   js-yaml: "^4.3.2"
-  shell-quote: "^1.8.5"
+  shell-quote: "^1.11.0"
+  source-map-js: "^1.2.2"
+  "undici@>=6.7.0 <6.28.1": "^6.28.1"
+  "undici@>=7.0.0 <7.29.1": "^7.29.1"
   "@wandelbots/nova-js": "workspace:*"
