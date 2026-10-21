@@ -218,7 +218,11 @@ export class NovaNatsClient {
       // never delivering anything.
       const streamName = await jsm.streams.find(resolvedSubject)
       const consumer = await jetstream(nc).consumers.get(streamName, {
-        filter_subjects: [resolvedSubject],
+        // A single string, not an array: only then does @nats-io/jetstream
+        // put the filter into the consumer-create subject
+        // ($JS.API.CONSUMER.CREATE.<stream>.<consumer>.<filter>), which NOVA's
+        // per-cell NATS authorization requires (IC-908).
+        filter_subjects: resolvedSubject,
         deliver_policy: DeliverPolicy.LastPerSubject,
       })
       const messages = await consumer.consume()

@@ -316,7 +316,7 @@ describe("NovaNatsClient", () => {
     expect(mockConnection.subscribe).not.toHaveBeenCalled()
     expect(jetstreamMocks.streamsFind).toHaveBeenCalledWith("nova.v2.cells.*")
     expect(jetstreamMocks.consumersGet).toHaveBeenCalledWith("the-stream", {
-      filter_subjects: ["nova.v2.cells.*"],
+      filter_subjects: "nova.v2.cells.*",
       deliver_policy: "last_per_subject",
     })
     expect(handler).toHaveBeenCalledWith(
