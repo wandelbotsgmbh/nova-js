@@ -63,6 +63,22 @@ export type NatsSubscribeOptions = {
   lastMessage?: boolean
 }
 
+/**
+ * What `subscribe()` returns: a function that unsubscribes when called, with
+ * a `closed` promise that resolves when the subscription has ended. After
+ * that, the subscription receives no more messages; subscribe again to
+ * receive them.
+ *
+ * `closed` resolves with `undefined` when the subscription ended without an
+ * error: after an unsubscribe, or because the connection was closed. It
+ * resolves with the error when the server or the NATS library ended it, for
+ * example when the server refused the subject, or when JetStream could not
+ * create a lost consumer again.
+ */
+export type NatsSubscription = (() => void) & {
+  closed: Promise<Error | undefined>
+}
+
 type NatsMessageHandler<K extends NatsSubscribeSubject> = (
   payload: NatsSubscribePayloads[K],
   msg: NatsSubscribeMsg<K>,
@@ -150,12 +166,13 @@ export class NovaNatsClient {
    * message persisted for each matching subject is replayed to the handler
    * immediately, before live messages (see {@link NatsSubscribeOptions}).
    *
-   * Returns a function that unsubscribes when called.
+   * Returns a function that unsubscribes when called. Its `closed` promise
+   * resolves when the subscription has ended (see {@link NatsSubscription}).
    */
   async subscribe<K extends NatsSubscribeSubject>(
     subject: K,
     ...args: SubscribeArgs<K>
-  ): Promise<() => void> {
+  ): Promise<NatsSubscription> {
     const [params, handler, options] =
       typeof args[0] === "function"
         ? ([{}, args[0], args[1] as NatsSubscribeOptions | undefined] as const)
@@ -175,8 +192,12 @@ export class NovaNatsClient {
       }
     }
 
-    const dispatch = (messages: AsyncIterable<NatsReceivedMsg>) => {
-      ;(async () => {
+    // Resolves when the messages end: with `undefined` when they end without
+    // an error, else with the error
+    const dispatch = (
+      messages: AsyncIterable<NatsReceivedMsg>,
+    ): Promise<Error | undefined> =>
+      (async () => {
         for await (const msg of messages) {
           // Handled per-message: a bad payload or a throwing/rejecting
           // handler should not stop the subscription from processing later
@@ -200,13 +221,14 @@ export class NovaNatsClient {
             )
           }
         }
+        return undefined
       })().catch((err: unknown) => {
         console.error(
           `NATS subscription iterator failed for "${resolvedSubject}"`,
           err,
         )
+        return err instanceof Error ? err : new Error(String(err))
       })
-    }
 
     if (options?.lastMessage) {
       // Delivered through JetStream instead of a core subscription: an
@@ -226,13 +248,13 @@ export class NovaNatsClient {
         deliver_policy: DeliverPolicy.LastPerSubject,
       })
       const messages = await consumer.consume()
-      dispatch(messages)
-      return () => void messages.close()
+      return Object.assign(() => void messages.close(), {
+        closed: dispatch(messages),
+      })
     }
 
     const sub = nc.subscribe(resolvedSubject)
-    dispatch(sub)
-    return () => sub.unsubscribe()
+    return Object.assign(() => sub.unsubscribe(), { closed: dispatch(sub) })
   }
 
   /**
