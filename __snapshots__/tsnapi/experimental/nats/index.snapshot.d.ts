@@ -886,7 +886,7 @@ export type NatsSubscribeOptions = {
 };
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
 export type NatsSubscription = (() => void) & {
-  closed: Promise<Error | undefined>;
+  closed(): Promise<Error | undefined>;
 };
 export type NetworkBackend = "macvlan" | "sriov";
 export type NetworkInterfacesReply = NetworkInterface[];

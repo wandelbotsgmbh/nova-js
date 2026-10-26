@@ -65,18 +65,24 @@ export type NatsSubscribeOptions = {
 
 /**
  * What `subscribe()` returns: a function that unsubscribes when called, with
- * a `closed` promise that resolves when the subscription has ended. After
- * that, the subscription receives no more messages; subscribe again to
- * receive them.
+ * a method `closed()`, whose promise resolves when the subscription has
+ * ended. After that, the subscription receives no more messages; subscribe
+ * again to receive them.
  *
- * `closed` resolves with `undefined` when the subscription ended without an
- * error: after an unsubscribe, or because the connection was closed. It
+ * The promise resolves with `undefined` when the subscription ended without
+ * an error: after an unsubscribe, or because the connection was closed. It
  * resolves with the error when the server or the NATS library ended it, for
  * example when the server refused the subject, or when JetStream could not
  * create a lost consumer again.
+ *
+ * The promise resolves only after the handler has finished with the last
+ * message, so the handler is never called after that. While a handler still
+ * runs, the promise waits for it, as `closed` of a nats.js subscription waits
+ * for the code that iterates its messages. So a handler must not wait for
+ * `closed()` of its own subscription.
  */
 export type NatsSubscription = (() => void) & {
-  closed: Promise<Error | undefined>
+  closed(): Promise<Error | undefined>
 }
 
 type NatsMessageHandler<K extends NatsSubscribeSubject> = (
@@ -166,8 +172,9 @@ export class NovaNatsClient {
    * message persisted for each matching subject is replayed to the handler
    * immediately, before live messages (see {@link NatsSubscribeOptions}).
    *
-   * Returns a function that unsubscribes when called. Its `closed` promise
-   * resolves when the subscription has ended (see {@link NatsSubscription}).
+   * Returns a function that unsubscribes when called. The promise of its
+   * `closed()` resolves when the subscription has ended (see
+   * {@link NatsSubscription}).
    */
   async subscribe<K extends NatsSubscribeSubject>(
     subject: K,
@@ -248,13 +255,15 @@ export class NovaNatsClient {
         deliver_policy: DeliverPolicy.LastPerSubject,
       })
       const messages = await consumer.consume()
+      const closed = dispatch(messages)
       return Object.assign(() => void messages.close(), {
-        closed: dispatch(messages),
+        closed: () => closed,
       })
     }
 
     const sub = nc.subscribe(resolvedSubject)
-    return Object.assign(() => sub.unsubscribe(), { closed: dispatch(sub) })
+    const closed = dispatch(sub)
+    return Object.assign(() => sub.unsubscribe(), { closed: () => closed })
   }
 
   /**
