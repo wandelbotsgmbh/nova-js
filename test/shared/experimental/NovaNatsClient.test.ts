@@ -294,6 +294,117 @@ describe("NovaNatsClient", () => {
     consoleErrorSpy.mockRestore()
   })
 
+  test("subscribe() returns a function that unsubscribes", async () => {
+    const unsubscribeSubscription = vi.fn()
+    mockConnection.subscribe.mockReturnValueOnce({
+      [Symbol.asyncIterator]: () => ({
+        next: async () => ({ value: undefined, done: true }),
+      }),
+      unsubscribe: unsubscribeSubscription,
+    } as unknown as ReturnType<typeof mockConnection.subscribe>)
+
+    const client = new NovaNatsClient(nova)
+    const unsubscribe = await client.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "cell" },
+      vi.fn(),
+    )
+    unsubscribe()
+
+    expect(unsubscribeSubscription).toHaveBeenCalled()
+  })
+
+  test("subscribe() resolves `closed()` with undefined when the subscription ends without an error", async () => {
+    const client = new NovaNatsClient(nova)
+    // The mock subscription delivers one message and then ends, as a
+    // subscription does when its connection closes
+    const subscription = await client.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "cell" },
+      vi.fn(),
+    )
+
+    await expect(subscription.closed()).resolves.toBeUndefined()
+  })
+
+  test("subscribe() resolves `closed()` only after the running handler has finished", async () => {
+    let finishHandler!: () => void
+    const handlerRuns = new Promise<void>((resolve) => {
+      finishHandler = resolve
+    })
+    const client = new NovaNatsClient(nova)
+    // The mock subscription delivers one message and then ends; the handler
+    // of that message waits
+    const subscription = await client.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "cell" },
+      () => handlerRuns,
+    )
+
+    const whileTheHandlerRuns = await Promise.race([
+      subscription.closed().then(() => "resolved"),
+      new Promise((resolve) => setTimeout(() => resolve("pending"), 10)),
+    ])
+    finishHandler()
+
+    // So the handler is never called after `closed()` has resolved
+    expect(whileTheHandlerRuns).toBe("pending")
+    await expect(subscription.closed()).resolves.toBeUndefined()
+  })
+
+  test("subscribe() resolves `closed()` with the error that ended the subscription", async () => {
+    const refused = new Error(
+      'Permissions Violation for Subscription to "nova.v2.cells.cell"',
+    )
+    mockConnection.subscribe.mockReturnValueOnce({
+      [Symbol.asyncIterator]: () => ({
+        next: async () => {
+          throw refused
+        },
+      }),
+      unsubscribe: vi.fn(),
+    } as unknown as ReturnType<typeof mockConnection.subscribe>)
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {})
+
+    const client = new NovaNatsClient(nova)
+    const subscription = await client.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "cell" },
+      vi.fn(),
+    )
+
+    await expect(subscription.closed()).resolves.toBe(refused)
+
+    consoleErrorSpy.mockRestore()
+  })
+
+  test("subscribe() resolves `closed()` with an Error when the subscription ends with a value that is no Error", async () => {
+    mockConnection.subscribe.mockReturnValueOnce({
+      [Symbol.asyncIterator]: () => ({
+        next: () => Promise.reject("connection reset"),
+      }),
+      unsubscribe: vi.fn(),
+    } as unknown as ReturnType<typeof mockConnection.subscribe>)
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {})
+
+    const client = new NovaNatsClient(nova)
+    const subscription = await client.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "cell" },
+      vi.fn(),
+    )
+
+    await expect(subscription.closed()).resolves.toEqual(
+      new Error("connection reset"),
+    )
+
+    consoleErrorSpy.mockRestore()
+  })
+
   test("subscribe() with lastMessage uses a JetStream ordered consumer with last-per-subject delivery", async () => {
     jetstreamMocks.messages = [
       {
@@ -339,6 +450,35 @@ describe("NovaNatsClient", () => {
         lastMessage: true,
       }),
     ).rejects.toThrow("no stream matches subject")
+  })
+
+  test("subscribe() with lastMessage resolves `closed()` with the error that ended the subscription", async () => {
+    // @nats-io/jetstream ends the messages with an error, for example when it
+    // cannot create a lost consumer again
+    const notCreated = new Error("the consumer could not be created")
+    jetstreamMocks.consume.mockResolvedValueOnce({
+      [Symbol.asyncIterator]: () => ({
+        next: async () => {
+          throw notCreated
+        },
+      }),
+      close: jetstreamMocks.close,
+    })
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {})
+
+    const client = new NovaNatsClient(nova)
+    const subscription = await client.subscribe(
+      "nova.v2.cells.{cell}",
+      { cell: "cell" },
+      vi.fn(),
+      { lastMessage: true },
+    )
+
+    await expect(subscription.closed()).resolves.toBe(notCreated)
+
+    consoleErrorSpy.mockRestore()
   })
 
   test("subscribe() without lastMessage does not touch JetStream", async () => {

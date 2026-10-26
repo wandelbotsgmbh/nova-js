@@ -12,6 +12,7 @@ overrides:
   js-yaml: ^4.3.2
   shell-quote: ^1.11.0
   source-map-js: ^1.2.2
+  zod: ^4.6.6
   undici@>=6.7.0 <6.28.1: ^6.28.1
   undici@>=7.0.0 <7.29.1: ^7.29.1
   vite@>=8.2.0 <8.2.4: ^8.2.4
@@ -4366,8 +4367,8 @@ packages:
   yuku-parser@0.8.3:
     resolution: {integrity: sha512-KPQcpF9aj77ywlJBIkQWCQ9DObdxnCA8AJdUOmA5CZZx042Xt4+dvbQmPJfWxF3E+KG5dVAZ2fBKuDJ8VsKWgA==}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
 snapshots:
 
@@ -7034,7 +7035,7 @@ snapshots:
       tinyglobby: 0.2.17
       unbash: 4.0.5
       yaml: 2.9.0
-      zod: 4.4.3
+      zod: 4.6.7
 
   leven@3.1.0: {}
 
@@ -8428,4 +8429,4 @@ snapshots:
       '@yuku-parser/binding-win32-arm64': 0.8.3
       '@yuku-parser/binding-win32-x64': 0.8.3
 
-  zod@4.4.3: {}
+  zod@4.6.7: {}

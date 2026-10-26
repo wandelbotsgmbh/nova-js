@@ -885,6 +885,9 @@ export type NatsSubscribeOptions = {
   lastMessage?: boolean;
 };
 export type NatsSubscribeSubject = keyof NatsSubscribePayloads;
+export type NatsSubscription = (() => void) & {
+  closed(): Promise<Error | undefined>;
+};
 export type NetworkBackend = "macvlan" | "sriov";
 export type NetworkInterfacesReply = NetworkInterface[];
 export type NetworkLinkState = "up" | "down";
@@ -973,7 +976,7 @@ export declare class NovaNatsClient {
   constructor(_: Nova, _?: NovaNatsClientConfig);
   connect(): Promise<NatsConnection>;
   close(): Promise<void>;
-  subscribe<K extends NatsSubscribeSubject>(_: K, ..._: SubscribeArgs<K>): Promise<() => void>;
+  subscribe<K extends NatsSubscribeSubject>(_: K, ..._: SubscribeArgs<K>): Promise<NatsSubscription>;
   request<K extends NatsRequestSubject>(_: K, _: NatsOperationParams[K], _: NatsRequestPayloads[K], _?: {
     timeout?: number;
   }): Promise<NatsReplyPayloads[K]>;

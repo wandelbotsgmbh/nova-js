@@ -24,5 +24,6 @@ export type {
   NatsReceivedMsg,
   NatsSubscribeMsg,
   NatsSubscribeOptions,
+  NatsSubscription,
   NovaNatsClientConfig,
 } from "../../lib/experimental/nats/NovaNatsClient.ts"
