@@ -54,8 +54,8 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
       '@wandelbots/nova-api':
-        specifier: 26.7.5
-        version: 26.7.5
+        specifier: 26.7.6
+        version: 26.7.6
       concurrently:
         specifier: ^10.0.4
         version: 10.0.4
@@ -766,12 +766,12 @@ packages:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.3
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.3
 
-  '@napi-rs/wasm-runtime@1.2.5':
-    resolution: {integrity: sha512-HshSvXzmBxNzqejd3k/KemgQ3hdREUYFRRrgxOZ+gPljDIsO2SDZrVZMd4Z/HsxudQbE62OVyVFE8z9BCurfjA==}
+  '@napi-rs/wasm-runtime@1.2.6':
+    resolution: {integrity: sha512-mRyDmEw9/fCDXCGfL1sbgIw/GUK0PVxRW4YwgPN61F3LQ+fSyoBFarJVzgGyhF6kRzEQZ0FejDqm4WLXSeqQmw==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=23.5.0}
     peerDependencies:
-      '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
-      '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.4
+      '@emnapi/core': ^1.7.1 || 2.0.0-beta.2
+      '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2
 
   '@nats-io/jetstream@3.4.0':
     resolution: {integrity: sha512-GzHQodNJ942+R5LRb8PuZ5ugVWVWMRiufxUYLLVWkXKfwDXYN+Owo0d7L/b9O7BPyrbYD7jQWAC6+ZVuXa9Gyw==}
@@ -1679,8 +1679,8 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
-  '@wandelbots/nova-api@26.7.5':
-    resolution: {integrity: sha512-9Bskl1qRlKGV2rEHVyMFSRlugKvx/HdcuDx0txt0x3h9KJdW3e1NU2bbYHwOVQ4swYyNBenlQydWJePPCjR+1A==}
+  '@wandelbots/nova-api@26.7.6':
+    resolution: {integrity: sha512-q5LfHlqweu1F1I/fPbxGdzdYh4BFKWC1Lg2qZPj3kw1v0/hg6ExC8en5UAqIuBWB9S77l/JZwcgK1LiqG9xgdw==}
 
   '@wandelbots/wandelbots-js-react-components@3.7.4':
     resolution: {integrity: sha512-wD4xygHQuh3qMr3jlJB1wLxCUkL8dfYR6OP+QNbbQIlUqH1DiXgjYAOsL4+2oRgqWwSUcIK6UtAPq/0pNkQOTw==}
@@ -4000,6 +4000,9 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+  tslib@2.9.1:
+    resolution: {integrity: sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==}
+
   tsnapi@0.3.4:
     resolution: {integrity: sha512-Q/hYEgp0ORiAcmzrjmsW3A5d1qvIh/F+G40ujIxF4Rnu/jNNDgb3IMqYOum8e75OmyTBvhYNm52cUhdpu7cS1Q==}
     hasBin: true
@@ -4587,7 +4590,7 @@ snapshots:
   '@emnapi/core@1.11.2':
     dependencies:
       '@emnapi/wasi-threads': 1.2.2
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@emnapi/runtime@1.11.1':
@@ -4597,12 +4600,12 @@ snapshots:
 
   '@emnapi/runtime@1.11.2':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@emnapi/wasi-threads@1.2.2':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@emotion/babel-plugin@11.13.5(supports-color@5.5.0)':
@@ -4988,7 +4991,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
-  '@napi-rs/wasm-runtime@1.2.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)':
+  '@napi-rs/wasm-runtime@1.2.6(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)':
     dependencies:
       '@emnapi/core': 1.11.2
       '@emnapi/runtime': 1.11.2
@@ -5266,7 +5269,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.11.2
       '@emnapi/runtime': 1.11.2
-      '@napi-rs/wasm-runtime': 1.2.5(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
+      '@napi-rs/wasm-runtime': 1.2.6(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
     optional: true
 
   '@oxc-resolver/binding-win32-arm64-msvc@11.24.2':
@@ -5626,7 +5629,7 @@ snapshots:
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@types/chai@5.2.3':
@@ -5760,7 +5763,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
-  '@wandelbots/nova-api@26.7.5':
+  '@wandelbots/nova-api@26.7.6':
     dependencies:
       axios: 1.20.0
     transitivePeerDependencies:
@@ -8069,6 +8072,9 @@ snapshots:
   tslib@1.14.1: {}
 
   tslib@2.8.1: {}
+
+  tslib@2.9.1:
+    optional: true
 
   tsnapi@0.3.4(vitest@4.1.11(@types/node@25.9.5)(jsdom@29.1.1)(vite@8.3.4(@types/node@25.9.5)(esbuild@0.27.2)(jiti@2.7.0)(yaml@2.9.0))):
     dependencies:
