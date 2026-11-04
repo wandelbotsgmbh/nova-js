@@ -35,13 +35,15 @@ export interface AbbPose {
 export interface ActionChunkRequest {
   'message_type': ActionChunkRequestMessageTypeEnum;
   'waypoints': Array<Waypoint>;
+  'delay_until_braking'?: number;
 }
 export interface ActionChunkResponse {
   'message'?: string;
   'kind': ActionChunkResponseKindEnum;
 }
 export interface ActivateLicenseRequest {
-  'owner_refresh_token': string;
+  'license_key'?: string;
+  'owner_refresh_token'?: string;
 }
 export interface AddTrajectoryError {
   'message'?: string;
@@ -1093,7 +1095,7 @@ export interface KukaStatusAndTurnBits {
 }
 export interface License {
   'product_name': string;
-  'owner_email': string;
+  'owner_email'?: string;
   'license_key': string;
   'license_expiry_date'?: string;
   'grace_period_expiry_date': string;
@@ -1282,6 +1284,7 @@ export interface MotionGroupJoints {
 export interface MotionGroupModelCatalog {
   'motion_group_name': string;
   'readable_name': string;
+  'serial_number'?: string;
 }
 export interface MotionGroupModelDescription {
   'name': string;
@@ -1735,12 +1738,10 @@ export interface RequestArgs {
 }
 export interface RerunLoggingConfigurationRequest {
   'enabled': boolean;
-  'rerun_url'?: string | null;
 }
 export interface RerunLoggingConfigurationResponse {
   'enabled': boolean;
   'rerun'?: string | null;
-  'rerun_url'?: string | null;
 }
 export interface RobotController {
   'name': string;
@@ -1848,6 +1849,7 @@ export interface ServiceStatus {
   'service': string;
   'group': ServiceGroup;
   'status': ServiceStatusStatus;
+  'modified'?: boolean;
 }
 export interface ServiceStatusResponse {
   'operating_state': OperatingState;
@@ -1947,6 +1949,9 @@ export interface StreamIOValuesResponse {
   'io_values': Array<IOValue>;
   'timestamp': string;
   'sequence_number': number;
+}
+export interface SystemFeatures {
+  'physical_devices_enabled': boolean;
 }
 export interface TcpOffset {
   'name': string;
@@ -2718,9 +2723,9 @@ export declare class MotionGroupApi extends BaseAPI {
   streamMotionGroupState(_: string, _: string, _: string, _?: number, _?: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupState, any, {}>>;
 }
 export declare class MotionGroupModelsApi extends BaseAPI {
-  copyMotionGroupModel(_: string, _: CopyMotionGroupModelRequest, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupModelDescription, any, {}>>;
-  deleteExperimentalMotionGroupModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
-  exportMotionGroupModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<File, any, {}>>;
+  copyMotionGroupModel(_: string, _: CopyMotionGroupModelRequest, _?: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupModelDescription, any, {}>>;
+  deleteExperimentalMotionGroupModel(_: string, _?: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<void, any, {}>>;
+  exportMotionGroupModel(_: string, _?: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<File, any, {}>>;
   getConfigurationForMotionGroup(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<MotionGroupConfiguration, any, {}>>;
   getMotionGroupCollisionModel(_: string, _?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<{
     [key: string]: Collider;
@@ -2842,6 +2847,7 @@ export declare class SystemApi extends BaseAPI {
   getDiagnosePackage(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<File, any, {}>>;
   getNetworkInterfaces(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<NetworkInterface[], any, {}>>;
   getNetworkState(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<NetworkState, any, {}>>;
+  getSystemFeatures(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<SystemFeatures, any, {}>>;
   getSystemStatus(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ServiceStatus[], any, {}>>;
   getSystemVersion(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<string, any, {}>>;
   listConfigurationResources(_?: RawAxiosRequestConfig): Promise<_$axios.AxiosResponse<ConfigurationResource[], any, {}>>;
@@ -3213,9 +3219,9 @@ export declare const MotionGroupApiFp: (configuration?: Configuration) => {
   streamMotionGroupState(cell: string, controller: string, motionGroup: string, responseRate?: number, responseCoordinateSystem?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MotionGroupState>>;
 };
 export declare const MotionGroupModelsApiAxiosParamCreator: (configuration?: Configuration) => {
-  copyMotionGroupModel: (motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
-  deleteExperimentalMotionGroupModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
-  exportMotionGroupModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  copyMotionGroupModel: (motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, serialNumber?: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  deleteExperimentalMotionGroupModel: (motionGroupModel: string, serialNumber?: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  exportMotionGroupModel: (motionGroupModel: string, serialNumber?: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getConfigurationForMotionGroup: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupCollisionModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getMotionGroupDynamicModel: (motionGroupModel: string, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
@@ -3229,9 +3235,9 @@ export declare const MotionGroupModelsApiAxiosParamCreator: (configuration?: Con
   importMotionGroupModel: (body: File, options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
 };
 export declare const MotionGroupModelsApiFactory: (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) => {
-  copyMotionGroupModel(motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, options?: RawAxiosRequestConfig): AxiosPromise<MotionGroupModelDescription>;
-  deleteExperimentalMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
-  exportMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<File>;
+  copyMotionGroupModel(motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, serialNumber?: string, options?: RawAxiosRequestConfig): AxiosPromise<MotionGroupModelDescription>;
+  deleteExperimentalMotionGroupModel(motionGroupModel: string, serialNumber?: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
+  exportMotionGroupModel(motionGroupModel: string, serialNumber?: string, options?: RawAxiosRequestConfig): AxiosPromise<File>;
   getConfigurationForMotionGroup(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<MotionGroupConfiguration>;
   getMotionGroupCollisionModel(motionGroupModel: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<{
     [key: string]: Collider;
@@ -3247,9 +3253,9 @@ export declare const MotionGroupModelsApiFactory: (configuration?: Configuration
   importMotionGroupModel(body: File, options?: RawAxiosRequestConfig): AxiosPromise<MotionGroupModelDescription>;
 };
 export declare const MotionGroupModelsApiFp: (configuration?: Configuration) => {
-  copyMotionGroupModel(motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MotionGroupModelDescription>>;
-  deleteExperimentalMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>>;
-  exportMotionGroupModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>>;
+  copyMotionGroupModel(motionGroupModel: string, copyMotionGroupModelRequest: CopyMotionGroupModelRequest, serialNumber?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MotionGroupModelDescription>>;
+  deleteExperimentalMotionGroupModel(motionGroupModel: string, serialNumber?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>>;
+  exportMotionGroupModel(motionGroupModel: string, serialNumber?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>>;
   getConfigurationForMotionGroup(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MotionGroupConfiguration>>;
   getMotionGroupCollisionModel(motionGroupModel: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<{
     [key: string]: Collider;
@@ -3486,6 +3492,7 @@ export declare const SystemApiAxiosParamCreator: (configuration?: Configuration)
   getDiagnosePackage: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getNetworkInterfaces: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getNetworkState: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
+  getSystemFeatures: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getSystemStatus: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   getSystemVersion: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
   listConfigurationResources: (options?: RawAxiosRequestConfig) => Promise<RequestArgs>;
@@ -3502,6 +3509,7 @@ export declare const SystemApiFactory: (configuration?: Configuration, basePath?
   getDiagnosePackage(options?: RawAxiosRequestConfig): AxiosPromise<File>;
   getNetworkInterfaces(options?: RawAxiosRequestConfig): AxiosPromise<Array<NetworkInterface>>;
   getNetworkState(options?: RawAxiosRequestConfig): AxiosPromise<NetworkState>;
+  getSystemFeatures(options?: RawAxiosRequestConfig): AxiosPromise<SystemFeatures>;
   getSystemStatus(options?: RawAxiosRequestConfig): AxiosPromise<Array<ServiceStatus>>;
   getSystemVersion(options?: RawAxiosRequestConfig): AxiosPromise<string>;
   listConfigurationResources(options?: RawAxiosRequestConfig): AxiosPromise<Array<ConfigurationResource>>;
@@ -3518,6 +3526,7 @@ export declare const SystemApiFp: (configuration?: Configuration) => {
   getDiagnosePackage(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>>;
   getNetworkInterfaces(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<NetworkInterface>>>;
   getNetworkState(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<NetworkState>>;
+  getSystemFeatures(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SystemFeatures>>;
   getSystemStatus(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ServiceStatus>>>;
   getSystemVersion(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>>;
   listConfigurationResources(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ConfigurationResource>>>;

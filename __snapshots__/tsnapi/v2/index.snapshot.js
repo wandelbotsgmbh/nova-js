@@ -110,9 +110,9 @@ export class MotionGroupApi extends BaseAPI {
   streamMotionGroupState(_, _, _, _, _, _) {}
 }
 export class MotionGroupModelsApi extends BaseAPI {
-  copyMotionGroupModel(_, _, _) {}
-  deleteExperimentalMotionGroupModel(_, _) {}
-  exportMotionGroupModel(_, _) {}
+  copyMotionGroupModel(_, _, _, _) {}
+  deleteExperimentalMotionGroupModel(_, _, _) {}
+  exportMotionGroupModel(_, _, _) {}
   getConfigurationForMotionGroup(_, _) {}
   getMotionGroupCollisionModel(_, _) {}
   getMotionGroupDynamicModel(_, _) {}
@@ -203,6 +203,7 @@ export class SystemApi extends BaseAPI {
   getDiagnosePackage(_) {}
   getNetworkInterfaces(_) {}
   getNetworkState(_) {}
+  getSystemFeatures(_) {}
   getSystemStatus(_) {}
   getSystemVersion(_) {}
   listConfigurationResources(_) {}
