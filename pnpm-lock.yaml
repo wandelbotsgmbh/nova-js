@@ -54,8 +54,8 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
       '@wandelbots/nova-api':
-        specifier: 26.8.0
-        version: 26.8.0
+        specifier: 26.8.1
+        version: 26.8.1
       concurrently:
         specifier: ^10.0.4
         version: 10.0.4
@@ -228,8 +228,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  '@babel/runtime@7.29.10':
-    resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
+  '@babel/runtime@7.29.13':
+    resolution: {integrity: sha512-v+oN26xP4YIlQsbQ/CbTH1WG5m/l/DjKKZNy/Kp3f/AFvbgt7Em/D0FeMM3O2hX0YzeN2M16W8lOpyhIkfCBcQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.29.7':
@@ -766,12 +766,12 @@ packages:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.3
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.3
 
-  '@napi-rs/wasm-runtime@1.2.6':
-    resolution: {integrity: sha512-mRyDmEw9/fCDXCGfL1sbgIw/GUK0PVxRW4YwgPN61F3LQ+fSyoBFarJVzgGyhF6kRzEQZ0FejDqm4WLXSeqQmw==}
+  '@napi-rs/wasm-runtime@1.2.7':
+    resolution: {integrity: sha512-zJccwplOAbgfZju95IUHazLnx9RAPtPN2YGJXI6UbrgeaR9QfPjGrQL6ERkSAtnVCA4Q+83ApGyaX5zdpCaKkQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=23.5.0}
     peerDependencies:
-      '@emnapi/core': ^1.7.1 || 2.0.0-beta.2
-      '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2
+      '@emnapi/core': ^1.7.1 || 2.0.0-beta.2 || 2.0.0-beta.3
+      '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2 || 2.0.0-beta.3
 
   '@nats-io/jetstream@3.4.0':
     resolution: {integrity: sha512-GzHQodNJ942+R5LRb8PuZ5ugVWVWMRiufxUYLLVWkXKfwDXYN+Owo0d7L/b9O7BPyrbYD7jQWAC6+ZVuXa9Gyw==}
@@ -1679,8 +1679,8 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
-  '@wandelbots/nova-api@26.8.0':
-    resolution: {integrity: sha512-MwEVd6ciWPQ5qqJazgBFs/MDdi1WmcTmxxt9IKmn/f3t2P0Z0mCc0+qBLXvRXOE+AbbZ4eZo7yGD+pAwdGoZYA==}
+  '@wandelbots/nova-api@26.8.1':
+    resolution: {integrity: sha512-csHONGeANaxyLbN8V2wIAt5LG/4ewRbjBXxjwqnkm1zIi+A9yDiUXAo4NYVHric7UYCaablt7IeDjbnu9cWH0g==}
 
   '@wandelbots/wandelbots-js-react-components@3.7.4':
     resolution: {integrity: sha512-wD4xygHQuh3qMr3jlJB1wLxCUkL8dfYR6OP+QNbbQIlUqH1DiXgjYAOsL4+2oRgqWwSUcIK6UtAPq/0pNkQOTw==}
@@ -4488,7 +4488,7 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.7
 
-  '@babel/runtime@7.29.10': {}
+  '@babel/runtime@7.29.13': {}
 
   '@babel/runtime@7.29.7': {}
 
@@ -4832,7 +4832,7 @@ snapshots:
 
   '@mui/private-theming@7.3.11(@types/react@19.2.16)(react@19.2.7)':
     dependencies:
-      '@babel/runtime': 7.29.10
+      '@babel/runtime': 7.29.13
       '@mui/utils': 7.3.11(@types/react@19.2.16)(react@19.2.7)
       prop-types: 15.8.1
       react: 19.2.7
@@ -4841,7 +4841,7 @@ snapshots:
 
   '@mui/styled-engine@7.3.10(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@types/react@19.2.16)(react@19.2.7))(react@19.2.7)':
     dependencies:
-      '@babel/runtime': 7.29.10
+      '@babel/runtime': 7.29.13
       '@emotion/cache': 11.14.0
       '@emotion/serialize': 1.3.3
       '@emotion/sheet': 1.4.0
@@ -4854,7 +4854,7 @@ snapshots:
 
   '@mui/system@7.3.11(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@types/react@19.2.16)(react@19.2.7))(@types/react@19.2.16)(react@19.2.7)':
     dependencies:
-      '@babel/runtime': 7.29.10
+      '@babel/runtime': 7.29.13
       '@mui/private-theming': 7.3.11(@types/react@19.2.16)(react@19.2.7)
       '@mui/styled-engine': 7.3.10(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@types/react@19.2.16)(react@19.2.7))(react@19.2.7)
       '@mui/types': 7.4.12(@types/react@19.2.16)
@@ -4991,7 +4991,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
-  '@napi-rs/wasm-runtime@1.2.6(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)':
+  '@napi-rs/wasm-runtime@1.2.7(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)':
     dependencies:
       '@emnapi/core': 1.11.2
       '@emnapi/runtime': 1.11.2
@@ -5269,7 +5269,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.11.2
       '@emnapi/runtime': 1.11.2
-      '@napi-rs/wasm-runtime': 1.2.6(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
+      '@napi-rs/wasm-runtime': 1.2.7(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
     optional: true
 
   '@oxc-resolver/binding-win32-arm64-msvc@11.24.2':
@@ -5763,7 +5763,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
-  '@wandelbots/nova-api@26.8.0':
+  '@wandelbots/nova-api@26.8.1':
     dependencies:
       axios: 1.20.0
     transitivePeerDependencies:
