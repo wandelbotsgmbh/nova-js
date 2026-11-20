@@ -54,8 +54,8 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
       '@wandelbots/nova-api':
-        specifier: 26.8.1
-        version: 26.8.1
+        specifier: 26.8.2
+        version: 26.8.2
       concurrently:
         specifier: ^10.0.4
         version: 10.0.4
@@ -228,8 +228,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  '@babel/runtime@7.29.13':
-    resolution: {integrity: sha512-v+oN26xP4YIlQsbQ/CbTH1WG5m/l/DjKKZNy/Kp3f/AFvbgt7Em/D0FeMM3O2hX0YzeN2M16W8lOpyhIkfCBcQ==}
+  '@babel/runtime@7.29.14':
+    resolution: {integrity: sha512-Y5tqevQaUAZhhj82BpYMNC1ssvLQTVAfwKdm8iy8qwmhvC2/CpcAu8OC+QEtjM7pMk7knx83u1Qj8gzkicyelw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.29.7':
@@ -1546,8 +1546,8 @@ packages:
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
 
-  '@tybys/wasm-util@0.10.4':
-    resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
+  '@tybys/wasm-util@0.10.5':
+    resolution: {integrity: sha512-dOGOPxlaNV+G046mZzN+9C0dAcQZeSKcXiVaM0TYy/LM4ttTmgSBDxYfovcYI8Em3+eAbiAYpvWLOv8+ZVRJKA==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -1679,8 +1679,8 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
-  '@wandelbots/nova-api@26.8.1':
-    resolution: {integrity: sha512-csHONGeANaxyLbN8V2wIAt5LG/4ewRbjBXxjwqnkm1zIi+A9yDiUXAo4NYVHric7UYCaablt7IeDjbnu9cWH0g==}
+  '@wandelbots/nova-api@26.8.2':
+    resolution: {integrity: sha512-CSyoeB0xeMbZG+p6cyKekAtHj2G6kGkxmJvmS+jqI22L74rg8qp400qXO+PYR5h/+h51rBECVdInq4oVjIv+aQ==}
 
   '@wandelbots/wandelbots-js-react-components@3.7.4':
     resolution: {integrity: sha512-wD4xygHQuh3qMr3jlJB1wLxCUkL8dfYR6OP+QNbbQIlUqH1DiXgjYAOsL4+2oRgqWwSUcIK6UtAPq/0pNkQOTw==}
@@ -2186,6 +2186,9 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  csstype@3.2.4:
+    resolution: {integrity: sha512-PoKaoPzQapnEoqUSnHx1u6W6ku8CVEgKsnpmmzU3m1nwkidpPBQ8V/Zq2+bWNrsOKoKLwTGdbx6xF7BXP1zLVQ==}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -4488,7 +4491,7 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.7
 
-  '@babel/runtime@7.29.13': {}
+  '@babel/runtime@7.29.14': {}
 
   '@babel/runtime@7.29.7': {}
 
@@ -4832,7 +4835,7 @@ snapshots:
 
   '@mui/private-theming@7.3.11(@types/react@19.2.16)(react@19.2.7)':
     dependencies:
-      '@babel/runtime': 7.29.13
+      '@babel/runtime': 7.29.14
       '@mui/utils': 7.3.11(@types/react@19.2.16)(react@19.2.7)
       prop-types: 15.8.1
       react: 19.2.7
@@ -4841,11 +4844,11 @@ snapshots:
 
   '@mui/styled-engine@7.3.10(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@types/react@19.2.16)(react@19.2.7))(react@19.2.7)':
     dependencies:
-      '@babel/runtime': 7.29.13
+      '@babel/runtime': 7.29.14
       '@emotion/cache': 11.14.0
       '@emotion/serialize': 1.3.3
       '@emotion/sheet': 1.4.0
-      csstype: 3.2.3
+      csstype: 3.2.4
       prop-types: 15.8.1
       react: 19.2.7
     optionalDependencies:
@@ -4854,13 +4857,13 @@ snapshots:
 
   '@mui/system@7.3.11(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@types/react@19.2.16)(react@19.2.7))(@types/react@19.2.16)(react@19.2.7)':
     dependencies:
-      '@babel/runtime': 7.29.13
+      '@babel/runtime': 7.29.14
       '@mui/private-theming': 7.3.11(@types/react@19.2.16)(react@19.2.7)
       '@mui/styled-engine': 7.3.10(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.16)(react@19.2.7)(supports-color@5.5.0))(@types/react@19.2.16)(react@19.2.7))(react@19.2.7)
       '@mui/types': 7.4.12(@types/react@19.2.16)
       '@mui/utils': 7.3.11(@types/react@19.2.16)(react@19.2.7)
       clsx: 2.1.1
-      csstype: 3.2.3
+      csstype: 3.2.4
       prop-types: 15.8.1
       react: 19.2.7
     optionalDependencies:
@@ -4995,7 +4998,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.11.2
       '@emnapi/runtime': 1.11.2
-      '@tybys/wasm-util': 0.10.4
+      '@tybys/wasm-util': 0.10.5
     optional: true
 
   '@nats-io/jetstream@3.4.0':
@@ -5627,7 +5630,7 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@tybys/wasm-util@0.10.4':
+  '@tybys/wasm-util@0.10.5':
     dependencies:
       tslib: 2.9.1
     optional: true
@@ -5763,7 +5766,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
-  '@wandelbots/nova-api@26.8.1':
+  '@wandelbots/nova-api@26.8.2':
     dependencies:
       axios: 1.20.0
     transitivePeerDependencies:
@@ -6189,6 +6192,8 @@ snapshots:
       source-map-js: 1.2.2
 
   csstype@3.2.3: {}
+
+  csstype@3.2.4: {}
 
   d3-array@3.2.4:
     dependencies:
